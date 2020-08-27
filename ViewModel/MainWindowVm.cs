@@ -22,7 +22,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void Instance_DataReadUpdate(object sender, DataReadEventArgs e)
         {
-            DataRead = e.DataRead;
+            DataRead += e.DataRead;
         }
     }   
 }

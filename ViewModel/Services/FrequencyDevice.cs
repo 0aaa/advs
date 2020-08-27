@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,15 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private string _comPort;
         private const int BaudRate = 9600;
         private string _dataRead;
+
+        public List<GateTimeDescription> GateTimeList { get; } = new List<GateTimeDescription>
+        {
+            new GateTimeDescription {Description = "1 сек", GateTime = GateTime.S1},
+            new GateTimeDescription {Description = "4 сек", GateTime = GateTime.S4},
+            new GateTimeDescription {Description = "7 сек", GateTime = GateTime.S7},
+            new GateTimeDescription {Description = "10 сек", GateTime = GateTime.S10},
+            new GateTimeDescription {Description = "100 сек", GateTime = GateTime.S100},
+        };
 
 
         private FrequencyDevice()
@@ -102,6 +112,54 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
             WriteCommandAsync($":INPut{channel}:FILTer {stringIsOn}", sleepTime);
         }
+
+        /// <summary>
+        /// Запрос на значение частоты
+        /// </summary>
+        /// <param name="sleepTime"></param>
+        public void GetCurrentHzValue(int sleepTime = 1000)
+        {
+            WriteCommandAsync("FETC?");
+        }
+
+        /// <summary>
+        /// Запрос версии
+        /// </summary>
+        /// <param name="sleepTime"></param>
+        public void GetModelVersion(int sleepTime = 1000)
+        {
+            WriteCommandAsync("*IDN?");
+        }
+
+        /// <summary>
+        /// Установка времени опроса частотомером
+        /// </summary>
+        /// <param name="gateTime"></param>
+        public void SetGateTime(GateTime gateTime)
+        {
+            WriteCommandAsync($":ARM:TIMer {(int)gateTime} S");
+        }
+
+        //Проверить работоспособность. Предположительно меняет измеряемый канал .
+        //13.	To mearsure frequency(измерить частоту)
+        //[:SENSe]:FUNCtion[:ON] FREQuency[1 | 2 | 3]
+
+    }
+
+
+    public enum GateTime
+    {
+        S1 = 1,
+        S4 = 4,
+        S7 = 7,
+        S10 = 10,
+        S100 = 100
+    }
+
+    public class GateTimeDescription
+    {
+        public GateTime GateTime { get; set; }
+        public string Description { get; set; }
     }
 
     public class DataReadEventArgs : EventArgs
