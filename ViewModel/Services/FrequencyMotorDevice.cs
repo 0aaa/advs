@@ -69,14 +69,12 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #endregion
 
-        public void SetFrequency(double freq)
+        public void SetFrequency(decimal freq)
         {
-            if (freq < 0.0 || freq > 16384.0)
+            if (freq < 0 || freq > 16384)
             {
-                throw new ArgumentOutOfRangeException(
-                    freq.ToString(CultureInfo.CurrentCulture),
-                    "Попытка установить значение частоты вне диапазона от 0 до 16384.0"
-                );
+                var errorMessage = "Попытка установить значение частоты вне диапазона от 0 до 16384.0";
+                throw new ArgumentOutOfRangeException(freq.ToString(CultureInfo.CurrentCulture), errorMessage);
             }
 
             var freqArray = new byte[8];
@@ -85,20 +83,20 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             freqArray[1] = TypeMessage06;
 
             //Отправка командного слова
-            if (freq == 0.0)
+            if (freq == 0)
             {
                 freqArray[2] = (byte) (CommandWordRegister / 256);
                 freqArray[3] = (byte) CommandWordRegister;
                 //Определенные настроки командного слова для остановки двигателя.
-                freqArray[4] = (byte) 132;
-                freqArray[5] = (byte) 188;
+                freqArray[4] = 132;
+                freqArray[5] = 188;
             }
             //Отправка частоты 
             else
             {
                 freqArray[2] = (byte) (FrequencyMotorRegister / 256);
                 freqArray[3] = (byte) FrequencyMotorRegister;
-                freqArray[4] = (byte) (freq / 256.0);
+                freqArray[4] = (byte) (freq / 256);
                 freqArray[5] = (byte) freq;
             }
 
@@ -112,7 +110,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             Thread.Sleep(100);
 
             //Если была отправленна частота, отправляю командное словы что бы ее закрепить
-            if (freq != 0.0)
+            if (freq != 0)
             {
                 var commandWord = new byte[8];
                 commandWord[0] = AddressMotorDevice;
@@ -120,8 +118,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 commandWord[2] = (byte) (CommandWordRegister / 256);
                 commandWord[3] = (byte) CommandWordRegister;
 
-                commandWord[4] = (byte) 4;
-                commandWord[5] = (byte) 124;
+                commandWord[4] = 4;
+                commandWord[5] = 124;
                 var (wordCrc1, wordCrc2) = GetCrc16(commandWord, 6);
                 commandWord[6] = wordCrc1;
                 commandWord[7] = wordCrc2;
@@ -137,16 +135,16 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public double GetReferenceValue()
         {
             //Запрос значения эталона
-            var sendPack = new byte[8]
+            var sendPack = new byte[]
             {
                 AddressAnemometerDevice,
                 TypeMessage04,
-                (byte) 0,
-                (byte) 0,
-                (byte) 0,
-                (byte) 1,
-                (byte) 0,
-                (byte) 0
+                0,
+                0,
+                0,
+                1,
+                0,
+                0
             };
 
 
@@ -168,15 +166,15 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             if (getPackCrc1 != getPack[5] || getPackCrc2 != getPack[6])
                 throw new Exception("Пакет данных (значения эталона) имеет неправильное crc16");
 
-            var numArray2 = new byte[2]
+            var numArray2 = new []
             {
                 getPack[3],
                 getPack[4]
             };
-            var num = (int) numArray2[0] * 256 + (int) numArray2[1];
+            var num = numArray2[0] * 256 + numArray2[1];
 
             //TODO  что это за обработка ? 
-            if (num > (int) short.MaxValue)
+            if (num > short.MaxValue)
                 num -= 65536;
 
             return (double) num / 100;
@@ -187,14 +185,14 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void ZeroReferenceValue()
         {
-            var setNullArray = new byte[6]
+            var setNullArray = new byte[]
             {
                 AddressAnemometerDevice,
                 TypeMessage03,
                 byte.MaxValue,
                 byte.MaxValue,
-                (byte) 0,
-                (byte) 0
+                0,
+                0
             };
 
             var (crc1, crc2) = GetCrc16(setNullArray, 4);
