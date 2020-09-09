@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace VerificationAirVelocitySensor.ViewModel.Services
 {
-    public class FrequencyDevice
+    /// <summary>
+    /// Управление частотомером
+    /// </summary>
+    public class FrequencyCounterDevice
     {
         private SerialPort _serialPort;
         public event EventHandler<DataReadEventArgs> DataReadUpdate;
@@ -17,26 +20,30 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         public List<GateTimeDescription> GateTimeList { get; } = new List<GateTimeDescription>
         {
-            new GateTimeDescription {Description = "1 сек", GateTime = GateTime.S1},
-            new GateTimeDescription {Description = "4 сек", GateTime = GateTime.S4},
-            new GateTimeDescription {Description = "7 сек", GateTime = GateTime.S7},
-            new GateTimeDescription {Description = "10 сек", GateTime = GateTime.S10},
-            new GateTimeDescription {Description = "100 сек", GateTime = GateTime.S100},
+            new GateTimeDescription(GateTime.S1,"1 сек"),
+            new GateTimeDescription(GateTime.S4,"4 сек"),
+            new GateTimeDescription(GateTime.S7,"7 сек"),
+            new GateTimeDescription(GateTime.S10,"10 сек"),
+            new GateTimeDescription(GateTime.S100,"100 сек"),
         };
 
 
-        private FrequencyDevice()
+        private FrequencyCounterDevice()
         {
         }
 
-        private static FrequencyDevice _instance;
+        private static FrequencyCounterDevice _instance;
 
-        public static FrequencyDevice Instance =>
-            _instance ?? (_instance = new FrequencyDevice());
+        public static FrequencyCounterDevice Instance =>
+            _instance ?? (_instance = new FrequencyCounterDevice());
 
 
         #region Open , Close , DataReceived
 
+        /// <summary>
+        /// Открывает или закрывает порт, в зависимости от его текущего состояния.
+        /// </summary>
+        /// <param name="comPort"></param>
         public void OpenClose(string comPort)
         {
             if (_serialPort.IsOpen)
@@ -156,10 +163,19 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         S100 = 100
     }
 
+    /// <summary>
+    /// Класс для создания коллекции доступных enum GateTime  для биндинга на интерфейс.
+    /// </summary>
     public class GateTimeDescription
     {
-        public GateTime GateTime { get; set; }
-        public string Description { get; set; }
+        public GateTimeDescription(GateTime gateTime , string description)
+        {
+            GateTime = gateTime;
+            Description = description;
+        }
+
+        public GateTime GateTime { get; }
+        public string Description { get;}
     }
 
     public class DataReadEventArgs : EventArgs

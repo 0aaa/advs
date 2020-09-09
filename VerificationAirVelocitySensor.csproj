@@ -77,7 +77,8 @@
     <Compile Include="ViewModel\BaseVm\BaseVm.cs" />
     <Compile Include="ViewModel\BaseVm\RelayCommand.cs" />
     <Compile Include="ViewModel\MainWindowVm.cs" />
-    <Compile Include="ViewModel\Services\FrequencyDevice.cs" />
+    <Compile Include="ViewModel\Services\FrequencyCounterDevice.cs" />
+    <Compile Include="ViewModel\Services\FrequencyMotorDevice.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
