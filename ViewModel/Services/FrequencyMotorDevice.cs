@@ -35,32 +35,18 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public static FrequencyMotorDevice Instance =>
             _instance ?? (_instance = new FrequencyMotorDevice());
 
+        public bool IsOpen() => _serialPort != null && _serialPort.IsOpen;
+
         #region Open , Close
 
-        /// <summary>
-        /// Открывает или закрывает порт, в зависимости от его текущего состояния.
-        /// </summary>
-        /// <param name="comPort"></param>
-        public void OpenClose(string comPort)
-        {
-            if (_serialPort.IsOpen)
-            {
-                ClosePort();
-            }
-            else
-            {
-                OpenPort(comPort);
-            }
-        }
-
-        private void OpenPort(string comPort)
+        public void OpenPort(string comPort)
         {
             _comPort = comPort;
             _serialPort = new SerialPort(_comPort, BaudRate);
             _serialPort.Open();
         }
 
-        private void ClosePort()
+        public void ClosePort()
         {
             _serialPort.Close();
             _serialPort.Dispose();

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.IO.Ports;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
 
@@ -9,6 +11,8 @@ namespace VerificationAirVelocitySensor.ViewModel
         #region RealyCommand
 
         #region Частотомер ЧЗ-85/6
+
+        #region Set Gate Time
 
         public RelayCommand SetGateTime1SCommand =>
             new RelayCommand(() => SetGateTime(GateTime.S1), SetGateTime1SValidation);
@@ -24,6 +28,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public RelayCommand SetGateTime100SCommand =>
             new RelayCommand(() => SetGateTime(GateTime.S100), SetGateTime100SValidation);
+
+        #endregion
 
         public RelayCommand SetFrequencyChannel1Command =>
             new RelayCommand(() => SetFrequencyChannel(FrequencyChannel.Channel1), SetFrequencyChannel1Validation);
@@ -43,18 +49,22 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand OffFilterChannel2Command =>
             new RelayCommand(() => OnOffFilter(2, false), OffFilterChannel2Validation);
 
-        public RelayCommand OpenCloseFrequencyCounterCommand =>
-            new RelayCommand(() => FrequencyCounterDevice.Instance.OpenClose(ComPortFrequencyCounter));
+        public RelayCommand OpenFrequencyCounterCommand =>
+            new RelayCommand(() => FrequencyCounterDevice.Instance.OpenPort(ComPortFrequencyCounter));
+        public RelayCommand CloseFrequencyCounterCommand =>
+            new RelayCommand(() => FrequencyCounterDevice.Instance.ClosePort() , FrequencyCounterDevice.Instance.IsOpen);
 
         #endregion
 
         public RelayCommand OpenCloseConnectionMenuCommand => new RelayCommand(OpenCloseConnectionMenu);
+        public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
 
         #endregion
 
         #region Property
 
         public bool VisibilityConnectionMenu { get; set; }
+        public ObservableCollection<string> PortsList { get; set; } = new ObservableCollection<string>(SerialPort.GetPortNames());
 
 
         public string ComPortFrequencyCounter { get; set; }
@@ -68,6 +78,37 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region RelayCommand Method
 
+        private void UpdateComPortsSource()
+        {
+            var newPortList = new ObservableCollection<string>(SerialPort.GetPortNames());
+
+            //Добавляю новые итемы из полученной коллекции.
+            foreach (var port in newPortList)
+            {
+                if (!PortsList.Contains(port))
+                {
+                    PortsList.Add(port);
+                }
+            }
+
+
+            var deletePorts = new ObservableCollection<string>();
+
+            //Записываю старые итемы в коллекцию на удаление
+            foreach (var port in PortsList)
+            {
+                if (!newPortList.Contains(port))
+                {
+                    deletePorts.Add(port);
+                }
+            }
+
+            //Удаляю лишние элементы
+            foreach (var port in deletePorts)
+            {
+                PortsList.Remove(port);
+            }
+        }
         private void OpenCloseConnectionMenu() => VisibilityConnectionMenu = !VisibilityConnectionMenu;
 
         #region Частотомер ЧЗ-85/6

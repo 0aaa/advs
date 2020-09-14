@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModel="clr-namespace:VerificationAirVelocitySensor.ViewModel"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         Background="LightSlateGray"
         Title="MainWindow"
@@ -80,7 +81,6 @@
         </Border>
 
         <Border Grid.Row="1"
-                Visibility="{Binding VisibilityConnectionMenu , Converter={StaticResource BoolToVis}}"
                 Margin="100,50,100,100"
                 BorderBrush="Black"
                 BorderThickness="1">
@@ -136,7 +136,17 @@
                                 <ColumnDefinition Width="1*" />
                             </Grid.ColumnDefinitions>
                             <Grid Grid.Column="0">
-                                <ComboBox Margin="5,10" />
+                                <ComboBox Margin="5,10"
+                                          HorizontalContentAlignment="Center"
+                                          VerticalContentAlignment="Center"
+                                          ItemsSource="{Binding PortsList}"
+                                          SelectedItem="{Binding ComPortFrequencyCounter}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="DropDownOpened">
+                                            <i:InvokeCommandAction Command="{Binding UpdateComPortsSourceCommand}" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </ComboBox>
                             </Grid>
                             <Grid Grid.Column="1">
                                 <Button Margin="5,10"
@@ -169,7 +179,17 @@
                                 <ColumnDefinition Width="1*" />
                             </Grid.ColumnDefinitions>
                             <Grid Grid.Column="0">
-                                <ComboBox Margin="5,10" />
+                                <ComboBox Margin="5,10"
+                                          HorizontalContentAlignment="Center"
+                                          VerticalContentAlignment="Center"
+                                          ItemsSource="{Binding PortsList}"
+                                          SelectedItem="{Binding ComPortFrequencyMotor}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="DropDownOpened">
+                                            <i:InvokeCommandAction Command="{Binding UpdateComPortsSourceCommand}" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </ComboBox>
                             </Grid>
                             <Grid Grid.Column="1">
                                 <Button Margin="5,10"
