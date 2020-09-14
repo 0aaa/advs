@@ -12,11 +12,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
     public class FrequencyCounterDevice
     {
         private SerialPort _serialPort;
-        public event EventHandler<DataReadEventArgs> DataReadUpdate;
-
         private string _comPort;
         private const int BaudRate = 9600;
-        private string _dataRead;
 
         public List<GateTimeDescription> GateTimeList { get; } = new List<GateTimeDescription>
         {
@@ -37,8 +34,11 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public static FrequencyCounterDevice Instance =>
             _instance ?? (_instance = new FrequencyCounterDevice());
 
+        public bool IsOpen() => true;
+            //_serialPort.IsOpen;
 
-        #region Open , Close , DataReceived
+
+        #region Open , Close 
 
         /// <summary>
         /// Открывает или закрывает порт, в зависимости от его текущего состояния.
@@ -59,29 +59,16 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private void OpenPort(string comPort)
         {
             _comPort = comPort;
-            _serialPort = new SerialPort(comPort, BaudRate);
-            _serialPort.DataReceived += _serialPort_DataReceived;
+            _serialPort = new SerialPort(_comPort, BaudRate);
             _serialPort.Open();
         }
 
         private void ClosePort()
         {
-            _serialPort.DataReceived -= _serialPort_DataReceived;
             _serialPort.Close();
             _serialPort.Dispose();
         }
 
-        private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            var sp = (SerialPort) sender;
-            var indate = sp.ReadExisting();
-            _dataRead = indate;
-
-            DataReadUpdate?.Invoke(this, new DataReadEventArgs
-            {
-                DataRead = indate
-            });
-        }
 
         #endregion
 
@@ -124,18 +111,24 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Запрос на значение частоты
         /// </summary>
         /// <param name="sleepTime"></param>
-        public void GetCurrentHzValue(int sleepTime = 1000)
+        public string GetCurrentHzValue(int sleepTime = 1000)
         {
             WriteCommandAsync("FETC?");
+
+            //TODO Здесь должен быть возврат значения с частотомера.
+            return null;
         }
 
         /// <summary>
         /// Запрос версии
         /// </summary>
         /// <param name="sleepTime"></param>
-        public void GetModelVersion(int sleepTime = 1000)
+        public string GetModelVersion(int sleepTime = 1000)
         {
             WriteCommandAsync("*IDN?");
+
+            //TODO Здесь должен быть возврат версии.
+            return null;
         }
 
         /// <summary>
@@ -147,13 +140,27 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             WriteCommandAsync($":ARM:TIMer {(int)gateTime} S");
         }
 
-        //Проверить работоспособность. Предположительно меняет измеряемый канал .
-        //13.	To mearsure frequency(измерить частоту)
-        //[:SENSe]:FUNCtion[:ON] FREQuency[1 | 2 | 3]
+        /// <summary>
+        /// Устанавливает выбранный канал для считывания значения частоты.
+        /// Доступных каналы : 1, 2, 3
+        /// </summary>
+        public void SetChannelFrequency(FrequencyChannel frequencyChannel)
+        {
+            WriteCommandAsync($":FUNCtion FREQuency {(int)frequencyChannel}");
+        }
 
     }
 
+    public enum FrequencyChannel
+    {
+        Channel1 = 1,
+        Channel2 = 2,
+        Channel3 = 3
+    }
 
+    /// <summary>
+    /// Период опроса частотомера в секундах
+    /// </summary>
     public enum GateTime
     {
         S1 = 1,
@@ -176,10 +183,5 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         public GateTime GateTime { get; }
         public string Description { get;}
-    }
-
-    public class DataReadEventArgs : EventArgs
-    {
-        public string DataRead { get; set; }
     }
 }

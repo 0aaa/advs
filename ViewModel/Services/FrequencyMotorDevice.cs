@@ -35,7 +35,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public static FrequencyMotorDevice Instance =>
             _instance ?? (_instance = new FrequencyMotorDevice());
 
-        #region Open , Close , DataReceived
+        #region Open , Close
 
         /// <summary>
         /// Открывает или закрывает порт, в зависимости от его текущего состояния.
@@ -56,7 +56,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private void OpenPort(string comPort)
         {
             _comPort = comPort;
-            _serialPort = new SerialPort(comPort, BaudRate);
+            _serialPort = new SerialPort(_comPort, BaudRate);
             _serialPort.Open();
         }
 
@@ -66,14 +66,13 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             _serialPort.Dispose();
         }
 
-
         #endregion
 
         public void SetFrequency(decimal freq)
         {
             if (freq < 0 || freq > 16384)
             {
-                var errorMessage = "Попытка установить значение частоты вне диапазона от 0 до 16384.0";
+                const string errorMessage = "Попытка установить значение частоты вне диапазона от 0 до 16384.0";
                 throw new ArgumentOutOfRangeException(freq.ToString(CultureInfo.CurrentCulture), errorMessage);
             }
 
@@ -110,6 +109,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             Thread.Sleep(100);
 
             //Если была отправленна частота, отправляю командное словы что бы ее закрепить
+            //Байты командного слова были стырены с проги института предоставившего сборку.
             if (freq != 0)
             {
                 var commandWord = new byte[8];
@@ -166,18 +166,18 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             if (getPackCrc1 != getPack[5] || getPackCrc2 != getPack[6])
                 throw new Exception("Пакет данных (значения эталона) имеет неправильное crc16");
 
-            var numArray2 = new []
+            var valueArray = new[]
             {
                 getPack[3],
                 getPack[4]
             };
-            var num = numArray2[0] * 256 + numArray2[1];
+            var value = valueArray[0] * 256 + valueArray[1];
 
             //TODO  что это за обработка ? 
-            if (num > short.MaxValue)
-                num -= 65536;
+            if (value > short.MaxValue)
+                value -= 65536;
 
-            return (double) num / 100;
+            return (double) value / 100;
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             setNullArray[4] = crc1;
             setNullArray[5] = crc2;
 
-            _serialPort.Write(setNullArray , 0 , setNullArray.Length);
+            _serialPort.Write(setNullArray, 0, setNullArray.Length);
         }
 
         /// <summary>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModel="clr-namespace:VerificationAirVelocitySensor.ViewModel"
         mc:Ignorable="d"
-        Background="MediumSeaGreen"
+        Background="LightSlateGray"
         Title="MainWindow"
         Height="400"
         Width="500">
@@ -13,52 +13,184 @@
         <viewModel:MainWindowVm />
     </Window.DataContext>
     <Grid>
-        <TextBox HorizontalAlignment="Left"
-                 Height="23"
-                 Margin="10,10,0,0"
-                 TextWrapping="Wrap"
-                 Text="{Binding CustomCommandText}"
-                 VerticalAlignment="Top"
-                 Width="303" />
-        <Button Content="Send"
-                Command="{Binding SendCustomCommand}"
-                HorizontalAlignment="Left"
-                Margin="327,10,0,0"
-                VerticalAlignment="Top"
-                Width="75"
-                Height="23" />
-        <Button Content="*RST"
-                Command="{Binding ResetCommand}"
-                HorizontalAlignment="Left"
-                Margin="10,54,0,0"
-                VerticalAlignment="Top"
-                Width="75" />
-        <Button Content="On Filter"
-                Command="{Binding OnFilterCommand}"
-                HorizontalAlignment="Left"
-                Margin="90,54,0,0"
-                VerticalAlignment="Top"
-                Width="75" />
-        <Button Content="Off Filter"
-                Command="{Binding OffFilterCommand}"
-                HorizontalAlignment="Left"
-                Margin="170,54,0,0"
-                VerticalAlignment="Top"
-                Width="75" />
-        <TextBox HorizontalAlignment="Left"
-                 Height="163"
-                 IsReadOnly="True"
-                 Margin="10,96,0,0"
-                 TextWrapping="Wrap"
-                 Text="{Binding DataRead}"
-                 VerticalAlignment="Top"
-                 Width="422" />
-        <Button Content="Open / Close Port"
-                Command="{Binding OpenClose}"
-                HorizontalAlignment="Left"
-                Height="23"
-                Margin="10,276,0,0"
-                VerticalAlignment="Top"
-                Width="120" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="1*" />
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0">
+            <Menu>
+                <MenuItem Header="Настройки">
+                    <MenuItem Header="Подключения" 
+                              Command="{Binding OpenCloseConnectionMenuCommand}"/>
+                    <MenuItem Header="Частотомер ЧЗ-85/6">
+                        <MenuItem Header="Канал">
+                            <MenuItem Header="1"
+                                      Command="{Binding SetFrequencyChannel1Command}" />
+                            <MenuItem Header="2"
+                                      Command="{Binding SetFrequencyChannel2Command}" />
+                        </MenuItem>
+                        <MenuItem Header="Время">
+                            <MenuItem Header="1c"
+                                      Command="{Binding SetGateTime1SCommand}" />
+                            <MenuItem Header="4c"
+                                      Command="{Binding SetGateTime4SCommand}" />
+                            <MenuItem Header="7c"
+                                      Command="{Binding SetGateTime7SCommand}" />
+                            <MenuItem Header="10c"
+                                      Command="{Binding SetGateTime10SCommand}" />
+                            <MenuItem Header="100c"
+                                      Command="{Binding SetGateTime100SCommand}" />
+                        </MenuItem>
+                        <MenuItem Header="ФНЧ">
+                            <MenuItem Header="1-ый канал On"
+                                      Command="{Binding OnFilterChannel1Command}" />
+                            <MenuItem Header="1-ый канал Off"
+                                      Command="{Binding OffFilterChannel1Command}" />
+                            <MenuItem Header="2-ый канал On"
+                                      Command="{Binding OnFilterChannel2Command}" />
+                            <MenuItem Header="2-ый канал Off"
+                                      Command="{Binding OffFilterChannel2Command}" />
+                        </MenuItem>
+                        <MenuItem Header="Измерения">
+                            <MenuItem Header="0,7 м/с" />
+                            <MenuItem Header="5 м/с" />
+                            <MenuItem Header="10 м/с" />
+                            <MenuItem Header="15 м/с" />
+                            <MenuItem Header="20 м/с" />
+                            <MenuItem Header="25 м/с" />
+                            <MenuItem Header="30 м/с" />
+                        </MenuItem>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="Режимы">
+                    <MenuItem Header="Отладка" />
+                    <MenuItem Header="Изменения" />
+                </MenuItem>
+            </Menu>
+        </Border>
+
+
+        <!--#region Connection Menu-->
+        <Border Grid.Row="1" 
+                Visibility="{Binding VisibilityConnectionMenu , Converter= {StaticResource BoolToVis}}">
+            <Button Style="{StaticResource OnlyBackgroundButtonStyle}"
+                    Command="{Binding OpenCloseConnectionMenuCommand}"
+                    Opacity="0.6"
+                    Background="Black" />
+        </Border>
+
+        <Border Grid.Row="1"
+                Visibility="{Binding VisibilityConnectionMenu , Converter={StaticResource BoolToVis}}"
+                Margin="100,50,100,100"
+                BorderBrush="Black"
+                BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <Grid Background="LightGray"
+                      Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <TextBlock Text="Подключения"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Left"
+                                   Margin="20,0"
+                                   FontWeight="DemiBold"
+                                   FontSize="20" />
+                    </Grid>
+                    <Grid Grid.Column="1">
+                        <Button Style="{StaticResource CloseSettingsMenuButtonStyle}"
+                                Margin="0,0,10,0"
+                                Command="{Binding OpenCloseConnectionMenuCommand}"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center" />
+                    </Grid>
+                </Grid>
+                <Grid Grid.Row="1"
+                      Background="#777F87">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="1*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <TextBlock Text="Частотомер ЧЗ-85/6"
+                                       FontSize="16"
+                                       FontWeight="DemiBold"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center" />
+                        </Grid>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Column="0">
+                                <ComboBox Margin="5,10" />
+                            </Grid>
+                            <Grid Grid.Column="1">
+                                <Button Margin="5,10"
+                                        Content="Connect / Un" />
+                            </Grid>
+                            <Grid Grid.Column="2">
+                                <TextBlock Text="Status"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Grid>
+                        </Grid>
+
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <TextBlock Text="ПЛК73"
+                                       FontSize="16"
+                                       FontWeight="DemiBold"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center" />
+                        </Grid>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Column="0">
+                                <ComboBox Margin="5,10" />
+                            </Grid>
+                            <Grid Grid.Column="1">
+                                <Button Margin="5,10"
+                                        Content="Connect / Un" />
+                            </Grid>
+                            <Grid Grid.Column="2">
+                                <TextBlock Text="Status"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Grid>
+                        </Grid>
+
+                    </Grid>
+
+                </Grid>
+
+            </Grid>
+
+        </Border>
+        <!--#endregion-->
+
+
     </Grid>
 </Window>
