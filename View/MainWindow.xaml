@@ -5,8 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModel="clr-namespace:VerificationAirVelocitySensor.ViewModel"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Background="LightSlateGray"
+        ResizeMode="CanMinimize"
         Title="MainWindow"
         Height="400"
         Width="500">
@@ -21,8 +23,8 @@
         <Border Grid.Row="0">
             <Menu>
                 <MenuItem Header="Настройки">
-                    <MenuItem Header="Подключения" 
-                              Command="{Binding OpenCloseConnectionMenuCommand}"/>
+                    <MenuItem Header="Подключения"
+                              Command="{Binding OpenCloseConnectionMenuCommand}" />
                     <MenuItem Header="Частотомер ЧЗ-85/6">
                         <MenuItem Header="Канал">
                             <MenuItem Header="1"
@@ -64,7 +66,8 @@
                     </MenuItem>
                 </MenuItem>
                 <MenuItem Header="Режимы">
-                    <MenuItem Header="Отладка" />
+                    <MenuItem Header="Отладка"
+                              Command="{Binding OpenCloseDebuggingMenuCommand}" />
                     <MenuItem Header="Изменения" />
                 </MenuItem>
             </Menu>
@@ -72,7 +75,7 @@
 
 
         <!--#region Connection Menu-->
-        <Border Grid.Row="1" 
+        <Border Grid.Row="1"
                 Visibility="{Binding VisibilityConnectionMenu , Converter= {StaticResource BoolToVis}}">
             <Button Style="{StaticResource OnlyBackgroundButtonStyle}"
                     Command="{Binding OpenCloseConnectionMenuCommand}"
@@ -81,6 +84,7 @@
         </Border>
 
         <Border Grid.Row="1"
+                Visibility="{Binding VisibilityConnectionMenu , Converter= {StaticResource BoolToVis}}"
                 Margin="100,50,100,100"
                 BorderBrush="Black"
                 BorderThickness="1">
@@ -117,97 +121,303 @@
                         <RowDefinition Height="1*" />
                         <RowDefinition Height="1*" />
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="1*" />
-                            <RowDefinition Height="1*" />
-                        </Grid.RowDefinitions>
-                        <Grid Grid.Row="0">
-                            <TextBlock Text="Частотомер ЧЗ-85/6"
-                                       FontSize="16"
-                                       FontWeight="DemiBold"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Center" />
-                        </Grid>
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*" />
-                                <ColumnDefinition Width="2*" />
-                                <ColumnDefinition Width="1*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid Grid.Column="0">
-                                <ComboBox Margin="5,10"
-                                          HorizontalContentAlignment="Center"
-                                          VerticalContentAlignment="Center"
-                                          ItemsSource="{Binding PortsList}"
-                                          SelectedItem="{Binding ComPortFrequencyCounter}">
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="DropDownOpened">
-                                            <i:InvokeCommandAction Command="{Binding UpdateComPortsSourceCommand}" />
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                </ComboBox>
-                            </Grid>
-                            <Grid Grid.Column="1">
-                                <Button Margin="5,10"
-                                        Content="Connect / Un" />
-                            </Grid>
-                            <Grid Grid.Column="2">
-                                <TextBlock Text="Status"
+                    <Border Grid.Row="0"
+                            BorderThickness="0,1,0,0"
+                            BorderBrush="Black">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <TextBlock Text="Частотомер ЧЗ-85/6"
+                                           FontSize="16"
+                                           FontWeight="DemiBold"
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Center" />
                             </Grid>
-                        </Grid>
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0">
+                                    <ComboBox Margin="5,10"
+                                              HorizontalContentAlignment="Center"
+                                              VerticalContentAlignment="Center"
+                                              ItemsSource="{Binding PortsList}"
+                                              SelectedItem="{Binding ComPortFrequencyCounter}">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="DropDownOpened">
+                                                <i:InvokeCommandAction Command="{Binding UpdateComPortsSourceCommand}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </ComboBox>
+                                </Grid>
+                                <Grid Grid.Column="1">
+                                    <Button Margin="5,10">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Command"
+                                                        Value="{Binding OpenPortFrequencyCounterCommand}" />
+                                                <Setter Property="Content"
+                                                        Value="Connect" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding FrequencyCounterIsOpen}"
+                                                                 Value="True">
+                                                        <Setter Property="Command"
+                                                                Value="{Binding ClosePortFrequencyCounterCommand}" />
+                                                        <Setter Property="Content"
+                                                                Value="Un Connect" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </Grid>
+                                <Grid Grid.Column="2">
+                                    <Image Height="15">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Source"
+                                                        Value="{StaticResource UnConnectIcon}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding FrequencyCounterIsOpen}"
+                                                                 Value="True">
+                                                        <Setter Property="Source"
+                                                                Value="{StaticResource ConnectIcon}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </Grid>
+                            </Grid>
 
-                    </Grid>
-                    <Grid Grid.Row="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="1*" />
-                            <RowDefinition Height="1*" />
-                        </Grid.RowDefinitions>
-                        <Grid Grid.Row="0">
-                            <TextBlock Text="ПЛК73"
-                                       FontSize="16"
-                                       FontWeight="DemiBold"
-                                       VerticalAlignment="Center"
-                                       HorizontalAlignment="Center" />
                         </Grid>
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*" />
-                                <ColumnDefinition Width="2*" />
-                                <ColumnDefinition Width="1*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid Grid.Column="0">
-                                <ComboBox Margin="5,10"
-                                          HorizontalContentAlignment="Center"
-                                          VerticalContentAlignment="Center"
-                                          ItemsSource="{Binding PortsList}"
-                                          SelectedItem="{Binding ComPortFrequencyMotor}">
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="DropDownOpened">
-                                            <i:InvokeCommandAction Command="{Binding UpdateComPortsSourceCommand}" />
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                </ComboBox>
-                            </Grid>
-                            <Grid Grid.Column="1">
-                                <Button Margin="5,10"
-                                        Content="Connect / Un" />
-                            </Grid>
-                            <Grid Grid.Column="2">
-                                <TextBlock Text="Status"
+                    </Border>
+                    <Border Grid.Row="1"
+                            BorderThickness="0,1,0,0"
+                            BorderBrush="Black">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <TextBlock Text="ПЛК73"
+                                           FontSize="16"
+                                           FontWeight="DemiBold"
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Center" />
                             </Grid>
-                        </Grid>
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0">
+                                    <ComboBox Margin="5,10"
+                                              HorizontalContentAlignment="Center"
+                                              VerticalContentAlignment="Center"
+                                              ItemsSource="{Binding PortsList}"
+                                              SelectedItem="{Binding ComPortFrequencyMotor}">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="DropDownOpened">
+                                                <i:InvokeCommandAction Command="{Binding UpdateComPortsSourceCommand}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </ComboBox>
+                                </Grid>
+                                <Grid Grid.Column="1">
+                                    <Button Margin="5,10">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Command"
+                                                        Value="{Binding OpenPortFrequencyMotorCommand}" />
+                                                <Setter Property="Content"
+                                                        Value="Connect" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding FrequencyMotorIsOpen}"
+                                                                 Value="True">
+                                                        <Setter Property="Command"
+                                                                Value="{Binding ClosePortFrequencyMotorCommand}" />
+                                                        <Setter Property="Content"
+                                                                Value="Un Connect" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </Grid>
+                                <Grid Grid.Column="2">
+                                    <Image Height="15">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Source"
+                                                        Value="{StaticResource UnConnectIcon}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding FrequencyMotorIsOpen}"
+                                                                 Value="True">
+                                                        <Setter Property="Source"
+                                                                Value="{StaticResource ConnectIcon}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </Grid>
+                            </Grid>
 
-                    </Grid>
+                        </Grid>
+                    </Border>
 
                 </Grid>
 
             </Grid>
 
+        </Border>
+        <!--#endregion-->
+
+        <!--#region Окно отладки (Ручного управления частотным двигателем)-->
+        <Border Grid.Row="1"
+                Visibility="{Binding VisibilityDebuggingMenu , Converter= {StaticResource BoolToVis}}">
+            <Button Style="{StaticResource OnlyBackgroundButtonStyle}"
+                    Command="{Binding OpenCloseDebuggingMenuCommand}"
+                    Opacity="0.6"
+                    Background="Black" />
+        </Border>
+
+        <Border Grid.Row="1"
+                Visibility="{Binding VisibilityDebuggingMenu , Converter= {StaticResource BoolToVis}}"
+                Margin="100,50,100,100"
+                BorderBrush="Black"
+                BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <Grid Background="LightGray"
+                      Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <TextBlock Text="Отладка"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Left"
+                                   Margin="20,0"
+                                   FontWeight="DemiBold"
+                                   FontSize="20" />
+                    </Grid>
+                    <Grid Grid.Column="1">
+                        <Button Style="{StaticResource CloseSettingsMenuButtonStyle}"
+                                Margin="0,0,10,0"
+                                Command="{Binding OpenCloseDebuggingMenuCommand}"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center" />
+                    </Grid>
+                </Grid>
+                <Grid Grid.Row="1"
+                      Background="#777F87">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="1*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" BorderThickness="0,1,0,1" BorderBrush="Black">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="1*" />
+                                    <RowDefinition Height="1*" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <TextBlock Text="Примерно уст. скорость"
+                                               FontSize="14"
+                                               TextWrapping="Wrap"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+                                <Grid Grid.Row="1">
+                                    <xctk:DecimalUpDown HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Value="{Binding SpeedFrequencyMotor}"
+                                                        FormatString="{}{0:0.0} м/c"
+                                                        TextAlignment="Center"
+                                                        ShowButtonSpinner="False"
+                                                        Minimum="0"
+                                                        Maximum="30"
+                                                        Increment="0.1"
+                                                        Width="75" />
+                                </Grid>
+                            </Grid>
+                            <Grid Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="1*" />
+                                    <RowDefinition Height="1*" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Button HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Command="{Binding SetSpeedFrequencyMotorCommand}"
+                                            Content="Установить"
+                                            Height="20"
+                                            Width="74" />
+                                </Grid>
+                                <Grid Row="1">
+                                    <Button HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Command="{Binding StopFrequencyMotorCommand}"
+                                            Height="20"
+                                            Width="75">
+                                        <TextBlock Text="СТОП"
+                                                   Foreground="Red"
+                                                   FontWeight="Bold" />
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                    <Grid Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Column="0">
+                            <TextBlock Text="Эталонная скорость"
+                                       TextWrapping="Wrap"
+                                       FontSize="14"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                        <Grid Column="1">
+                            <xctk:DecimalUpDown HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Background="ForestGreen"
+                                                BorderBrush="Red"
+                                                BorderThickness="2"
+                                                Value="{Binding SpeedReferenceValue}"
+                                                IsReadOnly="True"
+                                                TextAlignment="Center"
+                                                FormatString="{}{0} м/с"
+                                                ShowButtonSpinner="False"
+                                                Width="75" />
+                        </Grid>
+                    </Grid>
+
+                </Grid>
+            </Grid>
         </Border>
         <!--#endregion-->
 

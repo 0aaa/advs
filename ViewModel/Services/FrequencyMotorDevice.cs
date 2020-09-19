@@ -2,6 +2,8 @@
 using System.Globalization;
 using System.IO.Ports;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace VerificationAirVelocitySensor.ViewModel.Services
 {
@@ -26,6 +28,49 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private readonly int CommandWordRegister = 49999;
         private readonly int FrequencyMotorRegister = 50009;
 
+        /// <summary>
+        /// Эталонное значение
+        /// </summary>
+        private double _referenceValue;
+
+        /// <summary>
+        /// Флаг отвечающий за уведомление о состоянии опроса эталонного значения.
+        /// </summary>
+        private bool _isInterview;
+
+        /// <summary>
+        /// Флаг для работы с портом, при включенном опросе эталонного значения.
+        /// Для приостановки его в момент отправки команд.
+        /// </summary>
+        private bool _isSendCommand;
+
+        private readonly int _periodInterview = 500;
+        private readonly object _locker = new object();
+
+        #region EventHandler 
+
+        public event EventHandler<IsOpenFrequencyMotorEventArgs> IsOpenUpdate;
+
+        private void IsOpenUpdateMethod(bool isOpen)
+        {
+            IsOpenUpdate?.Invoke(this, new IsOpenFrequencyMotorEventArgs
+            {
+                IsOpen = isOpen
+            });
+        }
+
+        public event EventHandler<UpdateReferenceValueEventArgs> UpdateReferenceValue;
+
+        private void UpdateReferenceValueMethod(double referenceValue)
+        {
+            UpdateReferenceValue?.Invoke(this, new UpdateReferenceValueEventArgs
+            {
+                ReferenceValue = referenceValue
+            });
+        }
+
+        #endregion
+
         private FrequencyMotorDevice()
         {
         }
@@ -41,21 +86,41 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         public void OpenPort(string comPort)
         {
-            _comPort = comPort;
-            _serialPort = new SerialPort(_comPort, BaudRate);
-            _serialPort.Open();
+            try
+            {
+                _comPort = comPort;
+                _serialPort = new SerialPort(_comPort, BaudRate);
+                _serialPort.Open();
+
+                IsOpenUpdateMethod(_serialPort.IsOpen);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show($"{e.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public void ClosePort()
         {
             _serialPort.Close();
             _serialPort.Dispose();
+
+            if (_serialPort == null)
+            {
+                IsOpenUpdateMethod(false);
+                return;
+            }
+
+            IsOpenUpdateMethod(_serialPort.IsOpen);
         }
 
         #endregion
 
-        public void SetFrequency(decimal freq)
+        public void SetFrequency(decimal speed , decimal coefficient = 1)
         {
+            const int fMax = 80;
+            var freq = (double)speed * (double)coefficient * 16384.0 / fMax;
+
             if (freq < 0 || freq > 16384)
             {
                 const string errorMessage = "Попытка установить значение частоты вне диапазона от 0 до 16384.0";
@@ -68,6 +133,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             freqArray[1] = TypeMessage06;
 
             //Отправка командного слова
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (freq == 0)
             {
                 freqArray[2] = (byte) (CommandWordRegister / 256);
@@ -90,12 +156,16 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             freqArray[6] = freqCrc1;
             freqArray[7] = freqCrc2;
 
-            _serialPort.Write(freqArray, 0, freqArray.Length);
+            lock (_locker)
+            {
+                _serialPort.Write(freqArray, 0, freqArray.Length);
+            }
 
             Thread.Sleep(100);
 
             //Если была отправленна частота, отправляю командное словы что бы ее закрепить
             //Байты командного слова были стырены с проги института предоставившего сборку.
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (freq != 0)
             {
                 var commandWord = new byte[8];
@@ -110,7 +180,10 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 commandWord[6] = wordCrc1;
                 commandWord[7] = wordCrc2;
 
-                _serialPort.Write(commandWord, 0, commandWord.Length);
+                lock (_locker)
+                {
+                    _serialPort.Write(commandWord, 0, commandWord.Length);
+                }
             }
         }
 
@@ -118,7 +191,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Получить значение анемометра
         /// </summary>
         /// <returns></returns>
-        public double GetReferenceValue()
+        private double GetReferenceValue()
         {
             //Запрос значения эталона
             var sendPack = new byte[]
@@ -185,8 +258,45 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             setNullArray[4] = crc1;
             setNullArray[5] = crc2;
 
-            _serialPort.Write(setNullArray, 0, setNullArray.Length);
+            lock (_locker)
+            {
+                _serialPort.Write(setNullArray, 0, setNullArray.Length);
+            }
         }
+
+
+        public void OnInterviewReferenceValue()
+        {
+            _isInterview = true;
+
+            Task.Run(async () => await Task.Run(() =>
+            {
+                while (_isInterview)
+                {
+                    if (!_isSendCommand)
+                    {
+                        lock (_locker)
+                        {
+                            _isSendCommand = true;
+
+                            _referenceValue = GetReferenceValue();
+
+                            UpdateReferenceValueMethod(_referenceValue);
+
+                            _isSendCommand = false;
+                        }
+                    }
+
+                    Thread.Sleep(_periodInterview);
+                }
+            }));
+        }
+
+        public void OffInterviewReferenceValue()
+        {
+            _isInterview = false;
+        }
+
 
         /// <summary>
         /// Возвращает crc16  в виде двух byte
@@ -219,5 +329,18 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
             return (crc1, crc2);
         }
+    }
+
+    /// <summary>
+    /// Событие открытия или закрытие порта частотного двигателя
+    /// </summary>
+    public class IsOpenFrequencyMotorEventArgs : EventArgs
+    {
+        public bool IsOpen { get; set; }
+    }
+
+    public class UpdateReferenceValueEventArgs : EventArgs
+    {
+        public double ReferenceValue { get; set; }
     }
 }

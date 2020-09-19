@@ -33,4 +33,53 @@
         </DrawingImage.Drawing>
     </DrawingImage>
 
+    <DrawingImage x:Key="ConnectIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#FF32BA7C">
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry FillRule="Nonzero"
+                                          Figures="M260,310.4C271.2,321.6,271.2,340.8,260,352L236.8,375.2C225.6,386.4,206.4,386.4,195.2,375.2L93.6,272.8C82.4,261.6,82.4,242.4,93.6,231.2L116.8,208C128,196.8,147.2,196.8,158.4,208L260,310.4z" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#FF32BA7C">
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry FillRule="Nonzero"
+                                          Figures="M348.8,133.6C360,122.4,379.2,122.4,390.4,133.6L413.6,156.8C424.8,168,424.8,187.2,413.6,198.4L237.6,373.6C226.4,384.8,207.2,384.8,196,373.6L172.8,350.4C161.6,339.2,161.6,320,172.8,308.8L348.8,133.6z" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <DrawingImage x:Key="UnConnectIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.ClipGeometry>
+                    <RectangleGeometry Rect="0,0,507.2,507.2" />
+                </DrawingGroup.ClipGeometry>
+                <GeometryDrawing Brush="#FFF15249">
+                    <GeometryDrawing.Geometry>
+                        <PathGeometry FillRule="Nonzero"
+                                      Figures="M373.6,309.6C384.8,320.8,384.8,340,373.6,351.2L351.2,373.6C340,384.8,320.8,384.8,309.6,373.6L133.6,197.6C122.4,186.4,122.4,167.2,133.6,156L156.8,132.8C168,121.6,187.2,121.6,198.4,132.8L373.6,309.6z" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="#FFF15249">
+                    <GeometryDrawing.Geometry>
+                        <PathGeometry FillRule="Nonzero"
+                                      Figures="M280.8,216L216,280.8 309.6,373.6C320.8,384.8,340,384.8,351.2,373.6L374.4,350.4C385.6,339.2,385.6,320,374.4,308.8L280.8,216z" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="#FFF15249">
+                    <GeometryDrawing.Geometry>
+                        <PathGeometry FillRule="Nonzero"
+                                      Figures="M309.6,133.6C320.8,122.4,340,122.4,351.2,133.6L374.4,156.8C385.6,168,385.6,187.2,374.4,198.4L197.6,373.6C186.4,384.8,167.2,384.8,156,373.6L133.6,351.2C122.4,340,122.4,320.8,133.6,309.6L309.6,133.6z" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
 </ResourceDictionary>

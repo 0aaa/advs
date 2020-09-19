@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace VerificationAirVelocitySensor.ViewModel.Services
 {
@@ -15,13 +16,28 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private string _comPort;
         private const int BaudRate = 9600;
 
+        #region EventHandler Open/Close Port
+
+        public event EventHandler<IsOpenFrequencyCounterEventArgs> IsOpenUpdate;
+
+        private void IsOpenUpdateMethod(bool isOpen)
+        {
+            IsOpenUpdate?.Invoke(this, new IsOpenFrequencyCounterEventArgs
+            {
+                IsOpen = isOpen
+            });
+        }
+
+        #endregion
+
+
         public List<GateTimeDescription> GateTimeList { get; } = new List<GateTimeDescription>
         {
-            new GateTimeDescription(GateTime.S1,"1 сек"),
-            new GateTimeDescription(GateTime.S4,"4 сек"),
-            new GateTimeDescription(GateTime.S7,"7 сек"),
-            new GateTimeDescription(GateTime.S10,"10 сек"),
-            new GateTimeDescription(GateTime.S100,"100 сек"),
+            new GateTimeDescription(GateTime.S1, "1 сек"),
+            new GateTimeDescription(GateTime.S4, "4 сек"),
+            new GateTimeDescription(GateTime.S7, "7 сек"),
+            new GateTimeDescription(GateTime.S10, "10 сек"),
+            new GateTimeDescription(GateTime.S100, "100 сек"),
         };
 
 
@@ -39,30 +55,56 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #region Open , Close 
 
-
         public void OpenPort(string comPort)
         {
-            _comPort = comPort;
-            _serialPort = new SerialPort(_comPort, BaudRate);
-            _serialPort.Open();
+            try
+            {
+                _comPort = comPort;
+                _serialPort = new SerialPort(_comPort, BaudRate);
+                _serialPort.Open();
+
+                IsOpenUpdateMethod(_serialPort.IsOpen);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show($"{e.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public void ClosePort()
         {
             _serialPort.Close();
             _serialPort.Dispose();
-        }
 
+            if (_serialPort == null)
+            {
+                IsOpenUpdateMethod(false);
+                return;
+            }
+
+
+            IsOpenUpdateMethod(_serialPort.IsOpen);
+        }
 
         #endregion
 
-        public void WriteCommandAsync(string command, int sleepTime = 1000)
+        private void WriteCommandAsync(string command, int sleepTime = 1000)
         {
-            Task.Run(async () => await Task.Run(() =>
+            Task.Run(async () =>
             {
-                _serialPort.Write(command);
-                Thread.Sleep(sleepTime);
-            }));
+                try
+                {
+                    await Task.Run(() =>
+                    {
+                        _serialPort.Write(command);
+                        Thread.Sleep(sleepTime);
+                    });
+                }
+                catch
+                {
+                    throw new Exception($"Error Command ({command})");
+                }
+            });
         }
 
         /// <summary>
@@ -121,7 +163,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="gateTime"></param>
         public void SetGateTime(GateTime gateTime)
         {
-            WriteCommandAsync($":ARM:TIMer {(int)gateTime} S");
+            WriteCommandAsync($":ARM:TIMer {(int) gateTime} S");
         }
 
         /// <summary>
@@ -130,11 +172,14 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void SetChannelFrequency(FrequencyChannel frequencyChannel)
         {
-            WriteCommandAsync($":FUNCtion FREQuency {(int)frequencyChannel}");
+            WriteCommandAsync($":FUNCtion FREQuency {(int) frequencyChannel}");
         }
-
     }
 
+    /// <summary>
+    /// Каналы частотометра 1 и 2.
+    /// 3-ий использоваться не планируется.
+    /// </summary>
     public enum FrequencyChannel
     {
         Channel1 = 1,
@@ -159,13 +204,21 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
     /// </summary>
     public class GateTimeDescription
     {
-        public GateTimeDescription(GateTime gateTime , string description)
+        public GateTimeDescription(GateTime gateTime, string description)
         {
             GateTime = gateTime;
             Description = description;
         }
 
         public GateTime GateTime { get; }
-        public string Description { get;}
+        public string Description { get; }
+    }
+
+    /// <summary>
+    /// Событие открытия или закрытие порта частотомера
+    /// </summary>
+    public class IsOpenFrequencyCounterEventArgs : EventArgs
+    {
+        public bool IsOpen { get; set; }
     }
 }

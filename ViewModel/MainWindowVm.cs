@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.IO.Ports;
+using System.Threading;
+using System.Threading.Tasks;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
 
@@ -49,14 +51,26 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand OffFilterChannel2Command =>
             new RelayCommand(() => OnOffFilter(2, false), OffFilterChannel2Validation);
 
-        public RelayCommand OpenFrequencyCounterCommand =>
+        public RelayCommand OpenPortFrequencyCounterCommand =>
             new RelayCommand(() => FrequencyCounterDevice.Instance.OpenPort(ComPortFrequencyCounter));
-        public RelayCommand CloseFrequencyCounterCommand =>
+        public RelayCommand ClosePortFrequencyCounterCommand =>
             new RelayCommand(() => FrequencyCounterDevice.Instance.ClosePort() , FrequencyCounterDevice.Instance.IsOpen);
 
         #endregion
 
+        #region Анемометр / Частотный двигатель
+
+        public RelayCommand OpenPortFrequencyMotorCommand =>
+            new RelayCommand(() => FrequencyMotorDevice.Instance.OpenPort(ComPortFrequencyMotor));
+        public RelayCommand ClosePortFrequencyMotorCommand =>
+            new RelayCommand(() => FrequencyMotorDevice.Instance.ClosePort(), FrequencyMotorDevice.Instance.IsOpen);
+
+        public RelayCommand StopFrequencyMotorCommand => new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0) , FrequencyMotorDevice.Instance.IsOpen);
+        public RelayCommand SetSpeedFrequencyMotorCommand => new RelayCommand(SetSpeedFrequencyMotorMethod, FrequencyMotorDevice.Instance.IsOpen);
+
+        #endregion
         public RelayCommand OpenCloseConnectionMenuCommand => new RelayCommand(OpenCloseConnectionMenu);
+        public RelayCommand OpenCloseDebuggingMenuCommand => new RelayCommand(OpenCloseDebuggingMenu , OpenCloseDebuggingMenuValidation);
         public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
 
         #endregion
@@ -64,15 +78,37 @@ namespace VerificationAirVelocitySensor.ViewModel
         #region Property
 
         public bool VisibilityConnectionMenu { get; set; }
+        public bool VisibilityDebuggingMenu { get; set; }
         public ObservableCollection<string> PortsList { get; set; } = new ObservableCollection<string>(SerialPort.GetPortNames());
+        public bool FrequencyCounterIsOpen { get; set; }
+        public bool FrequencyMotorIsOpen { get; set; }
+
+        /// <summary>
+        /// Параметр для установки ожидаемой скорости трубы.
+        /// Внутри метода установки, переводится в частоту и отправляется на устройство.
+        /// После чего, сверяемся по эталонному значению скорости с трубы и корректируем отправляемую частоту на трубу,
+        /// что бы добится почти точного соответствия эталонной скорости и ожидаемой.
+        /// Корректируем с помощью изменения коеффициента в формуле расчета отправляемой частоты.
+        /// </summary>
+        public decimal SpeedFrequencyMotor { get; set; }
+        /// <summary>
+        /// Эталонное значение скорости с частотной трубы
+        /// </summary>
+        public decimal SpeedReferenceValue { get; set; }
+        /// <summary>
+        /// Коеффициент для корректировки скорости вращения трубы ,
+        /// при переводе ожидаемой скорости в частоту (вращения двигателя или типо того) 
+        /// </summary>
+        private decimal coefficient = 1;
 
 
-        public string ComPortFrequencyCounter { get; set; }
+        //TODO Все свойства что ниже, должны сохранятся пре перезапуске.
         public bool FilterChannel1 { get; set; }
         public bool FilterChannel2 { get; set; }
         public FrequencyChannel FrequencyChannel { get; set; } = FrequencyChannel.Channel1;
         public GateTime GateTime { get; set; } = GateTime.S1;
         public string ComPortFrequencyMotor { get; set; }
+        public string ComPortFrequencyCounter { get; set; }
 
         #endregion
 
@@ -110,6 +146,9 @@ namespace VerificationAirVelocitySensor.ViewModel
             }
         }
         private void OpenCloseConnectionMenu() => VisibilityConnectionMenu = !VisibilityConnectionMenu;
+        private void OpenCloseDebuggingMenu() => VisibilityDebuggingMenu = !VisibilityDebuggingMenu;
+
+        private bool OpenCloseDebuggingMenuValidation() => true; /* TODO сь FrequencyMotorIsOpen;*/
 
         #region Частотомер ЧЗ-85/6
 
@@ -177,6 +216,45 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #endregion
 
+        private void SetSpeedFrequencyMotorMethod()
+        {
+            Task.Run(async () => await Task.Run(() =>
+            {
+                FrequencyMotorDevice.Instance.SetFrequency(SpeedFrequencyMotor , coefficient);
+                FrequencyMotorDevice.Instance.OnInterviewReferenceValue();
+                Thread.Sleep(250);
+
+                //TODO здесь должна быть корректировка коеффицента и переотправка частоты на трубу.
+            }));
+        }
+
         #endregion
+
+        public MainWindowVm()
+        {
+            FrequencyCounterDevice.Instance.IsOpenUpdate += FrequencyCounter_IsOpenUpdate;
+
+            FrequencyMotorDevice.Instance.IsOpenUpdate += FrequencyMotor_IsOpenUpdate;
+
+            FrequencyMotorDevice.Instance.UpdateReferenceValue += FrequencyMotor_UpdateReferenceValue;
+        }
+
+        #region EventHandler Method
+        private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
+        {
+            SpeedReferenceValue = (decimal)e.ReferenceValue;
+        }
+
+        private void FrequencyMotor_IsOpenUpdate(object sender, IsOpenFrequencyMotorEventArgs e)
+        {
+            FrequencyMotorIsOpen = e.IsOpen;
+        }
+
+        private void FrequencyCounter_IsOpenUpdate(object sender, IsOpenFrequencyCounterEventArgs e)
+        {
+            FrequencyCounterIsOpen = e.IsOpen;
+        }
+        #endregion
+
     }
 }
