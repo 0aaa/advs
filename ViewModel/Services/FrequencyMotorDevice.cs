@@ -44,8 +44,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         private bool _isSendCommand;
 
-        private readonly int _periodInterview = 500;
-        private readonly object _locker = new object();
+        private readonly int _periodInterview = 1000;
+        private object _locker = new object();
 
         #region EventHandler 
 
@@ -163,6 +163,13 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
             Thread.Sleep(100);
 
+            //Если частота = 0 , то выключаем трубу и соответственно опрос эталонного датчика.
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
+            if (freq == 0)
+            {
+                OffInterviewReferenceValue();
+            }
+
             //Если была отправленна частота, отправляю командное словы что бы ее закрепить
             //Байты командного слова были стырены с проги института предоставившего сборку.
             // ReSharper disable once CompareOfFloatsByEqualityOperator
@@ -244,6 +251,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void ZeroReferenceValue()
         {
+            //байты взяты с исходников проги А-02 от создателей трубы
             var setNullArray = new byte[]
             {
                 AddressAnemometerDevice,
@@ -265,6 +273,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         }
 
 
+        /// <summary>
+        /// Вкл переодический опрос эталонного датчика
+        /// </summary>
         public void OnInterviewReferenceValue()
         {
             _isInterview = true;
@@ -292,6 +303,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             }));
         }
 
+        /// <summary>
+        /// Выкл переодического опроса эталонного датчика
+        /// </summary>
         public void OffInterviewReferenceValue()
         {
             _isInterview = false;
@@ -341,6 +355,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
     public class UpdateReferenceValueEventArgs : EventArgs
     {
+        /// <summary>
+        /// Эталонное значение скорости на анемометре
+        /// </summary>
         public double ReferenceValue { get; set; }
     }
 }

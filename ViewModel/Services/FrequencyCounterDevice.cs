@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Ports;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -141,8 +142,37 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         {
             WriteCommandAsync("FETC?");
 
+            var counter = 0;
+
+            var buffer = new List<byte>();
+            while (true)
+            {
+                if (_serialPort.BytesToRead != 0)
+                {
+                    var readByte = _serialPort.ReadByte();
+                    buffer.Add((byte)readByte);
+
+                    if (readByte == 0x0a)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    if (counter == 20)
+                    {
+                        throw new Exception("Превышен лимит ожидания ответа с частотометра");
+                    }
+                    counter++;
+                    Thread.Sleep(100);
+                }
+            }
+
+
+            var data = Encoding.ASCII.GetString(buffer.ToArray());
+
             //TODO Здесь должен быть возврат значения с частотомера.
-            return null;
+            return data;
         }
 
         /// <summary>

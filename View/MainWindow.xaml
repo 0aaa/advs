@@ -73,6 +73,22 @@
             </Menu>
         </Border>
 
+        <Button Content="Считать значение частотометра"
+                Command="{Binding ReadValueOnFrequencyCounterCommand}"
+                HorizontalAlignment="Left"
+                Margin="40,143,0,0"
+                Grid.Row="1"
+                VerticalAlignment="Top"
+                Width="248" />
+        <TextBlock HorizontalAlignment="Left"
+                   Height="20"
+                   Margin="40,168,0,0"
+                   Grid.Row="1"
+                   TextWrapping="Wrap"
+                   Text="{Binding FrequencyCounterValue}"
+                   VerticalAlignment="Top"
+                   Width="248" />
+
 
         <!--#region Connection Menu-->
         <Border Grid.Row="1"

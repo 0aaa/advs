@@ -33,6 +33,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #endregion
 
+        public RelayCommand ReadValueOnFrequencyCounterCommand => new RelayCommand(ReadValueOnFrequencyCounter , FrequencyCounterDevice.Instance.IsOpen);
+
         public RelayCommand SetFrequencyChannel1Command =>
             new RelayCommand(() => SetFrequencyChannel(FrequencyChannel.Channel1), SetFrequencyChannel1Validation);
 
@@ -66,7 +68,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             new RelayCommand(() => FrequencyMotorDevice.Instance.ClosePort(), FrequencyMotorDevice.Instance.IsOpen);
 
         public RelayCommand StopFrequencyMotorCommand => new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0) , FrequencyMotorDevice.Instance.IsOpen);
-        public RelayCommand SetSpeedFrequencyMotorCommand => new RelayCommand(SetSpeedFrequencyMotorMethod, FrequencyMotorDevice.Instance.IsOpen);
+        public RelayCommand SetSpeedFrequencyMotorCommand => new RelayCommand(SetSpeedFrequencyMotorMethodAsync, FrequencyMotorDevice.Instance.IsOpen);
 
         #endregion
         public RelayCommand OpenCloseConnectionMenuCommand => new RelayCommand(OpenCloseConnectionMenu);
@@ -77,6 +79,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region Property
 
+
+        public string FrequencyCounterValue { get; set; }
         public bool VisibilityConnectionMenu { get; set; }
         public bool VisibilityDebuggingMenu { get; set; }
         public ObservableCollection<string> PortsList { get; set; } = new ObservableCollection<string>(SerialPort.GetPortNames());
@@ -148,12 +152,18 @@ namespace VerificationAirVelocitySensor.ViewModel
         private void OpenCloseConnectionMenu() => VisibilityConnectionMenu = !VisibilityConnectionMenu;
         private void OpenCloseDebuggingMenu() => VisibilityDebuggingMenu = !VisibilityDebuggingMenu;
 
-        private bool OpenCloseDebuggingMenuValidation() => true; /* TODO сь FrequencyMotorIsOpen;*/
+        private bool OpenCloseDebuggingMenuValidation() => FrequencyMotorIsOpen;
 
         #region Частотомер ЧЗ-85/6
 
+        private void ReadValueOnFrequencyCounter()
+        {
+            FrequencyCounterValue = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+        }
+
         private void SetGateTime(GateTime gateTime)
         {
+            //TODO Команда частотомера. Делать ли асинк ? Протестировать
             FrequencyCounterDevice.Instance.SetGateTime(gateTime);
             GateTime = gateTime;
         }
@@ -175,6 +185,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void SetFrequencyChannel(FrequencyChannel frequencyChannel)
         {
+            //TODO Команда частотомера. Делать ли асинк ? Протестировать
             FrequencyCounterDevice.Instance.SetChannelFrequency(frequencyChannel);
             FrequencyChannel = frequencyChannel;
         }
@@ -187,6 +198,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void OnOffFilter(int channel, bool isOn)
         {
+
+            //TODO Команда частотомера. Делать ли асинк ? Протестировать
             switch (channel)
             {
                 case 1:
@@ -216,7 +229,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #endregion
 
-        private void SetSpeedFrequencyMotorMethod()
+        private void SetSpeedFrequencyMotorMethodAsync()
         {
             Task.Run(async () => await Task.Run(() =>
             {
