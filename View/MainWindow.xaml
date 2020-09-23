@@ -54,15 +54,7 @@
                             <MenuItem Header="2-ый канал Off"
                                       Command="{Binding OffFilterChannel2Command}" />
                         </MenuItem>
-                        <MenuItem Header="Измерения">
-                            <MenuItem Header="0,7 м/с" />
-                            <MenuItem Header="5 м/с" />
-                            <MenuItem Header="10 м/с" />
-                            <MenuItem Header="15 м/с" />
-                            <MenuItem Header="20 м/с" />
-                            <MenuItem Header="25 м/с" />
-                            <MenuItem Header="30 м/с" />
-                        </MenuItem>
+                        <MenuItem Header="Сброс" Command="{Binding ResetCommand}"/>
                     </MenuItem>
                 </MenuItem>
                 <MenuItem Header="Режимы">

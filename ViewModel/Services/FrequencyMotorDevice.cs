@@ -89,10 +89,11 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             try
             {
                 _comPort = comPort;
-                _serialPort = new SerialPort(_comPort, BaudRate);
+                _serialPort = new SerialPort(_comPort, BaudRate) {ReadTimeout = 2000, WriteTimeout = 2000};
                 _serialPort.Open();
 
                 IsOpenUpdateMethod(_serialPort.IsOpen);
+                OnInterviewReferenceValue();
             }
             catch (Exception e)
             {
@@ -102,6 +103,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         public void ClosePort()
         {
+            OffInterviewReferenceValue();
             _serialPort.Close();
             _serialPort.Dispose();
 
@@ -163,12 +165,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
             Thread.Sleep(100);
 
-            //Если частота = 0 , то выключаем трубу и соответственно опрос эталонного датчика.
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
-            if (freq == 0)
-            {
-                OffInterviewReferenceValue();
-            }
 
             //Если была отправленна частота, отправляю командное словы что бы ее закрепить
             //Байты командного слова были стырены с проги института предоставившего сборку.
@@ -200,7 +196,12 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <returns></returns>
         private double GetReferenceValue()
         {
-            //Запрос значения эталона
+            //Чистка буфера от старых трейдов.
+            Thread.Sleep(1000);
+            if (_serialPort.BytesToRead != 0)
+                _ = _serialPort.ReadExisting();
+
+            //Запрос значения эталон
             var sendPack = new byte[]
             {
                 AddressAnemometerDevice,
@@ -219,9 +220,13 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             sendPack[7] = sendPackCrc2;
 
             _serialPort.Write(sendPack, 0, sendPack.Length);
-            Thread.Sleep(200);
+            while (_serialPort.BytesToRead == 0)
+            {
+                Thread.Sleep(100);
+            }
 
-            var getPack = new byte[_serialPort.BytesToRead];
+            var bytesToRead = _serialPort.BytesToRead;
+            var getPack = new byte[bytesToRead];
             _serialPort.Read(getPack, 0, getPack.Length);
 
             if (getPack.Length != 7)
@@ -278,6 +283,11 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void OnInterviewReferenceValue()
         {
+            //В случае если опрос уже запущен  , не запускать доп задачи по опросу.
+            if (_isInterview)
+                return;
+
+
             _isInterview = true;
 
             Task.Run(async () => await Task.Run(() =>

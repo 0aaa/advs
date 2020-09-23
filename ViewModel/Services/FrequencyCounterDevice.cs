@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Ports;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -91,21 +92,23 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         private void WriteCommandAsync(string command, int sleepTime = 1000)
         {
-            Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Run(() =>
-                    {
-                        _serialPort.Write(command);
-                        Thread.Sleep(sleepTime);
-                    });
-                }
-                catch
-                {
-                    throw new Exception($"Error Command ({command})");
-                }
-            });
+            //Task.Run(async () =>
+            //{
+            //    try
+            //    {
+            //        await Task.Run(() =>
+            //        {
+            //            _serialPort.Write(command + "\r\n");
+            //            Thread.Sleep(sleepTime);
+            //        });
+            //    }
+            //    catch
+            //    {
+            //        throw new Exception($"Error Command ({command})");
+            //    }
+            //});
+            _serialPort.WriteLine(command);
+            Thread.Sleep(sleepTime);
         }
 
         /// <summary>
@@ -124,55 +127,38 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public void SwitchFilter(int channel, bool isOn, int sleepTime = 1000)
         {
-            if (channel != 1 || channel != 2 || channel != 3)
+            if (channel != 1 && channel != 2 && channel != 3)
                 throw new ArgumentOutOfRangeException();
 
             var stringIsOn = isOn
                 ? "ON"
                 : "OFF";
 
-            WriteCommandAsync($":INPut{channel}:FILTer {stringIsOn}", sleepTime);
+            var command = $":INPut{channel}:FILTer {stringIsOn}";
+
+            WriteCommandAsync(command, sleepTime);
         }
 
         /// <summary>
         /// Запрос на значение частоты
         /// </summary>
         /// <param name="sleepTime"></param>
-        public string GetCurrentHzValue(int sleepTime = 1000)
+        public decimal GetCurrentHzValue(int sleepTime = 1000)
         {
             WriteCommandAsync("FETC?");
 
-            var counter = 0;
+            Thread.Sleep(100);
+            var data = _serialPort.ReadExisting();
 
-            var buffer = new List<byte>();
-            while (true)
-            {
-                if (_serialPort.BytesToRead != 0)
-                {
-                    var readByte = _serialPort.ReadByte();
-                    buffer.Add((byte)readByte);
+            if (string.IsNullOrEmpty(data))
+                return 0;
 
-                    if (readByte == 0x0a)
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    if (counter == 20)
-                    {
-                        throw new Exception("Превышен лимит ожидания ответа с частотометра");
-                    }
-                    counter++;
-                    Thread.Sleep(100);
-                }
-            }
+            var substringValue = data.Substring(1, 7).Replace("." , ",");
+            var value = Decimal.Parse(substringValue);
 
+            var mathValue = Math.Round(value, 3);
 
-            var data = Encoding.ASCII.GetString(buffer.ToArray());
-
-            //TODO Здесь должен быть возврат значения с частотомера.
-            return data;
+            return mathValue;
         }
 
         /// <summary>

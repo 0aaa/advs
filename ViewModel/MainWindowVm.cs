@@ -35,6 +35,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public RelayCommand ReadValueOnFrequencyCounterCommand => new RelayCommand(ReadValueOnFrequencyCounter , FrequencyCounterDevice.Instance.IsOpen);
 
+        public RelayCommand ResetCommand => new RelayCommand(FrequencyCounterDevice.Instance.RstCommand , FrequencyCounterDevice.Instance.IsOpen);
+
         public RelayCommand SetFrequencyChannel1Command =>
             new RelayCommand(() => SetFrequencyChannel(FrequencyChannel.Channel1), SetFrequencyChannel1Validation);
 
@@ -80,7 +82,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         #region Property
 
 
-        public string FrequencyCounterValue { get; set; }
+        public decimal FrequencyCounterValue { get; set; }
         public bool VisibilityConnectionMenu { get; set; }
         public bool VisibilityDebuggingMenu { get; set; }
         public ObservableCollection<string> PortsList { get; set; } = new ObservableCollection<string>(SerialPort.GetPortNames());
@@ -234,7 +236,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             Task.Run(async () => await Task.Run(() =>
             {
                 FrequencyMotorDevice.Instance.SetFrequency(SpeedFrequencyMotor , coefficient);
-                FrequencyMotorDevice.Instance.OnInterviewReferenceValue();
                 Thread.Sleep(250);
 
                 //TODO здесь должна быть корректировка коеффицента и переотправка частоты на трубу.
