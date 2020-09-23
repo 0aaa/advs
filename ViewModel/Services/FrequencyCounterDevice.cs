@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace VerificationAirVelocitySensor.ViewModel.Services
@@ -145,7 +142,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public decimal GetCurrentHzValue(int sleepTime = 1000)
         {
-            WriteCommandAsync("FETC?");
+            WriteCommandAsync("FETC?" , sleepTime);
 
             Thread.Sleep(100);
             var data = _serialPort.ReadExisting();
@@ -154,7 +151,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 return 0;
 
             var substringValue = data.Substring(1, 7).Replace("." , ",");
-            var value = Decimal.Parse(substringValue);
+            var value = decimal.Parse(substringValue);
 
             var mathValue = Math.Round(value, 3);
 
@@ -169,8 +166,12 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         {
             WriteCommandAsync("*IDN?");
 
-            //TODO Здесь должен быть возврат версии.
-            return null;
+            Thread.Sleep(100);
+            var data = _serialPort.ReadExisting();
+
+            return string.IsNullOrEmpty(data) 
+                ? "Error" 
+                : data;
         }
 
         /// <summary>

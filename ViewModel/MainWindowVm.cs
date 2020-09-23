@@ -77,11 +77,16 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand OpenCloseDebuggingMenuCommand => new RelayCommand(OpenCloseDebuggingMenu , OpenCloseDebuggingMenuValidation);
         public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
 
+        public RelayCommand OpenReferenceCommand => new RelayCommand(() => IsReference = !IsReference);
+
         #endregion
 
         #region Property
 
-
+        /// <summary>
+        /// Флаг для отображения справки :)
+        /// </summary>
+        public bool IsReference { get; set; }
         public decimal FrequencyCounterValue { get; set; }
         public bool VisibilityConnectionMenu { get; set; }
         public bool VisibilityDebuggingMenu { get; set; }

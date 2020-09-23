@@ -54,7 +54,7 @@
                             <MenuItem Header="2-ый канал Off"
                                       Command="{Binding OffFilterChannel2Command}" />
                         </MenuItem>
-                        <MenuItem Header="Сброс" Command="{Binding ResetCommand}"/>
+                        <MenuItem Header="Сброс" Command="{Binding ResetCommand}" />
                     </MenuItem>
                 </MenuItem>
                 <MenuItem Header="Режимы">
@@ -62,6 +62,7 @@
                               Command="{Binding OpenCloseDebuggingMenuCommand}" />
                     <MenuItem Header="Изменения" />
                 </MenuItem>
+                <MenuItem Header="Справка" Command="{Binding OpenReferenceCommand}" />
             </Menu>
         </Border>
 
@@ -429,6 +430,11 @@
         </Border>
         <!--#endregion-->
 
+        <!--#region Reference-->
+        <Border Grid.Row="1" Visibility="{Binding IsReference , Converter={StaticResource BoolToVis}}">
+            <Image Source="../Style/KHhcEzQy3xA-600x338.jpg" />
+        </Border>
+        <!--#endregion-->
 
     </Grid>
 </Window>
