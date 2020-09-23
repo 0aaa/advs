@@ -152,7 +152,7 @@
     <Resource Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Style\KHhcEzQy3xA-600x338.jpg" />
+    <Resource Include="Style\b0e1b7cd6ed3c0b4f98e1b9385ad6b4d.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

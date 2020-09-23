@@ -432,7 +432,18 @@
 
         <!--#region Reference-->
         <Border Grid.Row="1" Visibility="{Binding IsReference , Converter={StaticResource BoolToVis}}">
-            <Image Source="../Style/KHhcEzQy3xA-600x338.jpg" />
+            <Grid>
+                <Image Source="../Style/b0e1b7cd6ed3c0b4f98e1b9385ad6b4d.jpg" />
+                <TextBlock Text="Нельзя так просто взять и сделать справку !!!" 
+                           Foreground="White"
+                           FontWeight="Bold"
+                           FontSize="20" 
+                           TextWrapping="Wrap" 
+                           Width="250" 
+                           Margin="29,40,0,0"
+                           VerticalAlignment="Top" 
+                           HorizontalAlignment="Left"/>
+            </Grid>
         </Border>
         <!--#endregion-->
 
