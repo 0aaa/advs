@@ -54,7 +54,8 @@
                             <MenuItem Header="2-ый канал Off"
                                       Command="{Binding OffFilterChannel2Command}" />
                         </MenuItem>
-                        <MenuItem Header="Сброс" Command="{Binding ResetCommand}" />
+                        <MenuItem Header="Сброс"
+                                  Command="{Binding ResetCommand}" />
                     </MenuItem>
                 </MenuItem>
                 <MenuItem Header="Режимы">
@@ -62,7 +63,8 @@
                               Command="{Binding OpenCloseDebuggingMenuCommand}" />
                     <MenuItem Header="Изменения" />
                 </MenuItem>
-                <MenuItem Header="Справка" Command="{Binding OpenReferenceCommand}" />
+                <MenuItem Header="Справка"
+                          Command="{Binding OpenReferenceCommand}" />
             </Menu>
         </Border>
 
@@ -334,11 +336,13 @@
                 <Grid Grid.Row="1"
                       Background="#777F87">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="3*" />
                         <RowDefinition Height="1*" />
                     </Grid.RowDefinitions>
 
-                    <Border Grid.Row="0" BorderThickness="0,1,0,1" BorderBrush="Black">
+                    <Border Grid.Row="0"
+                            BorderThickness="0,1,0,1"
+                            BorderBrush="Black">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1*" />
@@ -351,23 +355,57 @@
                                     <RowDefinition Height="1*" />
                                 </Grid.RowDefinitions>
                                 <Grid Grid.Row="0">
-                                    <TextBlock Text="Примерно уст. скорость"
-                                               FontSize="14"
-                                               TextWrapping="Wrap"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="1*" />
+                                        <RowDefinition Height="1*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0">
+                                        <TextBlock Text="Уст. скорость"
+                                                   FontSize="14"
+                                                   TextWrapping="Wrap"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+                                    <Grid Grid.Row="1">
+                                        <xctk:DecimalUpDown HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Value="{Binding SpeedFrequencyMotor}"
+                                                            FormatString="{}{0:0.0} м/c"
+                                                            TextAlignment="Center"
+                                                            ShowButtonSpinner="False"
+                                                            Minimum="0"
+                                                            Maximum="30"
+                                                            Increment="0.1"
+                                                            Width="75" />
+                                    </Grid>
                                 </Grid>
                                 <Grid Grid.Row="1">
-                                    <xctk:DecimalUpDown HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"
-                                                        Value="{Binding SpeedFrequencyMotor}"
-                                                        FormatString="{}{0:0.0} м/c"
-                                                        TextAlignment="Center"
-                                                        ShowButtonSpinner="False"
-                                                        Minimum="0"
-                                                        Maximum="30"
-                                                        Increment="0.1"
-                                                        Width="75" />
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="1*" />
+                                        <RowDefinition Height="1*" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid Grid.Row="0">
+                                        <TextBlock Text="Коэффицент"
+                                                   FontSize="14"
+                                                   TextWrapping="Wrap"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+                                    <Grid Grid.Row="1">
+                                        <xctk:DecimalUpDown HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            IsReadOnly="{Binding IsAutoCorrectionCoefficient , Converter={StaticResource InvertBool}}"
+                                                            Value="{Binding Coefficient}"
+                                                            FormatString="{}{0:0.00}"
+                                                            TextAlignment="Center"
+                                                            ShowButtonSpinner="False"
+                                                            Minimum="0"
+                                                            Maximum="30"
+                                                            Increment="0.1"
+                                                            Width="75" />
+                                    </Grid>
+
                                 </Grid>
                             </Grid>
                             <Grid Column="1">
@@ -376,23 +414,50 @@
                                     <RowDefinition Height="1*" />
                                 </Grid.RowDefinitions>
                                 <Grid Grid.Row="0">
-                                    <Button HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            Command="{Binding SetSpeedFrequencyMotorCommand}"
-                                            Content="Установить"
-                                            Height="20"
-                                            Width="74" />
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="1*" />
+                                        <RowDefinition Height="1*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0">
+                                        <Button HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Command="{Binding SetSpeedFrequencyMotorCommand}"
+                                                Content="Установить"
+                                                Height="20"
+                                                Width="74" />
+                                    </Grid>
+                                    <Grid Grid.Row="1">
+                                        <Button HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Command="{Binding StopFrequencyMotorCommand}"
+                                                Height="20"
+                                                Width="75">
+                                            <TextBlock Text="СТОП"
+                                                       Foreground="Red"
+                                                       FontWeight="Bold" />
+                                        </Button>
+                                    </Grid>
                                 </Grid>
                                 <Grid Row="1">
-                                    <Button HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            Command="{Binding StopFrequencyMotorCommand}"
-                                            Height="20"
-                                            Width="75">
-                                        <TextBlock Text="СТОП"
-                                                   Foreground="Red"
-                                                   FontWeight="Bold" />
-                                    </Button>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="1*" />
+                                        <RowDefinition Height="1*" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid Grid.Row="0">
+                                        <TextBlock Text="Авто корректировка коэфициента"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+                                    <Grid Grid.Row="1">
+                                        <Viewbox>
+                                            <CheckBox IsChecked="{Binding IsAutoCorrectionCoefficient}" 
+                                                      Margin="5"/>
+                                        </Viewbox>
+                                    </Grid>
+
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -431,18 +496,19 @@
         <!--#endregion-->
 
         <!--#region Reference-->
-        <Border Grid.Row="1" Visibility="{Binding IsReference , Converter={StaticResource BoolToVis}}">
+        <Border Grid.Row="1"
+                Visibility="{Binding IsReference , Converter={StaticResource BoolToVis}}">
             <Grid>
                 <Image Source="../Style/b0e1b7cd6ed3c0b4f98e1b9385ad6b4d.jpg" />
-                <TextBlock Text="Нельзя так просто взять и сделать справку !!!" 
+                <TextBlock Text="Нельзя так просто взять и сделать справку !!!"
                            Foreground="White"
                            FontWeight="Bold"
-                           FontSize="20" 
-                           TextWrapping="Wrap" 
-                           Width="250" 
+                           FontSize="20"
+                           TextWrapping="Wrap"
+                           Width="250"
                            Margin="29,40,0,0"
-                           VerticalAlignment="Top" 
-                           HorizontalAlignment="Left"/>
+                           VerticalAlignment="Top"
+                           HorizontalAlignment="Left" />
             </Grid>
         </Border>
         <!--#endregion-->

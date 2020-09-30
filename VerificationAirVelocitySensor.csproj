@@ -104,9 +104,12 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Model\DvsValue.cs" />
     <Compile Include="Style\Converter\BooleanConverter.cs" />
     <Compile Include="ViewModel\BaseVm\BaseVm.cs" />
     <Compile Include="ViewModel\BaseVm\RelayCommand.cs" />
+    <Compile Include="ViewModel\DvsVm\Dvs01Vm.cs" />
+    <Compile Include="ViewModel\DvsVm\Dvs02Vm.cs" />
     <Compile Include="ViewModel\MainWindowVm.cs" />
     <Compile Include="ViewModel\Services\FrequencyCounterDevice.cs" />
     <Compile Include="ViewModel\Services\FrequencyMotorDevice.cs" />
@@ -145,9 +148,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Model\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="FodyWeavers.xml" />
   </ItemGroup>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.IO.Ports;
-using System.Threading;
 using System.Threading.Tasks;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
@@ -33,9 +32,11 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #endregion
 
-        public RelayCommand ReadValueOnFrequencyCounterCommand => new RelayCommand(ReadValueOnFrequencyCounter , FrequencyCounterDevice.Instance.IsOpen);
+        public RelayCommand ReadValueOnFrequencyCounterCommand =>
+            new RelayCommand(ReadValueOnFrequencyCounter, FrequencyCounterDevice.Instance.IsOpen);
 
-        public RelayCommand ResetCommand => new RelayCommand(FrequencyCounterDevice.Instance.RstCommand , FrequencyCounterDevice.Instance.IsOpen);
+        public RelayCommand ResetCommand => new RelayCommand(FrequencyCounterDevice.Instance.RstCommand,
+            FrequencyCounterDevice.Instance.IsOpen);
 
         public RelayCommand SetFrequencyChannel1Command =>
             new RelayCommand(() => SetFrequencyChannel(FrequencyChannel.Channel1), SetFrequencyChannel1Validation);
@@ -57,8 +58,9 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public RelayCommand OpenPortFrequencyCounterCommand =>
             new RelayCommand(() => FrequencyCounterDevice.Instance.OpenPort(ComPortFrequencyCounter));
+
         public RelayCommand ClosePortFrequencyCounterCommand =>
-            new RelayCommand(() => FrequencyCounterDevice.Instance.ClosePort() , FrequencyCounterDevice.Instance.IsOpen);
+            new RelayCommand(() => FrequencyCounterDevice.Instance.ClosePort(), FrequencyCounterDevice.Instance.IsOpen);
 
         #endregion
 
@@ -66,17 +68,24 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public RelayCommand OpenPortFrequencyMotorCommand =>
             new RelayCommand(() => FrequencyMotorDevice.Instance.OpenPort(ComPortFrequencyMotor));
+
         public RelayCommand ClosePortFrequencyMotorCommand =>
             new RelayCommand(() => FrequencyMotorDevice.Instance.ClosePort(), FrequencyMotorDevice.Instance.IsOpen);
 
-        public RelayCommand StopFrequencyMotorCommand => new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0) , FrequencyMotorDevice.Instance.IsOpen);
-        public RelayCommand SetSpeedFrequencyMotorCommand => new RelayCommand(SetSpeedFrequencyMotorMethodAsync, FrequencyMotorDevice.Instance.IsOpen);
+        public RelayCommand StopFrequencyMotorCommand =>
+            new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0), FrequencyMotorDevice.Instance.IsOpen);
+
+        public RelayCommand SetSpeedFrequencyMotorCommand => new RelayCommand(SetSpeedFrequencyMotorMethodAsync,
+            FrequencyMotorDevice.Instance.IsOpen);
 
         #endregion
-        public RelayCommand OpenCloseConnectionMenuCommand => new RelayCommand(OpenCloseConnectionMenu);
-        public RelayCommand OpenCloseDebuggingMenuCommand => new RelayCommand(OpenCloseDebuggingMenu , OpenCloseDebuggingMenuValidation);
-        public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
 
+        public RelayCommand OpenCloseConnectionMenuCommand => new RelayCommand(OpenCloseConnectionMenu);
+
+        public RelayCommand OpenCloseDebuggingMenuCommand =>
+            new RelayCommand(OpenCloseDebuggingMenu, OpenCloseDebuggingMenuValidation);
+
+        public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
         public RelayCommand OpenReferenceCommand => new RelayCommand(() => IsReference = !IsReference);
 
         #endregion
@@ -87,10 +96,19 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// Флаг для отображения справки :)
         /// </summary>
         public bool IsReference { get; set; }
+
+        /// <summary>
+        /// Флаг для режима отладки на вкыл/выкл авто корректировки коэффициента расчета отправляемой частоты
+        /// </summary>
+        public bool IsAutoCorrectionCoefficient { get; set; }
+
         public decimal FrequencyCounterValue { get; set; }
         public bool VisibilityConnectionMenu { get; set; }
         public bool VisibilityDebuggingMenu { get; set; }
-        public ObservableCollection<string> PortsList { get; set; } = new ObservableCollection<string>(SerialPort.GetPortNames());
+
+        public ObservableCollection<string> PortsList { get; set; } =
+            new ObservableCollection<string>(SerialPort.GetPortNames());
+
         public bool FrequencyCounterIsOpen { get; set; }
         public bool FrequencyMotorIsOpen { get; set; }
 
@@ -102,15 +120,17 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// Корректируем с помощью изменения коеффициента в формуле расчета отправляемой частоты.
         /// </summary>
         public decimal SpeedFrequencyMotor { get; set; }
+
         /// <summary>
         /// Эталонное значение скорости с частотной трубы
         /// </summary>
         public decimal SpeedReferenceValue { get; set; }
+
         /// <summary>
         /// Коеффициент для корректировки скорости вращения трубы ,
         /// при переводе ожидаемой скорости в частоту (вращения двигателя или типо того) 
         /// </summary>
-        private decimal coefficient = 1;
+        public decimal Coefficient { get; set; } = 2.38m;
 
 
         //TODO Все свойства что ниже, должны сохранятся пре перезапуске.
@@ -156,6 +176,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 PortsList.Remove(port);
             }
         }
+
         private void OpenCloseConnectionMenu() => VisibilityConnectionMenu = !VisibilityConnectionMenu;
         private void OpenCloseDebuggingMenu() => VisibilityDebuggingMenu = !VisibilityDebuggingMenu;
 
@@ -205,7 +226,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void OnOffFilter(int channel, bool isOn)
         {
-
             //TODO Команда частотомера. Делать ли асинк ? Протестировать
             switch (channel)
             {
@@ -240,10 +260,11 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             Task.Run(async () => await Task.Run(() =>
             {
-                FrequencyMotorDevice.Instance.SetFrequency(SpeedFrequencyMotor , coefficient);
-                Thread.Sleep(250);
-
-                //TODO здесь должна быть корректировка коеффицента и переотправка частоты на трубу.
+                FrequencyMotorDevice.Instance.SetFrequency(SpeedFrequencyMotor, Coefficient);
+                if (IsAutoCorrectionCoefficient)
+                {
+                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
+                }
             }));
         }
 
@@ -256,12 +277,20 @@ namespace VerificationAirVelocitySensor.ViewModel
             FrequencyMotorDevice.Instance.IsOpenUpdate += FrequencyMotor_IsOpenUpdate;
 
             FrequencyMotorDevice.Instance.UpdateReferenceValue += FrequencyMotor_UpdateReferenceValue;
+
+            FrequencyMotorDevice.Instance.UpdateCoefficient += FrequencyMotor_UpdateCoefficient;
+        }
+
+        private void FrequencyMotor_UpdateCoefficient(object sender, UpdateCoefficientFrequencyMotorEventArgs e)
+        {
+            Coefficient = e.Coefficient;
         }
 
         #region EventHandler Method
+
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
-            SpeedReferenceValue = (decimal)e.ReferenceValue;
+            SpeedReferenceValue = (decimal) e.ReferenceValue;
         }
 
         private void FrequencyMotor_IsOpenUpdate(object sender, IsOpenFrequencyMotorEventArgs e)
@@ -273,7 +302,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             FrequencyCounterIsOpen = e.IsOpen;
         }
-        #endregion
 
+        #endregion
     }
 }

@@ -29,9 +29,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private readonly int FrequencyMotorRegister = 50009;
 
         /// <summary>
-        /// Эталонное значение
+        /// Эталонное значение скорости
         /// </summary>
-        private double _referenceValue;
+        private double _referenceSpeedValue;
 
         /// <summary>
         /// Флаг отвечающий за уведомление о состоянии опроса эталонного значения.
@@ -46,6 +46,28 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         private readonly int _periodInterview = 1000;
         private object _locker = new object();
+
+        /// <summary>
+        /// Флаг отвечающий за выставленную в данный момент скорость. Которая должна соотвествовать эталону.
+        /// </summary>
+        private decimal _setSpeedValue;
+
+
+        private decimal _coefficint;
+        /// <summary>
+        /// Переменная для корректировки значения частоты отправляемой в частотный двигатель
+        /// </summary>
+        private decimal Coefficient
+        {
+            get => _coefficint;
+            set
+            {
+                if (value == _coefficint) return;
+
+                _coefficint = value;
+                UpdateUpdateCoefficient(_coefficint);
+            }
+        }
 
         #region EventHandler 
 
@@ -66,6 +88,16 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             UpdateReferenceValue?.Invoke(this, new UpdateReferenceValueEventArgs
             {
                 ReferenceValue = referenceValue
+            });
+        }
+
+        public event EventHandler<UpdateCoefficientFrequencyMotorEventArgs> UpdateCoefficient;
+
+        private void UpdateUpdateCoefficient(decimal coefficient)
+        {
+            UpdateCoefficient?.Invoke(this, new UpdateCoefficientFrequencyMotorEventArgs
+            {
+                Coefficient = coefficient
             });
         }
 
@@ -118,10 +150,13 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #endregion
 
-        public void SetFrequency(decimal speed , decimal coefficient = 1)
+        public void SetFrequency(decimal speed, decimal coefficient = 1)
         {
+            _setSpeedValue = speed;
+            Coefficient = coefficient;
+
             const int fMax = 80;
-            var freq = (double)speed * (double)coefficient * 16384.0 / fMax;
+            var freq = (double) speed * (double) Coefficient * 16384.0 / fMax;
 
             if (freq < 0 || freq > 16384)
             {
@@ -300,9 +335,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         {
                             _isSendCommand = true;
 
-                            _referenceValue = GetReferenceValue();
+                            _referenceSpeedValue = GetReferenceValue();
 
-                            UpdateReferenceValueMethod(_referenceValue);
+                            UpdateReferenceValueMethod(_referenceSpeedValue);
 
                             _isSendCommand = false;
                         }
@@ -319,6 +354,83 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public void OffInterviewReferenceValue()
         {
             _isInterview = false;
+        }
+
+        /// <summary>
+        /// Расчет допустимой погрешности в зависимости от установленной скорости
+        /// </summary>
+        /// <returns></returns>
+        private decimal GetErrorValue()
+        {
+            const string message = "Недопустимое значение скорости";
+
+            if (_setSpeedValue > 0 && _setSpeedValue <= 0.7m)
+            {
+                return 0.02m;
+            }
+
+            if (_setSpeedValue > 0.7m && _setSpeedValue <= 30m)
+            {
+                return 0.1m;
+            }
+
+            if (_setSpeedValue > 30m)
+            {
+                throw new ArgumentOutOfRangeException($"{_setSpeedValue}", message);
+            }
+
+            throw new ArgumentOutOfRangeException($"{_setSpeedValue}", message);
+        }
+
+        /// <summary>
+        /// Метод для корректировки скорости эталона к установленному значению скорости
+        /// </summary>
+        public void CorrectionSpeedMotor()
+        {
+            Thread.Sleep(2000);
+
+            if (IsValueErrorValidation())
+                return;
+
+            Coefficient = (decimal) _referenceSpeedValue / _setSpeedValue;
+
+            SetFrequency(_setSpeedValue, Coefficient);
+
+            while (true)
+            {
+                Thread.Sleep(2000);
+
+                if (IsValueErrorValidation()) return;
+
+                const decimal stepValue = 0.05m;
+                var differenceValue = _setSpeedValue - (decimal) _referenceSpeedValue;
+
+                var step = (differenceValue > 0)
+                    ? stepValue
+                    : -stepValue;
+
+                Coefficient += step;
+
+                SetFrequency(_setSpeedValue, Coefficient);
+            }
+        }
+
+        /// <summary>
+        /// Проверка валидности эталонной скорости, относительно выставленной
+        /// </summary>
+        /// <returns></returns>
+        private bool IsValueErrorValidation()
+        {
+            //Допустимая погрешность (0,02 или 0,1)
+            var errorValue = GetErrorValue();
+
+            //Разница между установленной скоростью и полученной с эталона
+            var differenceValue = _setSpeedValue - (decimal) _referenceSpeedValue;
+
+            //Флаг отвечающий за совпадение скоростей эталона и выставленной с учетом допустиомй погрешности. 
+            var isValidSpeed = errorValue >= differenceValue && differenceValue >= -errorValue;
+
+            return isValidSpeed;
         }
 
 
@@ -361,6 +473,11 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
     public class IsOpenFrequencyMotorEventArgs : EventArgs
     {
         public bool IsOpen { get; set; }
+    }
+
+    public class UpdateCoefficientFrequencyMotorEventArgs : EventArgs
+    {
+        public decimal Coefficient { get; set; }
     }
 
     public class UpdateReferenceValueEventArgs : EventArgs
