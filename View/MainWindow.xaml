@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Background="LightSlateGray"
         ResizeMode="CanMinimize"
-        Title="MainWindow"
+        Title="Поверка датчиков скорости воздушного потока"
         Height="400"
         Width="500">
     <Window.DataContext>
