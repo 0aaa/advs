@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.IO.Ports;
 using System.Threading.Tasks;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
+using YamlDotNet.Serialization;
 
 namespace VerificationAirVelocitySensor.ViewModel
 {
@@ -92,6 +94,11 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region Property
 
+        private UserSettings _userSettings;
+        private readonly object _loker;
+
+        private const string _pathUserSettings = "UserSettings.txt";
+
         /// <summary>
         /// Флаг для отображения справки :)
         /// </summary>
@@ -113,33 +120,99 @@ namespace VerificationAirVelocitySensor.ViewModel
         public bool FrequencyMotorIsOpen { get; set; }
 
         /// <summary>
-        /// Параметр для установки ожидаемой скорости трубы.
-        /// Внутри метода установки, переводится в частоту и отправляется на устройство.
-        /// После чего, сверяемся по эталонному значению скорости с трубы и корректируем отправляемую частоту на трубу,
-        /// что бы добится почти точного соответствия эталонной скорости и ожидаемой.
-        /// Корректируем с помощью изменения коеффициента в формуле расчета отправляемой частоты.
+        /// Параметр для установки частотв трубы.
         /// </summary>
-        public decimal SpeedFrequencyMotor { get; set; }
+        public decimal SetFrequencyMotor { get; set; }
 
         /// <summary>
         /// Эталонное значение скорости с частотной трубы
         /// </summary>
         public decimal SpeedReferenceValue { get; set; }
 
-        /// <summary>
-        /// Коеффициент для корректировки скорости вращения трубы ,
-        /// при переводе ожидаемой скорости в частоту (вращения двигателя или типо того) 
-        /// </summary>
-        public decimal Coefficient { get; set; } = 2.38m;
+        //Все свойства что ниже, должны сохранятся пре перезапуске.
 
+        private bool _filterChannel1;
 
-        //TODO Все свойства что ниже, должны сохранятся пре перезапуске.
-        public bool FilterChannel1 { get; set; }
-        public bool FilterChannel2 { get; set; }
-        public FrequencyChannel FrequencyChannel { get; set; } = FrequencyChannel.Channel1;
-        public GateTime GateTime { get; set; } = GateTime.S1;
-        public string ComPortFrequencyMotor { get; set; }
-        public string ComPortFrequencyCounter { get; set; }
+        public bool FilterChannel1
+        {
+            get => _filterChannel1;
+            set
+            {
+                _filterChannel1 = value;
+                OnPropertyChanged(nameof(FilterChannel1));
+                _userSettings.FilterChannel1 = value;
+                Serialization();
+            }
+        }
+
+        private bool _filterChannel2;
+
+        public bool FilterChannel2
+        {
+            get => _filterChannel2;
+            set
+            {
+                _filterChannel2 = value;
+                OnPropertyChanged(nameof(FilterChannel2));
+                _userSettings.FilterChannel2 = value;
+                Serialization();
+            }
+        }
+
+        private FrequencyChannel _frequencyChannel;
+
+        public FrequencyChannel FrequencyChannel
+        {
+            get => _frequencyChannel;
+            set
+            {
+                _frequencyChannel = value;
+                OnPropertyChanged(nameof(FrequencyChannel));
+                _userSettings.FrequencyChannel = value;
+                Serialization();
+            }
+        }
+
+        private GateTime _gateTime;
+
+        public GateTime GateTime
+        {
+            get => _gateTime;
+            set
+            {
+                _gateTime = value;
+                OnPropertyChanged(nameof(GateTime));
+                _userSettings.GateTime = value;
+                Serialization();
+            }
+        }
+
+        private string _comPortFrequencyMotor;
+
+        public string ComPortFrequencyMotor
+        {
+            get => _comPortFrequencyMotor;
+            set
+            {
+                _comPortFrequencyMotor = value;
+                OnPropertyChanged(nameof(ComPortFrequencyMotor));
+                _userSettings.ComPortFrequencyMotor = value;
+                Serialization();
+            }
+        }
+
+        private string _comPortFrequencyCounter;
+        public string ComPortFrequencyCounter
+        {
+            get => _comPortFrequencyCounter;
+            set
+            {
+                _comPortFrequencyCounter = value;
+                OnPropertyChanged(nameof(ComPortFrequencyCounter));
+                _userSettings.ComPortFrequencyCounter = value;
+                Serialization();
+            }
+        }
 
         #endregion
 
@@ -260,7 +333,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             Task.Run(async () => await Task.Run(() =>
             {
-                FrequencyMotorDevice.Instance.SetFrequency(SpeedFrequencyMotor, Coefficient);
+                FrequencyMotorDevice.Instance.SetFrequency(SetFrequencyMotor);
                 if (IsAutoCorrectionCoefficient)
                 {
                     FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
@@ -278,13 +351,17 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             FrequencyMotorDevice.Instance.UpdateReferenceValue += FrequencyMotor_UpdateReferenceValue;
 
-            FrequencyMotorDevice.Instance.UpdateCoefficient += FrequencyMotor_UpdateCoefficient;
+            var deserialization = Deserialization();
+            _userSettings = deserialization ?? new UserSettings();
+
+            FilterChannel1 = _userSettings.FilterChannel1;
+            FilterChannel2 = _userSettings.FilterChannel2;
+            FrequencyChannel = _userSettings.FrequencyChannel;
+            GateTime = _userSettings.GateTime;
+            ComPortFrequencyMotor = _userSettings.ComPortFrequencyMotor;
+            ComPortFrequencyCounter = _userSettings.ComPortFrequencyCounter;
         }
 
-        private void FrequencyMotor_UpdateCoefficient(object sender, UpdateCoefficientFrequencyMotorEventArgs e)
-        {
-            Coefficient = e.Coefficient;
-        }
 
         #region EventHandler Method
 
@@ -301,6 +378,55 @@ namespace VerificationAirVelocitySensor.ViewModel
         private void FrequencyCounter_IsOpenUpdate(object sender, IsOpenFrequencyCounterEventArgs e)
         {
             FrequencyCounterIsOpen = e.IsOpen;
+        }
+
+        #endregion
+
+        #region deserilize / serilize
+
+        public void Serialization()
+        {
+            try
+            {
+                var serializer = new Serializer();
+
+                lock (_loker)
+                {
+                    using (var file = File.Open(_pathUserSettings, FileMode.Create))
+                    {
+                        using (var writer = new StreamWriter(file))
+                        {
+                            serializer.Serialize(writer, _userSettings);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
+
+        private UserSettings Deserialization()
+        {
+            var deserializer = new Deserializer();
+
+            using (var file = File.Open(_pathUserSettings, FileMode.OpenOrCreate, FileAccess.Read))
+            {
+                using (var reader = new StreamReader(file))
+                {
+                    try
+                    {
+                        var userSettings = deserializer.Deserialize<UserSettings>(reader);
+
+                        return userSettings;
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                }
+            }
         }
 
         #endregion

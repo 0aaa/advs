@@ -369,7 +369,7 @@
                                     <Grid Grid.Row="1">
                                         <xctk:DecimalUpDown HorizontalAlignment="Center"
                                                             VerticalAlignment="Center"
-                                                            Value="{Binding SpeedFrequencyMotor}"
+                                                            Value="{Binding SetFrequencyMotor}"
                                                             FormatString="{}{0:0.0} м/c"
                                                             TextAlignment="Center"
                                                             ShowButtonSpinner="False"

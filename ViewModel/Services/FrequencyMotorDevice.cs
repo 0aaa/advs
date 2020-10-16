@@ -50,26 +50,30 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <summary>
         /// Флаг отвечающий за выставленную в данный момент скорость. Которая должна соотвествовать эталону.
         /// </summary>
-        private decimal _setSpeedValue;
+        private decimal _setFrequencyValue;
 
-
-        private decimal _coefficint;
-        /// <summary>
-        /// Переменная для корректировки значения частоты отправляемой в частотный двигатель
-        /// </summary>
-        private decimal Coefficient
+        public decimal SetFrequencyValue
         {
-            get => _coefficint;
+            get => _setFrequencyValue;
             set
             {
-                if (value == _coefficint) return;
-
-                _coefficint = value;
-                UpdateUpdateCoefficient(_coefficint);
+                _setFrequencyValue = value;
+                UpdateSetFrequencyMethod(value);
             }
         }
 
+
         #region EventHandler 
+
+        public event EventHandler<UpdateSetFrequencyEventArgs> UpdateSetFrequency;
+
+        private void UpdateSetFrequencyMethod(decimal setFrequency)
+        {
+            UpdateSetFrequency?.Invoke(this , new UpdateSetFrequencyEventArgs
+            {
+                SetFrequency = setFrequency
+            });
+        }
 
         public event EventHandler<IsOpenFrequencyMotorEventArgs> IsOpenUpdate;
 
@@ -91,15 +95,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             });
         }
 
-        public event EventHandler<UpdateCoefficientFrequencyMotorEventArgs> UpdateCoefficient;
-
-        private void UpdateUpdateCoefficient(decimal coefficient)
-        {
-            UpdateCoefficient?.Invoke(this, new UpdateCoefficientFrequencyMotorEventArgs
-            {
-                Coefficient = coefficient
-            });
-        }
 
         #endregion
 
@@ -150,19 +145,15 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #endregion
 
-        public void SetFrequency(decimal speed, decimal coefficient = 1)
+        public void SetFrequency(decimal freq)
         {
-            _setSpeedValue = speed;
-            Coefficient = coefficient;
-
-            const int fMax = 80;
-            var freq = (double) speed * (double) Coefficient * 16384.0 / fMax;
+            _setFrequencyValue = freq;
 
             if (freq < 0 || freq > 16384)
             {
-                const string errorMessage = "Попытка установить значение частоты вне диапазона от 0 до 16384.0";
+                const string errorMessage = "Попытка установить значение частоты вне диапазона от 0 до 16384";
                 throw new ArgumentOutOfRangeException(freq.ToString(CultureInfo.CurrentCulture), errorMessage);
-            }
+            } 
 
             var freqArray = new byte[8];
 
@@ -364,22 +355,22 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         {
             const string message = "Недопустимое значение скорости";
 
-            if (_setSpeedValue > 0 && _setSpeedValue <= 0.7m)
+            if (_setFrequencyValue > 0 && _setFrequencyValue <= 0.7m)
             {
                 return 0.02m;
             }
 
-            if (_setSpeedValue > 0.7m && _setSpeedValue <= 30m)
+            if (_setFrequencyValue > 0.7m && _setFrequencyValue <= 30m)
             {
                 return 0.1m;
             }
 
-            if (_setSpeedValue > 30m)
+            if (_setFrequencyValue > 30m)
             {
-                throw new ArgumentOutOfRangeException($"{_setSpeedValue}", message);
+                throw new ArgumentOutOfRangeException($"{_setFrequencyValue}", message);
             }
 
-            throw new ArgumentOutOfRangeException($"{_setSpeedValue}", message);
+            throw new ArgumentOutOfRangeException($"{_setFrequencyValue}", message);
         }
 
         /// <summary>
@@ -392,9 +383,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             if (IsValueErrorValidation())
                 return;
 
-            Coefficient = (decimal) _referenceSpeedValue / _setSpeedValue;
 
-            SetFrequency(_setSpeedValue, Coefficient);
+            SetFrequency(_setFrequencyValue);
 
             while (true)
             {
@@ -403,15 +393,15 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 if (IsValueErrorValidation()) return;
 
                 const decimal stepValue = 0.05m;
-                var differenceValue = _setSpeedValue - (decimal) _referenceSpeedValue;
+                var differenceValue = _setFrequencyValue - (decimal) _referenceSpeedValue;
 
                 var step = (differenceValue > 0)
                     ? stepValue
                     : -stepValue;
 
-                Coefficient += step;
+                _setFrequencyValue += step;
 
-                SetFrequency(_setSpeedValue, Coefficient);
+                SetFrequency(_setFrequencyValue);
             }
         }
 
@@ -425,7 +415,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             var errorValue = GetErrorValue();
 
             //Разница между установленной скоростью и полученной с эталона
-            var differenceValue = _setSpeedValue - (decimal) _referenceSpeedValue;
+            var differenceValue = _setFrequencyValue - (decimal) _referenceSpeedValue;
 
             //Флаг отвечающий за совпадение скоростей эталона и выставленной с учетом допустиомй погрешности. 
             var isValidSpeed = errorValue >= differenceValue && differenceValue >= -errorValue;
@@ -475,10 +465,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public bool IsOpen { get; set; }
     }
 
-    public class UpdateCoefficientFrequencyMotorEventArgs : EventArgs
-    {
-        public decimal Coefficient { get; set; }
-    }
 
     public class UpdateReferenceValueEventArgs : EventArgs
     {
@@ -486,5 +472,10 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Эталонное значение скорости на анемометре
         /// </summary>
         public double ReferenceValue { get; set; }
+    }
+
+    public class UpdateSetFrequencyEventArgs : EventArgs
+    {
+        public decimal SetFrequency { get; set; }
     }
 }
