@@ -56,9 +56,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <summary>
         /// Флаг отвечающий за выставленную в данный момент скорость. Которая должна соотвествовать эталону.
         /// </summary>
-        private decimal _setFrequencyValue;
+        private int _setFrequencyValue;
 
-        public decimal SetFrequencyValue
+        public int SetFrequencyValue
         {
             get => _setFrequencyValue;
             set
@@ -68,12 +68,15 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             }
         }
 
+        //Переменная для метода корректировки установленной частоты на двигателе
+        private decimal _setSpeed;
+
 
         #region EventHandler 
 
         public event EventHandler<UpdateSetFrequencyEventArgs> UpdateSetFrequency;
 
-        private void UpdateSetFrequencyMethod(decimal setFrequency)
+        private void UpdateSetFrequencyMethod(int setFrequency)
         {
             UpdateSetFrequency?.Invoke(this, new UpdateSetFrequencyEventArgs
             {
@@ -150,9 +153,11 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #endregion
 
-        public void SetFrequency(decimal freq)
+        public void SetFrequency(int freqInt , decimal speed)
         {
-            _setFrequencyValue = freq;
+            SetFrequencyValue = freqInt;
+            _setSpeed = speed;
+            var freq = (double)freqInt;
 
             if (freq < 0 || freq > 16384)
             {
@@ -360,22 +365,22 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         {
             const string message = "Недопустимое значение скорости";
 
-            if (_setFrequencyValue > 0 && _setFrequencyValue <= 0.7m)
+            if (_setSpeed > 0 && _setSpeed <= 0.7m)
             {
                 return 0.02m;
             }
 
-            if (_setFrequencyValue > 0.7m && _setFrequencyValue <= 30m)
+            if (_setSpeed > 0.7m && _setSpeed <= 30m)
             {
                 return 0.1m;
             }
 
-            if (_setFrequencyValue > 30m)
+            if (_setSpeed > 30m)
             {
-                throw new ArgumentOutOfRangeException($"{_setFrequencyValue}", message);
+                throw new ArgumentOutOfRangeException($"{_setSpeed}", message);
             }
 
-            throw new ArgumentOutOfRangeException($"{_setFrequencyValue}", message);
+            throw new ArgumentOutOfRangeException($"{_setSpeed}", message);
         }
 
         /// <summary>
@@ -386,28 +391,22 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Выкл при снятии серии значений на одинй скорости.</param>
         public void CorrectionSpeedMotor(bool isOnWait = true)
         {
-            Thread.Sleep(2000);
-
-            if (IsValueErrorValidation(isOnWait))
-                return;
-
-
-            SetFrequency(_setFrequencyValue);
-
             while (true)
             {
                 if (IsValueErrorValidation(isOnWait)) return;
 
-                const decimal stepValue = 0.05m;
-                var differenceValue = _setFrequencyValue - (decimal) _referenceSpeedValue;
+                const int stepValue = 10;
+                var differenceValue = _setSpeed - (decimal) _referenceSpeedValue;
 
                 var step = (differenceValue > 0)
                     ? stepValue
                     : -stepValue;
 
-                _setFrequencyValue += step;
+                SetFrequencyValue += step;
 
-                SetFrequency(_setFrequencyValue);
+                SetFrequency(_setFrequencyValue , _setSpeed);
+
+                Thread.Sleep(2000);
             }
         }
 
@@ -430,7 +429,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             var errorValue = GetErrorValue();
 
             //Разница между установленной скоростью и полученной с эталона
-            var differenceValue = _setFrequencyValue - (decimal) _referenceSpeedValue;
+            var differenceValue = _setSpeed - (decimal) _referenceSpeedValue;
 
             //Флаг отвечающий за совпадение скоростей эталона и выставленной с учетом допустиомй погрешности. 
             var isValidSpeed = errorValue >= differenceValue && differenceValue >= -errorValue;
@@ -491,6 +490,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
     public class UpdateSetFrequencyEventArgs : EventArgs
     {
-        public decimal SetFrequency { get; set; }
+        public int SetFrequency { get; set; }
     }
 }

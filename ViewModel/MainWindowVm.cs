@@ -80,7 +80,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             new RelayCommand(() => FrequencyMotorDevice.Instance.ClosePort(), FrequencyMotorDevice.Instance.IsOpen);
 
         public RelayCommand StopFrequencyMotorCommand =>
-            new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0), FrequencyMotorDevice.Instance.IsOpen);
+            new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0 , 0), FrequencyMotorDevice.Instance.IsOpen);
 
         public RelayCommand SetSpeedFrequencyMotorCommand => new RelayCommand(SetSpeedFrequencyMotorMethodAsync,
             FrequencyMotorDevice.Instance.IsOpen);
@@ -124,7 +124,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// <summary>
         /// Параметр для установки частотв трубы.
         /// </summary>
-        public decimal SetFrequencyMotor { get; set; }
+        public int SetFrequencyMotor { get; set; }
 
         /// <summary>
         /// Эталонное значение скорости с частотной трубы
@@ -369,7 +369,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             Task.Run(async () => await Task.Run(() =>
             {
-                FrequencyMotorDevice.Instance.SetFrequency(SetFrequencyMotor);
+                FrequencyMotorDevice.Instance.SetFrequency(SetFrequencyMotor , 0);
                 FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
             }));
         }
@@ -403,47 +403,41 @@ namespace VerificationAirVelocitySensor.ViewModel
         private void StartTestDvs01()
         {
             var countValueOnAverage = 3;
-
-            foreach (var point in _controlPointSpeed)
-            {
-                if (point.Speed == 0.7m || point.Speed == 30)
-                    continue;
-
-                var value = new DvsValue(point.Speed);
-
-                FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency);
-                FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
-                //
-            }
         }
 
         private void StartTestDvs02()
         {
-            var countValueOnAverage = 6;
-
-            CollectionDvsValue.Clear();
-
-            foreach (var point in _controlPointSpeed)
+            Task.Run(async () =>
             {
-                var value = new DvsValue(point.Speed);
-
-                Application.Current.Dispatcher?.Invoke(() => CollectionDvsValue.Add(value));
-
-                FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency);
-                FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
-
-                //TODO Думаю необходимо проверять скорость трубы перед каждым съемом значения.
-                while (value.CollectionCount != countValueOnAverage)
+                await Task.Run(() => 
                 {
-                    var hzValue = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                    var countValueOnAverage = 6;
 
-                    Application.Current.Dispatcher?.Invoke(() => value.AddValueInCollection(hzValue));
+                    Application.Current.Dispatcher?.Invoke(() => CollectionDvsValue.Clear());
+                
+                    foreach (var point in _controlPointSpeed)
+                    {
+                        var value = new DvsValue(point.Speed);
 
-                    Thread.Sleep(GateTimeToMSec(GateTime) + 1000);
+                        Application.Current.Dispatcher?.Invoke(() => CollectionDvsValue.Add(value));
 
-                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor(false);
-                }
-            }
+                        FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency, point.Speed);
+                        FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
+
+                        //TODO Думаю необходимо проверять скорость трубы перед каждым съемом значения.
+                        while (value.CollectionCount != countValueOnAverage)
+                        {
+                            var hzValue = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+
+                            Application.Current.Dispatcher?.Invoke(() => value.AddValueInCollection(hzValue));
+
+                            Thread.Sleep(GateTimeToMSec(GateTime) + 1000);
+
+                            FrequencyMotorDevice.Instance.CorrectionSpeedMotor(false);
+                        }
+                    }
+                });
+             });
         }
 
         private int GateTimeToMSec(GateTime gateTime)

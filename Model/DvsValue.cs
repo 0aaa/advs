@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 
@@ -30,7 +31,7 @@ namespace VerificationAirVelocitySensor.Model
         {
             ValueCollection.Add(addValue);
 
-            AverageValue = ValueCollection.Sum() / ValueCollection.Count;
+            AverageValue = Math.Round(ValueCollection.Sum() / ValueCollection.Count, 3);
         }
 
         public decimal CollectionCount => ValueCollection.Count;

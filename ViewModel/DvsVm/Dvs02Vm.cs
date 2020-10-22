@@ -33,7 +33,7 @@ namespace VerificationAirVelocitySensor.ViewModel.DvsVm
             {
                 var value = new DvsValue(point.Speed);
 
-                FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency);
+                FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency , point.Speed);
                 FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
 
                 //TODO Думаю необходимо проверять скорость трубы перед каждым съемом значения.
@@ -81,13 +81,13 @@ namespace VerificationAirVelocitySensor.ViewModel.DvsVm
 
     public class ControlPointSpeedToFrequency
     {
-        public ControlPointSpeedToFrequency(decimal speed, decimal setFrequency)
+        public ControlPointSpeedToFrequency(decimal speed, int setFrequency)
         {
             Speed = speed;
             SetFrequency = setFrequency;
         }
 
         public decimal Speed { get; set; }
-        public decimal SetFrequency { get; set; }
+        public int SetFrequency { get; set; }
     }
 }
