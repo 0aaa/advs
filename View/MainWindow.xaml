@@ -8,8 +8,8 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Background="LightSlateGray"
-        ResizeMode="CanMinimize"
         Title="Поверка датчиков скорости воздушного потока"
+        d:DataContext="{d:DesignInstance Type=viewModel:MainWindowVm}"
         Height="400"
         Width="500">
     <Window.DataContext>
@@ -67,23 +67,6 @@
                           Command="{Binding OpenReferenceCommand}" />
             </Menu>
         </Border>
-
-        <Button Content="Считать значение частотометра"
-                Command="{Binding ReadValueOnFrequencyCounterCommand}"
-                HorizontalAlignment="Left"
-                Margin="40,143,0,0"
-                Grid.Row="1"
-                VerticalAlignment="Top"
-                Width="248" />
-        <TextBlock HorizontalAlignment="Left"
-                   Height="20"
-                   Margin="40,168,0,0"
-                   Grid.Row="1"
-                   TextWrapping="Wrap"
-                   Text="{Binding FrequencyCounterValue}"
-                   VerticalAlignment="Top"
-                   Width="248" />
-
 
         <!--#region Connection Menu-->
         <Border Grid.Row="1"
@@ -360,7 +343,7 @@
                                         <RowDefinition Height="1*" />
                                     </Grid.RowDefinitions>
                                     <Grid Grid.Row="0">
-                                        <TextBlock Text="Уст. скорость"
+                                        <TextBlock Text="Частота вращения"
                                                    FontSize="14"
                                                    TextWrapping="Wrap"
                                                    HorizontalAlignment="Center"
@@ -370,7 +353,7 @@
                                         <xctk:DecimalUpDown HorizontalAlignment="Center"
                                                             VerticalAlignment="Center"
                                                             Value="{Binding SetFrequencyMotor}"
-                                                            FormatString="{}{0:0.0} м/c"
+                                                            FormatString="{}{0:0.0}"
                                                             TextAlignment="Center"
                                                             ShowButtonSpinner="False"
                                                             Minimum="0"
@@ -385,26 +368,8 @@
                                         <RowDefinition Height="1*" />
                                     </Grid.RowDefinitions>
 
-                                    <Grid Grid.Row="0">
-                                        <TextBlock Text="Коэффицент"
-                                                   FontSize="14"
-                                                   TextWrapping="Wrap"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center" />
-                                    </Grid>
-                                    <Grid Grid.Row="1">
-                                        <xctk:DecimalUpDown HorizontalAlignment="Center"
-                                                            VerticalAlignment="Center"
-                                                            IsReadOnly="{Binding IsAutoCorrectionCoefficient , Converter={StaticResource InvertBool}}"
-                                                            Value="{Binding Coefficient}"
-                                                            FormatString="{}{0:0.00}"
-                                                            TextAlignment="Center"
-                                                            ShowButtonSpinner="False"
-                                                            Minimum="0"
-                                                            Maximum="30"
-                                                            Increment="0.1"
-                                                            Width="75" />
-                                    </Grid>
+                                    <Grid Grid.Row="0" />
+                                    <Grid Grid.Row="1" />
 
                                 </Grid>
                             </Grid>
@@ -438,27 +403,7 @@
                                         </Button>
                                     </Grid>
                                 </Grid>
-                                <Grid Row="1">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="1*" />
-                                        <RowDefinition Height="1*" />
-                                    </Grid.RowDefinitions>
-
-                                    <Grid Grid.Row="0">
-                                        <TextBlock Text="Авто корректировка коэфициента"
-                                                   FontSize="12"
-                                                   TextWrapping="Wrap"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center" />
-                                    </Grid>
-                                    <Grid Grid.Row="1">
-                                        <Viewbox>
-                                            <CheckBox IsChecked="{Binding IsAutoCorrectionCoefficient}" 
-                                                      Margin="5"/>
-                                        </Viewbox>
-                                    </Grid>
-
-                                </Grid>
+                                <Grid Row="1" />
                             </Grid>
                         </Grid>
                     </Border>
@@ -511,6 +456,143 @@
                            HorizontalAlignment="Left" />
             </Grid>
         </Border>
+        <!--#endregion-->
+
+        <!--#region Dvs2 Test -->
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="70" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="1*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0">
+                        <TextBlock Text="Частотометр, Гц"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="0">
+                                <TextBlock Text="Эталон, м/с"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Grid>
+                            <Grid Grid.Column="1" x:Name="ValueGrid1">
+                                <TextBlock Text="№1"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Grid>
+                            <Grid Grid.Column="2">
+                                <TextBlock Text="№2"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Grid>
+                            <Grid Grid.Column="3">
+                                <TextBlock Text="№3"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Grid>
+                            <Grid Grid.Column="4">
+                                <TextBlock Text="№4"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Grid>
+                            <Grid Grid.Column="5">
+                                <TextBlock Text="№5"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Grid>
+                            <Grid Grid.Column="6">
+                                <TextBlock Text="№6"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Grid>
+
+                        </Grid>
+                    </Border>
+
+                </Grid>
+            </Border>
+            <Border Grid.Row="1">
+                <Grid>
+                    <Grid>
+                        <ItemsControl ItemsSource="{Binding CollectionDvsValue}"
+                                      BorderThickness="0"
+                                      Padding="0"
+                                      Margin="0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="1*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Grid Column="0">
+                                            <TextBlock Text="{Binding AverageValue}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                        </Grid>
+                                        <Grid Grid.Column="1">
+                                            <ItemsControl ItemsSource="{Binding ValueCollection}"
+                                                          BorderThickness="0"
+                                                          Padding="0"
+                                                          Margin="0">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid
+                                                            Width="{Binding ElementName=ValueGrid1 , Path=ActualWidth}"
+                                                            Height="{Binding ElementName=ValueGrid1 , Path=ActualHeight}">
+                                                            <TextBlock Text="{Binding Path=.}"
+                                                                HorizontalAlignment="Center"
+                                                                     VerticalAlignment="Center" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Grid>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+
+                </Grid>
+            </Border>
+            <Border Grid.Row="2">
+                <Button Content="Старт" 
+                        Height="25"
+                        Width="100"
+                        Command="{Binding StartTestCommand}" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center"/>
+            </Border>
+        </Grid>
+
         <!--#endregion-->
 
     </Grid>

@@ -28,6 +28,12 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private readonly int CommandWordRegister = 49999;
         private readonly int FrequencyMotorRegister = 50009;
 
+
+        /// <summary>
+        /// Время ожидания после установки значения частоты, что бы дать аэротрубе стабилизировать значение
+        /// </summary>
+        private int _waitSetFrequency = 10000;
+
         /// <summary>
         /// Эталонное значение скорости
         /// </summary>
@@ -69,7 +75,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         private void UpdateSetFrequencyMethod(decimal setFrequency)
         {
-            UpdateSetFrequency?.Invoke(this , new UpdateSetFrequencyEventArgs
+            UpdateSetFrequency?.Invoke(this, new UpdateSetFrequencyEventArgs
             {
                 SetFrequency = setFrequency
             });
@@ -94,7 +100,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 ReferenceValue = referenceValue
             });
         }
-
 
         #endregion
 
@@ -153,7 +158,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             {
                 const string errorMessage = "Попытка установить значение частоты вне диапазона от 0 до 16384";
                 throw new ArgumentOutOfRangeException(freq.ToString(CultureInfo.CurrentCulture), errorMessage);
-            } 
+            }
 
             var freqArray = new byte[8];
 
@@ -376,11 +381,14 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <summary>
         /// Метод для корректировки скорости эталона к установленному значению скорости
         /// </summary>
-        public void CorrectionSpeedMotor()
+        /// <param name="isOnWait">Флаг отвечает за вкыл/выкл времени ожидания перед проверкой эталона.
+        /// Вкыл нужен при только что измененной скорости.
+        /// Выкл при снятии серии значений на одинй скорости.</param>
+        public void CorrectionSpeedMotor(bool isOnWait = true)
         {
             Thread.Sleep(2000);
 
-            if (IsValueErrorValidation())
+            if (IsValueErrorValidation(isOnWait))
                 return;
 
 
@@ -388,9 +396,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
             while (true)
             {
-                Thread.Sleep(2000);
-
-                if (IsValueErrorValidation()) return;
+                if (IsValueErrorValidation(isOnWait)) return;
 
                 const decimal stepValue = 0.05m;
                 var differenceValue = _setFrequencyValue - (decimal) _referenceSpeedValue;
@@ -408,9 +414,18 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <summary>
         /// Проверка валидности эталонной скорости, относительно выставленной
         /// </summary>
+        /// <param name="isOnWait">Флаг отвечает за вкыл/выкл времени ожидания перед проверкой эталона.
+        /// Вкыл нужен при смене. Выкл при снятии серии значений на одинй скорости.</param>
         /// <returns></returns>
-        private bool IsValueErrorValidation()
+        private bool IsValueErrorValidation(bool isOnWait)
         {
+            //Время ожидание для стабилизации значения после установки
+
+            if (isOnWait)
+            {
+                Thread.Sleep(_waitSetFrequency);
+            }
+
             //Допустимая погрешность (0,02 или 0,1)
             var errorValue = GetErrorValue();
 

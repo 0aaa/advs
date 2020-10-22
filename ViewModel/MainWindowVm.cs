@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Ports;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using VerificationAirVelocitySensor.Model;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
+using VerificationAirVelocitySensor.ViewModel.DvsVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
 using YamlDotNet.Serialization;
 
@@ -90,24 +95,21 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
         public RelayCommand OpenReferenceCommand => new RelayCommand(() => IsReference = !IsReference);
 
+        public RelayCommand StartTestCommand => new RelayCommand(StartTest);
+
         #endregion
 
         #region Property
 
         private UserSettings _userSettings;
-        private readonly object _loker;
+        private readonly object _loker = new object();
 
-        private const string _pathUserSettings = "UserSettings.txt";
+        private const string PathUserSettings = "UserSettings.txt";
 
         /// <summary>
         /// Флаг для отображения справки :)
         /// </summary>
         public bool IsReference { get; set; }
-
-        /// <summary>
-        /// Флаг для режима отладки на вкыл/выкл авто корректировки коэффициента расчета отправляемой частоты
-        /// </summary>
-        public bool IsAutoCorrectionCoefficient { get; set; }
 
         public decimal FrequencyCounterValue { get; set; }
         public bool VisibilityConnectionMenu { get; set; }
@@ -129,7 +131,22 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// </summary>
         public decimal SpeedReferenceValue { get; set; }
 
+
         //Все свойства что ниже, должны сохранятся пре перезапуске.
+        //TODO Позже сделать переключатель на интерфейсе.
+        public TypeTest _typeTest = TypeTest.Dvs02;
+
+        public TypeTest TypeTest
+        {
+            get => _typeTest;
+            set
+            {
+                _typeTest = value;
+                OnPropertyChanged(nameof(TypeTest));
+                _userSettings.TypeTest = value;
+                Serialization();
+            }
+        }
 
         private bool _filterChannel1;
 
@@ -202,6 +219,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         }
 
         private string _comPortFrequencyCounter;
+
         public string ComPortFrequencyCounter
         {
             get => _comPortFrequencyCounter;
@@ -217,6 +235,24 @@ namespace VerificationAirVelocitySensor.ViewModel
         #endregion
 
         #region RelayCommand Method
+
+        private static bool ValidationIsOpenPorts()
+        {
+            if (!FrequencyMotorDevice.Instance.IsOpen())
+            {
+                MessageBox.Show("Порт частотного двигателя закрыт", "Error", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return false;
+            }
+
+            if (!FrequencyCounterDevice.Instance.IsOpen())
+            {
+                MessageBox.Show("Порт частотомера закрыт", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            return true;
+        }
 
         private void UpdateComPortsSource()
         {
@@ -334,36 +370,187 @@ namespace VerificationAirVelocitySensor.ViewModel
             Task.Run(async () => await Task.Run(() =>
             {
                 FrequencyMotorDevice.Instance.SetFrequency(SetFrequencyMotor);
-                if (IsAutoCorrectionCoefficient)
-                {
-                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
-                }
+                FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
             }));
         }
 
         #endregion
 
+        #region Test Method
+
+        public ObservableCollection<DvsValue> CollectionDvsValue { get; set; }
+            = new ObservableCollection<DvsValue>();
+
+        private void StartTest()
+        {
+            var isValidation = ValidationIsOpenPorts();
+
+            if (isValidation == false) return;
+
+            switch (TypeTest)
+            {
+                case TypeTest.Dvs01:
+                    StartTestDvs01();
+                    break;
+                case TypeTest.Dvs02:
+                    StartTestDvs02();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void StartTestDvs01()
+        {
+            var countValueOnAverage = 3;
+
+            foreach (var point in _controlPointSpeed)
+            {
+                if (point.Speed == 0.7m || point.Speed == 30)
+                    continue;
+
+                var value = new DvsValue(point.Speed);
+
+                FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency);
+                FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
+                //
+            }
+        }
+
+        private void StartTestDvs02()
+        {
+            var countValueOnAverage = 6;
+
+            CollectionDvsValue.Clear();
+
+            foreach (var point in _controlPointSpeed)
+            {
+                var value = new DvsValue(point.Speed);
+
+                Application.Current.Dispatcher?.Invoke(() => CollectionDvsValue.Add(value));
+
+                FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency);
+                FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
+
+                //TODO Думаю необходимо проверять скорость трубы перед каждым съемом значения.
+                while (value.CollectionCount != countValueOnAverage)
+                {
+                    var hzValue = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+
+                    Application.Current.Dispatcher?.Invoke(() => value.AddValueInCollection(hzValue));
+
+                    Thread.Sleep(GateTimeToMSec(GateTime) + 1000);
+
+                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor(false);
+                }
+            }
+        }
+
+        private int GateTimeToMSec(GateTime gateTime)
+        {
+            switch (gateTime)
+            {
+                case GateTime.S1:
+                    return 1000;
+                case GateTime.S4:
+                    return 4000;
+                case GateTime.S7:
+                    return 7000;
+                case GateTime.S10:
+                    return 10000;
+                case GateTime.S100:
+                    return 100000;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(gateTime), gateTime, null);
+            }
+        }
+
+        #endregion
+
+        private readonly List<ControlPointSpeedToFrequency> _controlPointSpeed = new List<ControlPointSpeedToFrequency>
+        {
+            new ControlPointSpeedToFrequency(0.7m, 445),
+            new ControlPointSpeedToFrequency(5, 2505),
+            new ControlPointSpeedToFrequency(10, 4745),
+            new ControlPointSpeedToFrequency(15, 7140),
+            new ControlPointSpeedToFrequency(20, 9480),
+            new ControlPointSpeedToFrequency(25, 12015),
+            new ControlPointSpeedToFrequency(30, 15200),
+        };
+
         public MainWindowVm()
         {
             FrequencyCounterDevice.Instance.IsOpenUpdate += FrequencyCounter_IsOpenUpdate;
-
             FrequencyMotorDevice.Instance.IsOpenUpdate += FrequencyMotor_IsOpenUpdate;
-
             FrequencyMotorDevice.Instance.UpdateReferenceValue += FrequencyMotor_UpdateReferenceValue;
+            FrequencyMotorDevice.Instance.UpdateSetFrequency += FrequencyMotor_UpdateSetFrequency;
 
             var deserialization = Deserialization();
             _userSettings = deserialization ?? new UserSettings();
-
             FilterChannel1 = _userSettings.FilterChannel1;
             FilterChannel2 = _userSettings.FilterChannel2;
             FrequencyChannel = _userSettings.FrequencyChannel;
             GateTime = _userSettings.GateTime;
             ComPortFrequencyMotor = _userSettings.ComPortFrequencyMotor;
             ComPortFrequencyCounter = _userSettings.ComPortFrequencyCounter;
+
+
+            #region Test Code
+
+            //var x = new DvsValue(0.7m);
+
+            //CollectionDvsValue = new ObservableCollection<DvsValue>
+            //{
+            //    x
+            //};
+
+
+            
+
+
+
+            //Task.Run(async () => await Task.Run(() =>
+            //{
+            //    Thread.Sleep(1000);
+
+
+
+            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(20));
+
+            //    Thread.Sleep(2000);
+
+            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(30));
+
+            //    Thread.Sleep(2000);
+
+            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(40));
+
+            //    Thread.Sleep(2000);
+
+            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(50));
+
+            //    Thread.Sleep(2000);
+
+            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(60));
+
+            //    Thread.Sleep(2000);
+
+            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(70));
+
+            //    Thread.Sleep(2000);
+
+            //}));
+
+            #endregion
         }
 
 
         #region EventHandler Method
+
+        private void FrequencyMotor_UpdateSetFrequency(object sender, UpdateSetFrequencyEventArgs e)
+        {
+            SetFrequencyMotor = e.SetFrequency;
+        }
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
@@ -384,7 +571,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region deserilize / serilize
 
-        public void Serialization()
+        private void Serialization()
         {
             try
             {
@@ -392,7 +579,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 lock (_loker)
                 {
-                    using (var file = File.Open(_pathUserSettings, FileMode.Create))
+                    using (var file = File.Open(PathUserSettings, FileMode.Create))
                     {
                         using (var writer = new StreamWriter(file))
                         {
@@ -411,7 +598,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             var deserializer = new Deserializer();
 
-            using (var file = File.Open(_pathUserSettings, FileMode.OpenOrCreate, FileAccess.Read))
+            using (var file = File.Open(PathUserSettings, FileMode.OpenOrCreate, FileAccess.Read))
             {
                 using (var reader = new StreamReader(file))
                 {
@@ -430,5 +617,11 @@ namespace VerificationAirVelocitySensor.ViewModel
         }
 
         #endregion
+    }
+
+    public enum TypeTest
+    {
+        Dvs01 = 1,
+        Dvs02 = 2
     }
 }

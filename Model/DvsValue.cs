@@ -1,9 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
+using VerificationAirVelocitySensor.ViewModel.BaseVm;
 
 namespace VerificationAirVelocitySensor.Model
 {
-    public class DvsValue
+    public class DvsValue : BaseVm
     {
         
         public DvsValue(decimal speedValue)
@@ -22,15 +23,16 @@ namespace VerificationAirVelocitySensor.Model
         /// </summary>
         public decimal AverageValue { get; set; }
 
-        private readonly ObservableCollection<decimal> _valueCollection = new ObservableCollection<decimal>();
+        public ObservableCollection<decimal> ValueCollection { get; set; }
+            = new ObservableCollection<decimal>();
 
         public void AddValueInCollection(decimal addValue)
         {
-            _valueCollection.Add(addValue);
+            ValueCollection.Add(addValue);
 
-            AverageValue = _valueCollection.Sum() / _valueCollection.Count;
+            AverageValue = ValueCollection.Sum() / ValueCollection.Count;
         }
 
-        public decimal CollectionCount => _valueCollection.Count;
+        public decimal CollectionCount => ValueCollection.Count;
     }
 }

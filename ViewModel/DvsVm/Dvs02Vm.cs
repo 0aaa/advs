@@ -12,42 +12,40 @@ namespace VerificationAirVelocitySensor.ViewModel.DvsVm
         /// <summary>
         /// Значения скорости на которых нужно считать значения датчика.
         /// </summary>
-        private readonly List<decimal> _controlPointSpeed = new List<decimal>
-            {0.7m, 5, 10, 15, 20, 25, 30};
+        private readonly List<ControlPointSpeedToFrequency> _controlPointSpeed = new List<ControlPointSpeedToFrequency>
+        {
+            new ControlPointSpeedToFrequency(0.7m, 445),
+            new ControlPointSpeedToFrequency(5, 2505),
+            new ControlPointSpeedToFrequency(10, 4745),
+            new ControlPointSpeedToFrequency(15, 7140),
+            new ControlPointSpeedToFrequency(20, 9480),
+            new ControlPointSpeedToFrequency(25, 12015),
+            new ControlPointSpeedToFrequency(30, 15200),
+        };
 
         private const int CountValueOnAverage = 6;
 
         public void StartTest(GateTime gateTime)
         {
-            if (!FrequencyMotorDevice.Instance.IsOpen())
-            {
-                MessageBox.Show("Порт частотного двигателя закрыт", "Error", MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-                return;
-            }
-
-            if (!FrequencyCounterDevice.Instance.IsOpen())
-            {
-                MessageBox.Show("Порт частотомера закрыт", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
             var collectionValue = new List<DvsValue>();
 
-            foreach (var speed in _controlPointSpeed)
+            foreach (var point in _controlPointSpeed)
             {
-                var value = new DvsValue(speed);
+                var value = new DvsValue(point.Speed);
 
-                FrequencyMotorDevice.Instance.SetFrequency(speed);
+                FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency);
                 FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
 
-
+                //TODO Думаю необходимо проверять скорость трубы перед каждым съемом значения.
                 while (value.CollectionCount != CountValueOnAverage)
                 {
                     var hzValue = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                     value.AddValueInCollection(hzValue);
 
-                    Thread.Sleep(GateTimeToMSec(gateTime) + 250 /*Небольшая страховка*/);
+
+                    Thread.Sleep(GateTimeToMSec(gateTime) + 1000);
+
+                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor(false);
                 }
 
                 collectionValue.Add(value);
@@ -79,5 +77,17 @@ namespace VerificationAirVelocitySensor.ViewModel.DvsVm
                     throw new ArgumentOutOfRangeException(nameof(gateTime), gateTime, null);
             }
         }
+    }
+
+    public class ControlPointSpeedToFrequency
+    {
+        public ControlPointSpeedToFrequency(decimal speed, decimal setFrequency)
+        {
+            Speed = speed;
+            SetFrequency = setFrequency;
+        }
+
+        public decimal Speed { get; set; }
+        public decimal SetFrequency { get; set; }
     }
 }

@@ -11,8 +11,14 @@ namespace VerificationAirVelocitySensor.ViewModel.DvsVm
         /// <summary>
         /// Значения скорости на которых нужно считать значения датчика.
         /// </summary>
-        private readonly List<decimal> _controlPointSpeed = new List<decimal>
-            {5, 10, 15, 20, 25};
+        private readonly List<ControlPointSpeedToFrequency> _controlPointSpeed = new List<ControlPointSpeedToFrequency>
+        {
+            new ControlPointSpeedToFrequency(5 , 2505),
+            new ControlPointSpeedToFrequency(10 , 4745),
+            new ControlPointSpeedToFrequency(15 , 7140),
+            new ControlPointSpeedToFrequency(20 , 9480),
+            new ControlPointSpeedToFrequency(25 , 12015)
+        };
 
         private const int CountValueOnAverage = 3;
 
