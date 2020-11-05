@@ -460,10 +460,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             {
                 var value = new DvsValue(point.Speed);
 
-                Application.Current.Dispatcher?.Invoke(() =>
-                {
-                    CollectionDvsValue.Add(value);
-                });
+                Application.Current.Dispatcher?.Invoke(() => CollectionDvsValue.Add(value));
 
                 FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency, point.Speed);
 

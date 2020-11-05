@@ -415,7 +415,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             var errorValue = GetErrorValue();
 
             //Разница между установленной скоростью и полученной с эталона
-            var differenceValue = _setSpeed - (decimal)averageReferenceSpeedValue;
+            var differenceValue = _setSpeed - averageReferenceSpeedValue;
 
             //Флаг отвечающий за совпадение скоростей эталона и выставленной с учетом допустиомй погрешности. 
             var isValidSpeed = errorValue >= differenceValue && differenceValue >= -errorValue;

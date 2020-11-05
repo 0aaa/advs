@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 
@@ -30,10 +28,7 @@ namespace VerificationAirVelocitySensor.Model
 
         public void AddValueInCollection(decimal addValue)
         {
-            Application.Current.Dispatcher?.Invoke(() =>
-            {
-                ValueCollection.Add(addValue);
-            });
+            Application.Current.Dispatcher?.Invoke(() => ValueCollection.Add(addValue));
         }
 
         public decimal CollectionCount => ValueCollection.Count;
