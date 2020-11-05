@@ -417,7 +417,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 new ControlPointSpeedToFrequency(4, 15, 7750),
                 new ControlPointSpeedToFrequency(5, 20, 10600),
                 new ControlPointSpeedToFrequency(6, 25, 13600),
-                new ControlPointSpeedToFrequency(7, 30, 16000),
+                new ControlPointSpeedToFrequency(7, 30, 16384),
             };
 
         #region Test Method
@@ -460,6 +460,11 @@ namespace VerificationAirVelocitySensor.ViewModel
             {
                 var value = new DvsValue(point.Speed);
 
+                Application.Current.Dispatcher?.Invoke(() =>
+                {
+                    CollectionDvsValue.Add(value);
+                });
+
                 FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency, point.Speed);
 
                 //Время ожидания для стабилизации трубы
@@ -474,6 +479,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                     FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue);
                 }
 
+                value.ReferenceSpeedValue = SpeedReferenceValue;
+
                 while (value.CollectionCount != countValueOnAverage)
                 {
                     var hzValue = FrequencyCounterDevice.Instance.GetCurrentHzValue();
@@ -484,10 +491,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                     Thread.Sleep(timeOutCounter);
                 }
 
-                Application.Current.Dispatcher?.Invoke(() => 
-                { 
-                    CollectionDvsValue.Add(value); 
-                });
 
             }
 

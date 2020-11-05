@@ -388,7 +388,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         {
             while (true)
             {
-                if (IsValueErrorValidation()) return;
+                if (IsValueErrorValidation(ref averageReferenceSpeedValue)) return;
 
                 const int stepValue = 10;
                 var differenceValue = _setSpeed - averageReferenceSpeedValue;
@@ -409,13 +409,13 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Проверка валидности эталонной скорости, относительно выставленной
         /// </summary>
         /// <returns></returns>
-        private bool IsValueErrorValidation()
+        private bool IsValueErrorValidation(ref decimal averageReferenceSpeedValue)
         {
             //Допустимая погрешность (0,02 или 0,1)
             var errorValue = GetErrorValue();
 
             //Разница между установленной скоростью и полученной с эталона
-            var differenceValue = _setSpeed - (decimal) _referenceSpeedValue;
+            var differenceValue = _setSpeed - (decimal)averageReferenceSpeedValue;
 
             //Флаг отвечающий за совпадение скоростей эталона и выставленной с учетом допустиомй погрешности. 
             var isValidSpeed = errorValue >= differenceValue && differenceValue >= -errorValue;

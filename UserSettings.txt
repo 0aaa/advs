@@ -1,0 +1,7 @@
+FilterChannel1: false
+FilterChannel2: false
+FrequencyChannel: Channel1
+GateTime: S1
+ComPortFrequencyMotor: ''
+ComPortFrequencyCounter: ''
+TypeTest: 0

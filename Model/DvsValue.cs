@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 
 namespace VerificationAirVelocitySensor.Model
@@ -22,16 +23,17 @@ namespace VerificationAirVelocitySensor.Model
         /// TODO Что именно мы снимаем ? 
         /// Снимаемое значение частоты
         /// </summary>
-        public decimal AverageValue { get; set; }
+        public decimal ReferenceSpeedValue { get; set; }
 
         public ObservableCollection<decimal> ValueCollection { get; set; }
             = new ObservableCollection<decimal>();
 
         public void AddValueInCollection(decimal addValue)
         {
-            ValueCollection.Add(addValue);
-
-            AverageValue = Math.Round(ValueCollection.Sum() / ValueCollection.Count, 3);
+            Application.Current.Dispatcher?.Invoke(() =>
+            {
+                ValueCollection.Add(addValue);
+            });
         }
 
         public decimal CollectionCount => ValueCollection.Count;

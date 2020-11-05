@@ -159,7 +159,7 @@
                                         </Grid.ColumnDefinitions>
 
                                         <Grid Column="0">
-                                            <TextBox Text="{Binding AverageValue}"
+                                            <TextBox Text="{Binding ReferenceSpeedValue}"
                                                      Width="55"
                                                      Height="20"
                                                      IsReadOnly="True"
