@@ -89,21 +89,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         private void WriteCommandAsync(string command, int sleepTime = 1000)
         {
-            //Task.Run(async () =>
-            //{
-            //    try
-            //    {
-            //        await Task.Run(() =>
-            //        {
-            //            _serialPort.Write(command + "\r\n");
-            //            Thread.Sleep(sleepTime);
-            //        });
-            //    }
-            //    catch
-            //    {
-            //        throw new Exception($"Error Command ({command})");
-            //    }
-            //});
             _serialPort.WriteLine(command);
             Thread.Sleep(sleepTime);
         }
@@ -190,6 +175,28 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public void SetChannelFrequency(FrequencyChannel frequencyChannel)
         {
             WriteCommandAsync($":FUNCtion FREQuency {(int) frequencyChannel}");
+        }
+
+
+
+
+        public int GateTimeToMSec(GateTime gateTime)
+        {
+            switch (gateTime)
+            {
+                case GateTime.S1:
+                    return 1000;
+                case GateTime.S4:
+                    return 4000;
+                case GateTime.S7:
+                    return 7000;
+                case GateTime.S10:
+                    return 10000;
+                case GateTime.S100:
+                    return 100000;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(gateTime), gateTime, null);
+            }
         }
     }
 

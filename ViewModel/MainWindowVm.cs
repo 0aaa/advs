@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Ports;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using VerificationAirVelocitySensor.Model;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
-using VerificationAirVelocitySensor.ViewModel.DvsVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
 using YamlDotNet.Serialization;
 
@@ -63,8 +63,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand OffFilterChannel2Command =>
             new RelayCommand(() => OnOffFilter(2, false), OffFilterChannel2Validation);
 
-        public RelayCommand OpenPortFrequencyCounterCommand =>
-            new RelayCommand(() => FrequencyCounterDevice.Instance.OpenPort(ComPortFrequencyCounter));
+        public RelayCommand OpenPortFrequencyCounterCommand => new RelayCommand(OpenPortFrequencyCounterDevice);
 
         public RelayCommand ClosePortFrequencyCounterCommand =>
             new RelayCommand(() => FrequencyCounterDevice.Instance.ClosePort(), FrequencyCounterDevice.Instance.IsOpen);
@@ -80,7 +79,8 @@ namespace VerificationAirVelocitySensor.ViewModel
             new RelayCommand(() => FrequencyMotorDevice.Instance.ClosePort(), FrequencyMotorDevice.Instance.IsOpen);
 
         public RelayCommand StopFrequencyMotorCommand =>
-            new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0 , 0), FrequencyMotorDevice.Instance.IsOpen);
+            new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0, 0),
+                FrequencyMotorDevice.Instance.IsOpen);
 
         public RelayCommand SetSpeedFrequencyMotorCommand => new RelayCommand(SetSpeedFrequencyMotorMethodAsync,
             FrequencyMotorDevice.Instance.IsOpen);
@@ -96,6 +96,8 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand OpenReferenceCommand => new RelayCommand(() => IsReference = !IsReference);
 
         public RelayCommand StartTestCommand => new RelayCommand(StartTest);
+
+        public RelayCommand OpenCloseSetSpeedPointsMenuCommand => new RelayCommand(OpenCloseSetSpeedPoints);
 
         #endregion
 
@@ -114,6 +116,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         public decimal FrequencyCounterValue { get; set; }
         public bool VisibilityConnectionMenu { get; set; }
         public bool VisibilityDebuggingMenu { get; set; }
+        public bool VisibilitySetSpeedPoints { get; set; }
 
         public ObservableCollection<string> PortsList { get; set; } =
             new ObservableCollection<string>(SerialPort.GetPortNames());
@@ -131,6 +134,21 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// </summary>
         public decimal SpeedReferenceValue { get; set; }
 
+        public ObservableCollection<decimal> AverageSpeedReferenceCollection { get; set; } =
+            new ObservableCollection<decimal>();
+
+        private decimal _averageSpeedReferenceValue;
+
+        private void UpdateAverageSpeedReferenceValue(decimal newValue)
+        {
+            AverageSpeedReferenceCollection.Add(newValue);
+            _averageSpeedReferenceValue = AverageSpeedReferenceCollection.Average();
+        }
+
+        /// <summary>
+        /// Время ожидания после установки значения частоты, что бы дать аэротрубе стабилизировать значение
+        /// </summary>
+        public int WaitSetFrequency { get; set; } = 5000;
 
         //Все свойства что ниже, должны сохранятся пре перезапуске.
         //TODO Позже сделать переключатель на интерфейсе.
@@ -236,6 +254,18 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region RelayCommand Method
 
+        private void OpenPortFrequencyCounterDevice()
+        {
+            FrequencyCounterDevice.Instance.OpenPort(ComPortFrequencyCounter);
+
+            //TODO Что бы не выглядело как зависание, добавить BusyIndicator
+
+            FrequencyCounterDevice.Instance.SetChannelFrequency(_userSettings.FrequencyChannel);
+            FrequencyCounterDevice.Instance.SetGateTime(_userSettings.GateTime);
+            FrequencyCounterDevice.Instance.SwitchFilter(1, _userSettings.FilterChannel1);
+            FrequencyCounterDevice.Instance.SwitchFilter(2, _userSettings.FilterChannel2);
+        }
+
         private static bool ValidationIsOpenPorts()
         {
             if (!FrequencyMotorDevice.Instance.IsOpen())
@@ -288,6 +318,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void OpenCloseConnectionMenu() => VisibilityConnectionMenu = !VisibilityConnectionMenu;
         private void OpenCloseDebuggingMenu() => VisibilityDebuggingMenu = !VisibilityDebuggingMenu;
+        private void OpenCloseSetSpeedPoints() => VisibilitySetSpeedPoints = !VisibilitySetSpeedPoints;
 
         private bool OpenCloseDebuggingMenuValidation() => FrequencyMotorIsOpen;
 
@@ -367,14 +398,27 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void SetSpeedFrequencyMotorMethodAsync()
         {
-            Task.Run(async () => await Task.Run(() =>
-            {
-                FrequencyMotorDevice.Instance.SetFrequency(SetFrequencyMotor , 0);
-                FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
-            }));
+            Task.Run(async () =>
+                await Task.Run(() => FrequencyMotorDevice.Instance.SetFrequency(SetFrequencyMotor, 0)));
         }
 
         #endregion
+
+
+        /// <summary>
+        /// Значения скорости на которых нужно считать значения датчика.
+        /// </summary>
+        public ObservableCollection<ControlPointSpeedToFrequency> ControlPointSpeed { get; set; } =
+            new ObservableCollection<ControlPointSpeedToFrequency>
+            {
+                new ControlPointSpeedToFrequency(1, 0.7m, 445),
+                new ControlPointSpeedToFrequency(2, 5, 2605),
+                new ControlPointSpeedToFrequency(3, 10, 5650),
+                new ControlPointSpeedToFrequency(4, 15, 7750),
+                new ControlPointSpeedToFrequency(5, 20, 10600),
+                new ControlPointSpeedToFrequency(6, 25, 13600),
+                new ControlPointSpeedToFrequency(7, 30, 16000),
+            };
 
         #region Test Method
 
@@ -387,90 +431,72 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             if (isValidation == false) return;
 
-            switch (TypeTest)
+            Task.Run(async () => await Task.Run(() =>
             {
-                case TypeTest.Dvs01:
-                    StartTestDvs01();
-                    break;
-                case TypeTest.Dvs02:
-                    StartTestDvs02();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        private void StartTestDvs01()
-        {
-            var countValueOnAverage = 3;
-        }
-
-        private void StartTestDvs02()
-        {
-            Task.Run(async () =>
-            {
-                await Task.Run(() => 
+                switch (TypeTest)
                 {
-                    var countValueOnAverage = 6;
+                    case TypeTest.Dvs01:
 
-                    Application.Current.Dispatcher?.Invoke(() => CollectionDvsValue.Clear());
-                
-                    foreach (var point in _controlPointSpeed)
-                    {
-                        var value = new DvsValue(point.Speed);
-
-                        Application.Current.Dispatcher?.Invoke(() => CollectionDvsValue.Add(value));
-
-                        FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency, point.Speed);
-                        FrequencyMotorDevice.Instance.CorrectionSpeedMotor();
-
-                        //TODO Думаю необходимо проверять скорость трубы перед каждым съемом значения.
-                        while (value.CollectionCount != countValueOnAverage)
-                        {
-                            var hzValue = FrequencyCounterDevice.Instance.GetCurrentHzValue();
-
-                            Application.Current.Dispatcher?.Invoke(() => value.AddValueInCollection(hzValue));
-
-                            Thread.Sleep(GateTimeToMSec(GateTime) + 1000);
-
-                            FrequencyMotorDevice.Instance.CorrectionSpeedMotor(false);
-                        }
-                    }
-                });
-             });
+                        break;
+                    case TypeTest.Dvs02:
+                        StartTestDvs02(GateTime);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }));
         }
 
-        private int GateTimeToMSec(GateTime gateTime)
+
+        public void StartTestDvs02(GateTime gateTime)
         {
-            switch (gateTime)
+            var countValueOnAverage = 6;
+
+            CollectionDvsValue = new ObservableCollection<DvsValue>();
+
+            Application.Current.Dispatcher?.Invoke(CollectionDvsValue.Clear);
+
+            foreach (var point in ControlPointSpeed)
             {
-                case GateTime.S1:
-                    return 1000;
-                case GateTime.S4:
-                    return 4000;
-                case GateTime.S7:
-                    return 7000;
-                case GateTime.S10:
-                    return 10000;
-                case GateTime.S100:
-                    return 100000;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(gateTime), gateTime, null);
+                var value = new DvsValue(point.Speed);
+
+                FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency, point.Speed);
+
+                //Время ожидания для стабилизации трубы
+                Thread.Sleep(WaitSetFrequency);
+
+                Application.Current.Dispatcher?.Invoke(AverageSpeedReferenceCollection.Clear);
+
+                //Для скоростной точки 30, отключаю коррекцию скорости, так как труба не может разогнаться до 30 м/с . 
+                //А где-то до 27-29 м/с
+                if (point.Speed != 30)
+                {
+                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue);
+                }
+
+                while (value.CollectionCount != countValueOnAverage)
+                {
+                    var hzValue = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                    value.AddValueInCollection(hzValue);
+
+                    var timeOutCounter = FrequencyCounterDevice.Instance.GateTimeToMSec(gateTime) + 1000;
+
+                    Thread.Sleep(timeOutCounter);
+                }
+
+                CollectionDvsValue.Add(value);
             }
+
+            ResultToCsvDvs2(CollectionDvsValue.ToList());
+        }
+
+        private void ResultToCsvDvs2(List<DvsValue> resultValues)
+        {
+            //TODO Здесь будут создаваться csv результаты
         }
 
         #endregion
 
-        private readonly List<ControlPointSpeedToFrequency> _controlPointSpeed = new List<ControlPointSpeedToFrequency>
-        {
-            new ControlPointSpeedToFrequency(0.7m, 445),
-            new ControlPointSpeedToFrequency(5, 2505),
-            new ControlPointSpeedToFrequency(10, 4745),
-            new ControlPointSpeedToFrequency(15, 7140),
-            new ControlPointSpeedToFrequency(20, 9480),
-            new ControlPointSpeedToFrequency(25, 12015),
-            new ControlPointSpeedToFrequency(30, 15200),
-        };
 
         public MainWindowVm()
         {
@@ -487,55 +513,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             GateTime = _userSettings.GateTime;
             ComPortFrequencyMotor = _userSettings.ComPortFrequencyMotor;
             ComPortFrequencyCounter = _userSettings.ComPortFrequencyCounter;
-
-
-            #region Test Code
-
-            //var x = new DvsValue(0.7m);
-
-            //CollectionDvsValue = new ObservableCollection<DvsValue>
-            //{
-            //    x
-            //};
-
-
-            
-
-
-
-            //Task.Run(async () => await Task.Run(() =>
-            //{
-            //    Thread.Sleep(1000);
-
-
-
-            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(20));
-
-            //    Thread.Sleep(2000);
-
-            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(30));
-
-            //    Thread.Sleep(2000);
-
-            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(40));
-
-            //    Thread.Sleep(2000);
-
-            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(50));
-
-            //    Thread.Sleep(2000);
-
-            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(60));
-
-            //    Thread.Sleep(2000);
-
-            //    Application.Current.Dispatcher?.Invoke(() => x.AddValueInCollection(70));
-
-            //    Thread.Sleep(2000);
-
-            //}));
-
-            #endregion
         }
 
 
@@ -549,6 +526,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
             SpeedReferenceValue = (decimal) e.ReferenceValue;
+            UpdateAverageSpeedReferenceValue(SpeedReferenceValue);
         }
 
         private void FrequencyMotor_IsOpenUpdate(object sender, IsOpenFrequencyMotorEventArgs e)
@@ -611,6 +589,25 @@ namespace VerificationAirVelocitySensor.ViewModel
         }
 
         #endregion
+    }
+
+    public class ControlPointSpeedToFrequency
+    {
+        public ControlPointSpeedToFrequency(int id, decimal speed, int setFrequency)
+        {
+            Speed = speed;
+            SetFrequency = setFrequency;
+            Id = id;
+        }
+
+        public ControlPointSpeedToFrequency()
+        {
+        }
+
+        public decimal Speed { get; set; }
+        public int SetFrequency { get; set; }
+
+        public int Id { get; set; }
     }
 
     public enum TypeTest
