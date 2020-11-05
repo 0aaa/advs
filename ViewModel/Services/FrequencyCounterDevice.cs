@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO.Ports;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 
@@ -87,7 +89,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #endregion
 
-        private void WriteCommandAsync(string command, int sleepTime = 1000)
+        private void WriteCommandAsync(string command, int sleepTime = 2000)
         {
             _serialPort.WriteLine(command);
             Thread.Sleep(sleepTime);
@@ -127,20 +129,46 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public decimal GetCurrentHzValue(int sleepTime = 1000)
         {
-            WriteCommandAsync("FETC?" , sleepTime);
 
-            Thread.Sleep(100);
-            var data = _serialPort.ReadExisting();
+            while (true)
+            {
+                _ = _serialPort.ReadExisting();
 
-            if (string.IsNullOrEmpty(data))
-                return 0;
+                WriteCommandAsync("FETC?", sleepTime);
 
-            var substringValue = data.Substring(1, 7).Replace("." , ",");
-            var value = decimal.Parse(substringValue);
+                Thread.Sleep(100);
+                var data = _serialPort.ReadExisting();
 
-            var mathValue = Math.Round(value, 3);
 
-            return mathValue;
+                if (string.IsNullOrEmpty(data))
+                   continue;
+
+                data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
+
+                if (data[0] == '-' || data[0] == '+')
+                {
+                    data = data.Remove(0, 1);
+                    var value = decimal.Parse(data, NumberStyles.Float | NumberStyles.AllowExponent, CultureInfo.InvariantCulture);
+
+                    var mathValue = Math.Round(value, 3);
+
+                    if (mathValue == 0)
+                        continue;
+
+                    return mathValue;
+                }
+                else
+                {
+                    var value = decimal.Parse(data);
+                    var mathValue = Math.Round(value, 3);
+
+
+                    if (mathValue == 0)
+                        continue;
+
+                    return mathValue;
+                }
+            }
         }
 
         /// <summary>
