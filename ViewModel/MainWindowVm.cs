@@ -141,6 +141,11 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void UpdateAverageSpeedReferenceValue(decimal newValue)
         {
+            if (AverageSpeedReferenceCollection.Count > 4)
+            {
+                AverageSpeedReferenceCollection.Clear();
+            }
+
             AverageSpeedReferenceCollection.Add(newValue);
             _averageSpeedReferenceValue = AverageSpeedReferenceCollection.Average();
         }
@@ -487,8 +492,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                     Thread.Sleep(timeOutCounter);
                 }
-
-
             }
 
             ResultToCsvDvs2(CollectionDvsValue.ToList());
