@@ -153,7 +153,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// <summary>
         /// Время ожидания после установки значения частоты, что бы дать аэротрубе стабилизировать значение
         /// </summary>
-        public int WaitSetFrequency { get; set; } = 10000;
+        public int WaitSetFrequency { get; set; } = 5000;
 
         //Все свойства что ниже, должны сохранятся пре перезапуске.
         //TODO Позже сделать переключатель на интерфейсе.

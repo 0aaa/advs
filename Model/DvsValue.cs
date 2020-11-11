@@ -6,7 +6,6 @@ namespace VerificationAirVelocitySensor.Model
 {
     public class DvsValue : BaseVm
     {
-        
         public DvsValue(decimal speedValue)
         {
             SpeedValue = speedValue;
@@ -22,6 +21,13 @@ namespace VerificationAirVelocitySensor.Model
         /// Снимаемое значение частоты
         /// </summary>
         public decimal ReferenceSpeedValue { get; set; }
+
+        public decimal? DeviceSpeedValue1 { get; set; }
+        public decimal? DeviceSpeedValue2 { get; set; }
+        public decimal? DeviceSpeedValue3 { get; set; }
+        public decimal? DeviceSpeedValue4 { get; set; }
+        public decimal? DeviceSpeedValue5 { get; set; }
+        public decimal? DeviceSpeedValue6 { get; set; }
 
         public ObservableCollection<decimal> ValueCollection { get; set; }
             = new ObservableCollection<decimal>();
