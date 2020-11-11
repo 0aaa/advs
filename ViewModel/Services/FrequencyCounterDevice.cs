@@ -131,41 +131,48 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
             while (true)
             {
-                _ = _serialPort.ReadExisting();
-
-                WriteCommandAsync("FETC?", sleepTime);
-
-                Thread.Sleep(100);
-                var data = _serialPort.ReadExisting();
-
-
-                if (string.IsNullOrEmpty(data))
-                   continue;
-
-                data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
-
-                if (data[0] == '-' || data[0] == '+')
+                try
                 {
-                    data = data.Remove(0, 1);
-                    var value = decimal.Parse(data, NumberStyles.Float | NumberStyles.AllowExponent, CultureInfo.InvariantCulture);
+                    _ = _serialPort.ReadExisting();
 
-                    var mathValue = Math.Round(value, 3);
+                    WriteCommandAsync("FETC?", sleepTime);
 
-                    if (mathValue == 0)
+                    Thread.Sleep(500);
+                    var data = _serialPort.ReadExisting();
+
+
+                    if (string.IsNullOrEmpty(data))
                         continue;
 
-                    return mathValue;
+                    data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
+
+                    if (data[0] == '-' || data[0] == '+')
+                    {
+                        data = data.Remove(0, 1);
+                        var value = decimal.Parse(data, NumberStyles.Float | NumberStyles.AllowExponent, CultureInfo.InvariantCulture);
+
+                        var mathValue = Math.Round(value, 3);
+
+                        if (mathValue == 0)
+                            continue;
+
+                        return mathValue;
+                    }
+                    else
+                    {
+                        var value = decimal.Parse(data);
+                        var mathValue = Math.Round(value, 3);
+
+
+                        if (mathValue == 0)
+                            continue;
+
+                        return mathValue;
+                    }
                 }
-                else
+                catch
                 {
-                    var value = decimal.Parse(data);
-                    var mathValue = Math.Round(value, 3);
-
-
-                    if (mathValue == 0)
-                        continue;
-
-                    return mathValue;
+                    continue;
                 }
             }
         }

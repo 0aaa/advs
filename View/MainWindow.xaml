@@ -219,12 +219,17 @@
                 </Grid>
             </Border>
             <Border Grid.Row="2">
-                <Button Content="Старт"
+                <Grid>
+                    <Button Content="Старт"
                         Height="25"
                         Width="100"
+                            Margin="20,0,0,0"
                         Command="{Binding StartTestCommand}"
-                        HorizontalAlignment="Center"
+                        HorizontalAlignment="Left"
                         VerticalAlignment="Center" />
+
+                    <TextBlock Text="{Binding SpeedReferenceValue}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,50,0" FontSize="16"/>
+                </Grid>
             </Border>
         </Grid>
 

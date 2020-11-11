@@ -141,14 +141,20 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void UpdateAverageSpeedReferenceValue(decimal newValue)
         {
-            if (AverageSpeedReferenceCollection.Count > 4)
+            if (AverageSpeedReferenceCollection.Count > 5 && AcceptCorrectionReference == false)
             {
                 AverageSpeedReferenceCollection.Clear();
             }
 
             AverageSpeedReferenceCollection.Add(newValue);
-            _averageSpeedReferenceValue = AverageSpeedReferenceCollection.Average();
+            _averageSpeedReferenceValue = Math.Round(AverageSpeedReferenceCollection.Average() , 2);
         }
+
+        /// <summary>
+        /// Флаг для включения в колекцию среднего значения эталона , 
+        /// всех его значений за время теста скоростной точки после прохождения корректировки.
+        /// </summary>
+        private bool AcceptCorrectionReference = false;
 
         /// <summary>
         /// Время ожидания после установки значения частоты, что бы дать аэротрубе стабилизировать значение
@@ -452,6 +458,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                         catch (Exception e)
                         {
                             //TODO log
+                            Console.WriteLine(e.Message);
                         }
                         finally
                         {
@@ -492,12 +499,20 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             foreach (var point in ControlPointSpeed)
             {
+
+                AcceptCorrectionReference = false;
+
                 FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency, point.Speed);
 
                 //Время ожидания для стабилизации трубы
                 Thread.Sleep(WaitSetFrequency);
 
                 Application.Current.Dispatcher?.Invoke(AverageSpeedReferenceCollection.Clear);
+
+                if(point.Speed == 30)
+                {
+                    Thread.Sleep(10000);
+                }
 
                 //Для скоростной точки 30, отключаю коррекцию скорости, так как труба не может разогнаться до 30 м/с . 
                 //А где-то до 27-29 м/с
@@ -506,7 +521,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                     FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue);
                 }
 
-                CollectionDvsValue[point.Id].ReferenceSpeedValue = SpeedReferenceValue;
+
+                AcceptCorrectionReference = true;
 
                 Thread.Sleep(250);
 
@@ -522,6 +538,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                 Thread.Sleep(timeOutCounter);
                 CollectionDvsValue[point.Id].DeviceSpeedValue6 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 Thread.Sleep(timeOutCounter);
+
+                CollectionDvsValue[point.Id].ReferenceSpeedValue = _averageSpeedReferenceValue;
             }
         }
 
