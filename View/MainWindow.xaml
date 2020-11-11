@@ -10,11 +10,25 @@
         Background="LightSlateGray"
         Title="Поверка датчиков скорости воздушного потока"
         d:DataContext="{d:DesignInstance Type=viewModel:MainWindowVm}"
+        MinHeight="400"
+        MinWidth="500"
         Height="400"
         Width="500">
     <Window.DataContext>
         <viewModel:MainWindowVm />
     </Window.DataContext>
+    <Window.Resources>
+        <Style x:Key="TextBoxStyle" TargetType="TextBox">
+            <Setter Property="Width" Value="55" />
+            <Setter Property="Margin" Value="10,5" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20" />
@@ -160,41 +174,41 @@
 
                                         <Grid Column="0">
                                             <TextBox Text="{Binding ReferenceSpeedValue}"
-                                                     Width="55"
-                                                     Height="20"
-                                                     IsReadOnly="True"
-                                                     TextAlignment="Center"
-                                                     VerticalContentAlignment="Center"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center" />
+                                                     Style="{StaticResource TextBoxStyle}" />
                                         </Grid>
                                         <Grid Grid.Column="1">
-                                            <ItemsControl ItemsSource="{Binding ValueCollection}"
-                                                          BorderThickness="0"
-                                                          Padding="0"
-                                                          Margin="0">
-                                                <ItemsControl.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <StackPanel Orientation="Horizontal" />
-                                                    </ItemsPanelTemplate>
-                                                </ItemsControl.ItemsPanel>
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Grid
-                                                            Width="{Binding ElementName=ValueGrid1 , Path=ActualWidth}"
-                                                            Height="{Binding ElementName=ValueGrid1 , Path=ActualHeight}">
-                                                            <TextBox Text="{Binding Path=.}"
-                                                                     Width="55"
-                                                                     Height="20"
-                                                                     IsReadOnly="True"
-                                                                     TextAlignment="Center"
-                                                                     VerticalContentAlignment="Center"
-                                                                     HorizontalAlignment="Center"
-                                                                     VerticalAlignment="Center" />
-                                                        </Grid>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*" />
+                                                <ColumnDefinition Width="1*" />
+                                                <ColumnDefinition Width="1*" />
+                                                <ColumnDefinition Width="1*" />
+                                                <ColumnDefinition Width="1*" />
+                                                <ColumnDefinition Width="1*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Grid.Column="0">
+                                                <TextBox Text="{Binding DeviceSpeedValue1}"
+                                                         Style="{StaticResource TextBoxStyle}" />
+                                            </Grid>
+                                            <Grid Grid.Column="1">
+                                                <TextBox Text="{Binding DeviceSpeedValue2}"
+                                                         Style="{StaticResource TextBoxStyle}" />
+                                            </Grid>
+                                            <Grid Grid.Column="2">
+                                                <TextBox Text="{Binding DeviceSpeedValue3}"
+                                                         Style="{StaticResource TextBoxStyle}" />
+                                            </Grid>
+                                            <Grid Grid.Column="3">
+                                                <TextBox Text="{Binding DeviceSpeedValue4}"
+                                                         Style="{StaticResource TextBoxStyle}" />
+                                            </Grid>
+                                            <Grid Grid.Column="4">
+                                                <TextBox Text="{Binding DeviceSpeedValue5}"
+                                                         Style="{StaticResource TextBoxStyle}" />
+                                            </Grid>
+                                            <Grid Grid.Column="5">
+                                                <TextBox Text="{Binding DeviceSpeedValue6}"
+                                                         Style="{StaticResource TextBoxStyle}" />
+                                            </Grid>
                                         </Grid>
                                     </Grid>
                                 </DataTemplate>
@@ -642,7 +656,7 @@
 
                             <Button Style="{StaticResource CloseSettingsMenuButtonStyle}"
                                     Command="{Binding OpenCloseSetSpeedPointsMenuCommand}"
-                                    Grid.Column="1" 
+                                    Grid.Column="1"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center" />
                         </Grid>

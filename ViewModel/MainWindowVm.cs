@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Ports;
@@ -7,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using OfficeOpenXml;
 using VerificationAirVelocitySensor.Model;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
@@ -416,13 +416,13 @@ namespace VerificationAirVelocitySensor.ViewModel
         public ObservableCollection<ControlPointSpeedToFrequency> ControlPointSpeed { get; set; } =
             new ObservableCollection<ControlPointSpeedToFrequency>
             {
-                new ControlPointSpeedToFrequency(1, 0.7m, 445),
-                new ControlPointSpeedToFrequency(2, 5, 2605),
-                new ControlPointSpeedToFrequency(3, 10, 5650),
-                new ControlPointSpeedToFrequency(4, 15, 7750),
-                new ControlPointSpeedToFrequency(5, 20, 10600),
-                new ControlPointSpeedToFrequency(6, 25, 13600),
-                new ControlPointSpeedToFrequency(7, 30, 16384),
+                new ControlPointSpeedToFrequency(0, 0.7m, 445),
+                new ControlPointSpeedToFrequency(1, 5, 2605),
+                new ControlPointSpeedToFrequency(2, 10, 5650),
+                new ControlPointSpeedToFrequency(3, 15, 7750),
+                new ControlPointSpeedToFrequency(4, 20, 10600),
+                new ControlPointSpeedToFrequency(5, 25, 13600),
+                new ControlPointSpeedToFrequency(6, 30, 16384),
             };
 
         #region Test Method
@@ -444,7 +444,22 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                         break;
                     case TypeTest.Dvs02:
-                        StartTestDvs02(GateTime);
+                        LoadDefaultValueCollectionDvs2Value();
+                        try
+                        {
+                            StartTestDvs02(GateTime);
+                        }
+                        catch (Exception e)
+                        {
+                            //TODO log
+                        }
+                        finally
+                        {
+                            FrequencyMotorDevice.Instance.SetFrequency(0, 0);
+
+                            ResultToXlsxDvs2();
+                        }
+
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -452,21 +467,31 @@ namespace VerificationAirVelocitySensor.ViewModel
             }));
         }
 
+        /// <summary>
+        /// Метод для очистки от старых значений  CollectionDvsValue и заполнением пустых значений. Для ДВС2
+        /// </summary>
+        public void LoadDefaultValueCollectionDvs2Value()
+        {
+            Application.Current.Dispatcher?.Invoke(() =>
+            {
+                CollectionDvsValue?.Clear();
+
+                CollectionDvsValue = new ObservableCollection<DvsValue>();
+
+                foreach (var point in ControlPointSpeed)
+                {
+                    CollectionDvsValue.Add(new DvsValue(point.Speed));
+                }
+            });
+        }
+
 
         public void StartTestDvs02(GateTime gateTime)
         {
-            var countValueOnAverage = 6;
-
-            CollectionDvsValue = new ObservableCollection<DvsValue>();
-
-            Application.Current.Dispatcher?.Invoke(CollectionDvsValue.Clear);
+            var timeOutCounter = FrequencyCounterDevice.Instance.GateTimeToMSec(gateTime) + 1000;
 
             foreach (var point in ControlPointSpeed)
             {
-                var value = new DvsValue(point.Speed);
-
-                Application.Current.Dispatcher?.Invoke(() => CollectionDvsValue.Add(value));
-
                 FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency, point.Speed);
 
                 //Время ожидания для стабилизации трубы
@@ -481,25 +506,144 @@ namespace VerificationAirVelocitySensor.ViewModel
                     FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue);
                 }
 
-                value.ReferenceSpeedValue = SpeedReferenceValue;
+                CollectionDvsValue[point.Id].ReferenceSpeedValue = SpeedReferenceValue;
 
-                while (value.CollectionCount != countValueOnAverage)
-                {
-                    var hzValue = FrequencyCounterDevice.Instance.GetCurrentHzValue();
-                    value.AddValueInCollection(hzValue);
+                Thread.Sleep(250);
 
-                    var timeOutCounter = FrequencyCounterDevice.Instance.GateTimeToMSec(gateTime) + 1000;
-
-                    Thread.Sleep(timeOutCounter);
-                }
+                CollectionDvsValue[point.Id].DeviceSpeedValue1 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                Thread.Sleep(timeOutCounter);
+                CollectionDvsValue[point.Id].DeviceSpeedValue2 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                Thread.Sleep(timeOutCounter);
+                CollectionDvsValue[point.Id].DeviceSpeedValue3 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                Thread.Sleep(timeOutCounter);
+                CollectionDvsValue[point.Id].DeviceSpeedValue4 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                Thread.Sleep(timeOutCounter);
+                CollectionDvsValue[point.Id].DeviceSpeedValue5 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                Thread.Sleep(timeOutCounter);
+                CollectionDvsValue[point.Id].DeviceSpeedValue6 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                Thread.Sleep(timeOutCounter);
             }
-
-            ResultToCsvDvs2(CollectionDvsValue.ToList());
         }
 
-        private void ResultToCsvDvs2(List<DvsValue> resultValues)
+        private void ResultToXlsxDvs2()
         {
-            //TODO Здесь будут создаваться csv результаты
+            var pathExampleXlsxFile = @"Resources\Dvs2.xlsx";
+            while (true)
+            {
+                if (File.Exists(pathExampleXlsxFile))
+                    break;
+
+                var errorMessage =
+                    "Отсутствует файл образец test_cs_protocol.xlsx  " +
+                    "Пожалуйста поместите файл и повторите попытку(ОК). Или нажмите отмена для пропуска создания .xlsx";
+
+                var mb = MessageBox.Show(errorMessage, "Ошибка", MessageBoxButton.OKCancel);
+
+                //Если было нажато ОК
+                if (mb == MessageBoxResult.OK)
+                    continue;
+
+                //Если была нажата отмена
+                return;
+            }
+
+            using (var package = new ExcelPackage(new FileInfo(pathExampleXlsxFile)))
+            {
+                var ws = package.Workbook.Worksheets.First();
+
+                #region Заполнение значений
+
+                #region 0.7
+
+                ws.Cells[12, 12].Value = CollectionDvsValue[0].ReferenceSpeedValue;
+                ws.Cells[12, 13].Value = CollectionDvsValue[0].DeviceSpeedValue1;
+                ws.Cells[12, 14].Value = CollectionDvsValue[0].DeviceSpeedValue2;
+                ws.Cells[12, 15].Value = CollectionDvsValue[0].DeviceSpeedValue3;
+                ws.Cells[12, 16].Value = CollectionDvsValue[0].DeviceSpeedValue4;
+                ws.Cells[12, 17].Value = CollectionDvsValue[0].DeviceSpeedValue5;
+                ws.Cells[12, 18].Value = CollectionDvsValue[0].DeviceSpeedValue6;
+
+                #endregion
+
+                #region 5
+
+                ws.Cells[13, 12].Value = CollectionDvsValue[1].ReferenceSpeedValue;
+                ws.Cells[13, 13].Value = CollectionDvsValue[1].DeviceSpeedValue1;
+                ws.Cells[13, 14].Value = CollectionDvsValue[1].DeviceSpeedValue2;
+                ws.Cells[13, 15].Value = CollectionDvsValue[1].DeviceSpeedValue3;
+                ws.Cells[13, 16].Value = CollectionDvsValue[1].DeviceSpeedValue4;
+                ws.Cells[13, 17].Value = CollectionDvsValue[1].DeviceSpeedValue5;
+                ws.Cells[13, 18].Value = CollectionDvsValue[1].DeviceSpeedValue6;
+
+                #endregion
+
+                #region 10
+
+                ws.Cells[14, 12].Value = CollectionDvsValue[2].ReferenceSpeedValue;
+                ws.Cells[14, 13].Value = CollectionDvsValue[2].DeviceSpeedValue1;
+                ws.Cells[14, 14].Value = CollectionDvsValue[2].DeviceSpeedValue2;
+                ws.Cells[14, 15].Value = CollectionDvsValue[2].DeviceSpeedValue3;
+                ws.Cells[14, 16].Value = CollectionDvsValue[2].DeviceSpeedValue4;
+                ws.Cells[14, 17].Value = CollectionDvsValue[2].DeviceSpeedValue5;
+                ws.Cells[14, 18].Value = CollectionDvsValue[2].DeviceSpeedValue6;
+
+                #endregion
+
+                #region 15
+
+                ws.Cells[15, 12].Value = CollectionDvsValue[3].ReferenceSpeedValue;
+                ws.Cells[15, 13].Value = CollectionDvsValue[3].DeviceSpeedValue1;
+                ws.Cells[15, 14].Value = CollectionDvsValue[3].DeviceSpeedValue2;
+                ws.Cells[15, 15].Value = CollectionDvsValue[3].DeviceSpeedValue3;
+                ws.Cells[15, 16].Value = CollectionDvsValue[3].DeviceSpeedValue4;
+                ws.Cells[15, 17].Value = CollectionDvsValue[3].DeviceSpeedValue5;
+                ws.Cells[15, 18].Value = CollectionDvsValue[3].DeviceSpeedValue6;
+
+                #endregion
+
+                #region 20
+
+                ws.Cells[16, 12].Value = CollectionDvsValue[4].ReferenceSpeedValue;
+                ws.Cells[16, 13].Value = CollectionDvsValue[4].DeviceSpeedValue1;
+                ws.Cells[16, 14].Value = CollectionDvsValue[4].DeviceSpeedValue2;
+                ws.Cells[16, 15].Value = CollectionDvsValue[4].DeviceSpeedValue3;
+                ws.Cells[16, 16].Value = CollectionDvsValue[4].DeviceSpeedValue4;
+                ws.Cells[16, 17].Value = CollectionDvsValue[4].DeviceSpeedValue5;
+                ws.Cells[16, 18].Value = CollectionDvsValue[4].DeviceSpeedValue6;
+
+                #endregion
+
+                #region 25
+
+                ws.Cells[17, 12].Value = CollectionDvsValue[5].ReferenceSpeedValue;
+                ws.Cells[17, 13].Value = CollectionDvsValue[5].DeviceSpeedValue1;
+                ws.Cells[17, 14].Value = CollectionDvsValue[5].DeviceSpeedValue2;
+                ws.Cells[17, 15].Value = CollectionDvsValue[5].DeviceSpeedValue3;
+                ws.Cells[17, 16].Value = CollectionDvsValue[5].DeviceSpeedValue4;
+                ws.Cells[17, 17].Value = CollectionDvsValue[5].DeviceSpeedValue5;
+                ws.Cells[17, 18].Value = CollectionDvsValue[5].DeviceSpeedValue6;
+
+                #endregion
+
+                #region 30
+
+                ws.Cells[18, 12].Value = CollectionDvsValue[6].ReferenceSpeedValue;
+                ws.Cells[18, 13].Value = CollectionDvsValue[6].DeviceSpeedValue1;
+                ws.Cells[18, 14].Value = CollectionDvsValue[6].DeviceSpeedValue2;
+                ws.Cells[18, 15].Value = CollectionDvsValue[6].DeviceSpeedValue3;
+                ws.Cells[18, 16].Value = CollectionDvsValue[6].DeviceSpeedValue4;
+                ws.Cells[18, 17].Value = CollectionDvsValue[6].DeviceSpeedValue5;
+                ws.Cells[18, 18].Value = CollectionDvsValue[6].DeviceSpeedValue6;
+
+                #endregion
+
+                #endregion
+
+
+                //var xlsxCombinePath = Path.Combine(folderPath, $"{NameSc}.xlsx");
+
+                package.SaveAs(new FileInfo($"{DateTime.Now:dd.MM.yyyy_HH-mm-ss}.xlsx"));
+            }
         }
 
         #endregion
