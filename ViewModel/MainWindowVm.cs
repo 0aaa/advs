@@ -536,8 +536,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 Thread.Sleep(timeOutCounter);
                 CollectionDvsValue[point.Id].DeviceSpeedValue5 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 Thread.Sleep(timeOutCounter);
-                CollectionDvsValue[point.Id].DeviceSpeedValue6 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
-                Thread.Sleep(timeOutCounter);
 
                 CollectionDvsValue[point.Id].ReferenceSpeedValue = _averageSpeedReferenceValue;
             }
@@ -579,7 +577,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[12, 15].Value = CollectionDvsValue[0].DeviceSpeedValue3;
                 ws.Cells[12, 16].Value = CollectionDvsValue[0].DeviceSpeedValue4;
                 ws.Cells[12, 17].Value = CollectionDvsValue[0].DeviceSpeedValue5;
-                ws.Cells[12, 18].Value = CollectionDvsValue[0].DeviceSpeedValue6;
 
                 #endregion
 
@@ -591,7 +588,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[13, 15].Value = CollectionDvsValue[1].DeviceSpeedValue3;
                 ws.Cells[13, 16].Value = CollectionDvsValue[1].DeviceSpeedValue4;
                 ws.Cells[13, 17].Value = CollectionDvsValue[1].DeviceSpeedValue5;
-                ws.Cells[13, 18].Value = CollectionDvsValue[1].DeviceSpeedValue6;
 
                 #endregion
 
@@ -603,7 +599,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[14, 15].Value = CollectionDvsValue[2].DeviceSpeedValue3;
                 ws.Cells[14, 16].Value = CollectionDvsValue[2].DeviceSpeedValue4;
                 ws.Cells[14, 17].Value = CollectionDvsValue[2].DeviceSpeedValue5;
-                ws.Cells[14, 18].Value = CollectionDvsValue[2].DeviceSpeedValue6;
 
                 #endregion
 
@@ -615,7 +610,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[15, 15].Value = CollectionDvsValue[3].DeviceSpeedValue3;
                 ws.Cells[15, 16].Value = CollectionDvsValue[3].DeviceSpeedValue4;
                 ws.Cells[15, 17].Value = CollectionDvsValue[3].DeviceSpeedValue5;
-                ws.Cells[15, 18].Value = CollectionDvsValue[3].DeviceSpeedValue6;
 
                 #endregion
 
@@ -627,7 +621,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[16, 15].Value = CollectionDvsValue[4].DeviceSpeedValue3;
                 ws.Cells[16, 16].Value = CollectionDvsValue[4].DeviceSpeedValue4;
                 ws.Cells[16, 17].Value = CollectionDvsValue[4].DeviceSpeedValue5;
-                ws.Cells[16, 18].Value = CollectionDvsValue[4].DeviceSpeedValue6;
 
                 #endregion
 
@@ -639,7 +632,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[17, 15].Value = CollectionDvsValue[5].DeviceSpeedValue3;
                 ws.Cells[17, 16].Value = CollectionDvsValue[5].DeviceSpeedValue4;
                 ws.Cells[17, 17].Value = CollectionDvsValue[5].DeviceSpeedValue5;
-                ws.Cells[17, 18].Value = CollectionDvsValue[5].DeviceSpeedValue6;
 
                 #endregion
 
@@ -651,7 +643,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[18, 15].Value = CollectionDvsValue[6].DeviceSpeedValue3;
                 ws.Cells[18, 16].Value = CollectionDvsValue[6].DeviceSpeedValue4;
                 ws.Cells[18, 17].Value = CollectionDvsValue[6].DeviceSpeedValue5;
-                ws.Cells[18, 18].Value = CollectionDvsValue[6].DeviceSpeedValue6;
 
                 #endregion
 
