@@ -147,7 +147,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             }
 
             AverageSpeedReferenceCollection.Add(newValue);
-            _averageSpeedReferenceValue = Math.Round(AverageSpeedReferenceCollection.Average() , 2);
+            _averageSpeedReferenceValue = Math.Round(AverageSpeedReferenceCollection.Average(), 2);
         }
 
         /// <summary>
@@ -486,9 +486,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 CollectionDvsValue = new ObservableCollection<DvsValue>();
 
                 foreach (var point in ControlPointSpeed)
-                {
                     CollectionDvsValue.Add(new DvsValue(point.Speed));
-                }
             });
         }
 
@@ -499,7 +497,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             foreach (var point in ControlPointSpeed)
             {
-
                 AcceptCorrectionReference = false;
 
                 FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency, point.Speed);
@@ -509,17 +506,13 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 Application.Current.Dispatcher?.Invoke(AverageSpeedReferenceCollection.Clear);
 
-                if(point.Speed == 30)
-                {
+                if (point.Speed == 30)
                     Thread.Sleep(10000);
-                }
 
                 //Для скоростной точки 30, отключаю коррекцию скорости, так как труба не может разогнаться до 30 м/с . 
                 //А где-то до 27-29 м/с
                 if (point.Speed != 30)
-                {
                     FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue);
-                }
 
 
                 AcceptCorrectionReference = true;
@@ -571,89 +564,91 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 #region 0.7
 
-                ws.Cells[12, 12].Value = CollectionDvsValue[0].ReferenceSpeedValue;
-                ws.Cells[12, 13].Value = CollectionDvsValue[0].DeviceSpeedValue1;
-                ws.Cells[12, 14].Value = CollectionDvsValue[0].DeviceSpeedValue2;
-                ws.Cells[12, 15].Value = CollectionDvsValue[0].DeviceSpeedValue3;
-                ws.Cells[12, 16].Value = CollectionDvsValue[0].DeviceSpeedValue4;
-                ws.Cells[12, 17].Value = CollectionDvsValue[0].DeviceSpeedValue5;
+                ws.Cells[12, 12].Value = ConvertResultForXlsx(CollectionDvsValue[0].ReferenceSpeedValue);
+                ws.Cells[12, 13].Value = ConvertResultForXlsx(CollectionDvsValue[0].DeviceSpeedValue1);
+                ws.Cells[12, 14].Value = ConvertResultForXlsx(CollectionDvsValue[0].DeviceSpeedValue2);
+                ws.Cells[12, 15].Value = ConvertResultForXlsx(CollectionDvsValue[0].DeviceSpeedValue3);
+                ws.Cells[12, 16].Value = ConvertResultForXlsx(CollectionDvsValue[0].DeviceSpeedValue4);
+                ws.Cells[12, 17].Value = ConvertResultForXlsx(CollectionDvsValue[0].DeviceSpeedValue5);
 
                 #endregion
 
                 #region 5
 
-                ws.Cells[13, 12].Value = CollectionDvsValue[1].ReferenceSpeedValue;
-                ws.Cells[13, 13].Value = CollectionDvsValue[1].DeviceSpeedValue1;
-                ws.Cells[13, 14].Value = CollectionDvsValue[1].DeviceSpeedValue2;
-                ws.Cells[13, 15].Value = CollectionDvsValue[1].DeviceSpeedValue3;
-                ws.Cells[13, 16].Value = CollectionDvsValue[1].DeviceSpeedValue4;
-                ws.Cells[13, 17].Value = CollectionDvsValue[1].DeviceSpeedValue5;
+                ws.Cells[13, 12].Value = ConvertResultForXlsx(CollectionDvsValue[1].ReferenceSpeedValue);
+                ws.Cells[13, 13].Value = ConvertResultForXlsx(CollectionDvsValue[1].DeviceSpeedValue1);
+                ws.Cells[13, 14].Value = ConvertResultForXlsx(CollectionDvsValue[1].DeviceSpeedValue2);
+                ws.Cells[13, 15].Value = ConvertResultForXlsx(CollectionDvsValue[1].DeviceSpeedValue3);
+                ws.Cells[13, 16].Value = ConvertResultForXlsx(CollectionDvsValue[1].DeviceSpeedValue4);
+                ws.Cells[13, 17].Value = ConvertResultForXlsx(CollectionDvsValue[1].DeviceSpeedValue5);
 
                 #endregion
 
                 #region 10
 
-                ws.Cells[14, 12].Value = CollectionDvsValue[2].ReferenceSpeedValue;
-                ws.Cells[14, 13].Value = CollectionDvsValue[2].DeviceSpeedValue1;
-                ws.Cells[14, 14].Value = CollectionDvsValue[2].DeviceSpeedValue2;
-                ws.Cells[14, 15].Value = CollectionDvsValue[2].DeviceSpeedValue3;
-                ws.Cells[14, 16].Value = CollectionDvsValue[2].DeviceSpeedValue4;
-                ws.Cells[14, 17].Value = CollectionDvsValue[2].DeviceSpeedValue5;
+                ws.Cells[14, 12].Value = ConvertResultForXlsx(CollectionDvsValue[2].ReferenceSpeedValue);
+                ws.Cells[14, 13].Value = ConvertResultForXlsx(CollectionDvsValue[2].DeviceSpeedValue1);
+                ws.Cells[14, 14].Value = ConvertResultForXlsx(CollectionDvsValue[2].DeviceSpeedValue2);
+                ws.Cells[14, 15].Value = ConvertResultForXlsx(CollectionDvsValue[2].DeviceSpeedValue3);
+                ws.Cells[14, 16].Value = ConvertResultForXlsx(CollectionDvsValue[2].DeviceSpeedValue4);
+                ws.Cells[14, 17].Value = ConvertResultForXlsx(CollectionDvsValue[2].DeviceSpeedValue5);
 
                 #endregion
 
                 #region 15
 
-                ws.Cells[15, 12].Value = CollectionDvsValue[3].ReferenceSpeedValue;
-                ws.Cells[15, 13].Value = CollectionDvsValue[3].DeviceSpeedValue1;
-                ws.Cells[15, 14].Value = CollectionDvsValue[3].DeviceSpeedValue2;
-                ws.Cells[15, 15].Value = CollectionDvsValue[3].DeviceSpeedValue3;
-                ws.Cells[15, 16].Value = CollectionDvsValue[3].DeviceSpeedValue4;
-                ws.Cells[15, 17].Value = CollectionDvsValue[3].DeviceSpeedValue5;
+                ws.Cells[15, 12].Value = ConvertResultForXlsx(CollectionDvsValue[3].ReferenceSpeedValue);
+                ws.Cells[15, 13].Value = ConvertResultForXlsx(CollectionDvsValue[3].DeviceSpeedValue1);
+                ws.Cells[15, 14].Value = ConvertResultForXlsx(CollectionDvsValue[3].DeviceSpeedValue2);
+                ws.Cells[15, 15].Value = ConvertResultForXlsx(CollectionDvsValue[3].DeviceSpeedValue3);
+                ws.Cells[15, 16].Value = ConvertResultForXlsx(CollectionDvsValue[3].DeviceSpeedValue4);
+                ws.Cells[15, 17].Value = ConvertResultForXlsx(CollectionDvsValue[3].DeviceSpeedValue5);
 
                 #endregion
 
                 #region 20
 
-                ws.Cells[16, 12].Value = CollectionDvsValue[4].ReferenceSpeedValue;
-                ws.Cells[16, 13].Value = CollectionDvsValue[4].DeviceSpeedValue1;
-                ws.Cells[16, 14].Value = CollectionDvsValue[4].DeviceSpeedValue2;
-                ws.Cells[16, 15].Value = CollectionDvsValue[4].DeviceSpeedValue3;
-                ws.Cells[16, 16].Value = CollectionDvsValue[4].DeviceSpeedValue4;
-                ws.Cells[16, 17].Value = CollectionDvsValue[4].DeviceSpeedValue5;
+                ws.Cells[16, 12].Value = ConvertResultForXlsx(CollectionDvsValue[4].ReferenceSpeedValue);
+                ws.Cells[16, 13].Value = ConvertResultForXlsx(CollectionDvsValue[4].DeviceSpeedValue1);
+                ws.Cells[16, 14].Value = ConvertResultForXlsx(CollectionDvsValue[4].DeviceSpeedValue2);
+                ws.Cells[16, 15].Value = ConvertResultForXlsx(CollectionDvsValue[4].DeviceSpeedValue3);
+                ws.Cells[16, 16].Value = ConvertResultForXlsx(CollectionDvsValue[4].DeviceSpeedValue4);
+                ws.Cells[16, 17].Value = ConvertResultForXlsx(CollectionDvsValue[4].DeviceSpeedValue5);
 
                 #endregion
 
                 #region 25
 
-                ws.Cells[17, 12].Value = CollectionDvsValue[5].ReferenceSpeedValue;
-                ws.Cells[17, 13].Value = CollectionDvsValue[5].DeviceSpeedValue1;
-                ws.Cells[17, 14].Value = CollectionDvsValue[5].DeviceSpeedValue2;
-                ws.Cells[17, 15].Value = CollectionDvsValue[5].DeviceSpeedValue3;
-                ws.Cells[17, 16].Value = CollectionDvsValue[5].DeviceSpeedValue4;
-                ws.Cells[17, 17].Value = CollectionDvsValue[5].DeviceSpeedValue5;
+                ws.Cells[17, 12].Value = ConvertResultForXlsx(CollectionDvsValue[5].ReferenceSpeedValue);
+                ws.Cells[17, 13].Value = ConvertResultForXlsx(CollectionDvsValue[5].DeviceSpeedValue1);
+                ws.Cells[17, 14].Value = ConvertResultForXlsx(CollectionDvsValue[5].DeviceSpeedValue2);
+                ws.Cells[17, 15].Value = ConvertResultForXlsx(CollectionDvsValue[5].DeviceSpeedValue3);
+                ws.Cells[17, 16].Value = ConvertResultForXlsx(CollectionDvsValue[5].DeviceSpeedValue4);
+                ws.Cells[17, 17].Value = ConvertResultForXlsx(CollectionDvsValue[5].DeviceSpeedValue5);
 
                 #endregion
 
                 #region 30
 
-                ws.Cells[18, 12].Value = CollectionDvsValue[6].ReferenceSpeedValue;
-                ws.Cells[18, 13].Value = CollectionDvsValue[6].DeviceSpeedValue1;
-                ws.Cells[18, 14].Value = CollectionDvsValue[6].DeviceSpeedValue2;
-                ws.Cells[18, 15].Value = CollectionDvsValue[6].DeviceSpeedValue3;
-                ws.Cells[18, 16].Value = CollectionDvsValue[6].DeviceSpeedValue4;
-                ws.Cells[18, 17].Value = CollectionDvsValue[6].DeviceSpeedValue5;
+                ws.Cells[18, 12].Value = ConvertResultForXlsx(CollectionDvsValue[6].ReferenceSpeedValue);
+                ws.Cells[18, 13].Value = ConvertResultForXlsx(CollectionDvsValue[6].DeviceSpeedValue1);
+                ws.Cells[18, 14].Value = ConvertResultForXlsx(CollectionDvsValue[6].DeviceSpeedValue2);
+                ws.Cells[18, 15].Value = ConvertResultForXlsx(CollectionDvsValue[6].DeviceSpeedValue3);
+                ws.Cells[18, 16].Value = ConvertResultForXlsx(CollectionDvsValue[6].DeviceSpeedValue4);
+                ws.Cells[18, 17].Value = ConvertResultForXlsx(CollectionDvsValue[6].DeviceSpeedValue5);
 
                 #endregion
 
                 #endregion
-
 
                 //var xlsxCombinePath = Path.Combine(folderPath, $"{NameSc}.xlsx");
 
                 package.SaveAs(new FileInfo($"{DateTime.Now:dd.MM.yyyy_HH-mm-ss}.xlsx"));
             }
         }
+
+        private string ConvertResultForXlsx(decimal? value) =>
+            value == null ? string.Empty : Convert.ToString(value);
 
         #endregion
 

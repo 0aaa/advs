@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO.Ports;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -147,11 +148,11 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #endregion
 
-        public void SetFrequency(int freqInt , decimal speed)
+        public void SetFrequency(int freqInt, decimal speed)
         {
             SetFrequencyValue = freqInt;
             _setSpeed = speed;
-            var freq = (double)freqInt;
+            var freq = (double) freqInt;
 
             if (freq < 0 || freq > 16384)
             {
@@ -227,7 +228,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private double GetReferenceValue()
         {
             //Чистка буфера от старых трейдов.
-            Thread.Sleep(1000);
+            Thread.Sleep(250);
             if (_serialPort.BytesToRead != 0)
                 _ = _serialPort.ReadExisting();
 
@@ -259,18 +260,31 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             var getPack = new byte[bytesToRead];
             _serialPort.Read(getPack, 0, getPack.Length);
 
-            if (getPack.Length != 7)
+            var packValue = new byte[7];
+
+            for (var i = 0; i < getPack.Length; i++)
+            {
+                if (getPack[i] != 0x01) continue;
+                if (getPack[i + 1] != 0x04) continue;
+                if (getPack[i + 2] == 0x02)
+                    packValue = getPack.Skip(i).Take(7).ToArray();
+            }
+
+            if (packValue[0] == 0)
+                throw new Exception("Не удалось выделить из массива данных, значение скорости эталона");
+
+            if (packValue.Length != 7)
                 throw new Exception("Пакет данных (значения эталона) меньше ожидаемого");
 
-            var (getPackCrc1, getPackCrc2) = GetCrc16(getPack, 5);
+            var (getPackCrc1, getPackCrc2) = GetCrc16(packValue, 5);
 
-            if (getPackCrc1 != getPack[5] || getPackCrc2 != getPack[6])
+            if (getPackCrc1 != packValue[5] || getPackCrc2 != packValue[6])
                 throw new Exception("Пакет данных (значения эталона) имеет неправильное crc16");
 
             var valueArray = new[]
             {
-                getPack[3],
-                getPack[4]
+                packValue[3],
+                packValue[4]
             };
             var value = valueArray[0] * 256 + valueArray[1];
 
@@ -330,7 +344,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         {
                             _isSendCommand = true;
 
-                            _referenceSpeedValue =  GetReferenceValue();
+                            _referenceSpeedValue = GetReferenceValue();
 
                             UpdateReferenceValueMethod(_referenceSpeedValue);
 
@@ -338,7 +352,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         }
                     }
 
-                    Thread.Sleep(_periodInterview);
+                    //Thread.Sleep(_periodInterview);
                 }
             }));
         }
@@ -384,7 +398,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="isOnWait">Флаг отвечает за вкыл/выкл времени ожидания перед проверкой эталона.
         /// Вкыл нужен при только что измененной скорости.
         /// Выкл при снятии серии значений на одинй скорости.</param>
-        public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue , bool isOnWait = true)
+        public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue, bool isOnWait = true)
         {
             while (true)
             {
@@ -399,7 +413,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                 SetFrequencyValue += step;
 
-                SetFrequency(_setFrequencyValue , _setSpeed);
+                SetFrequency(_setFrequencyValue, _setSpeed);
 
                 Thread.Sleep(2000);
             }
