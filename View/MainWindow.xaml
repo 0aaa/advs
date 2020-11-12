@@ -7,12 +7,12 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Background="LightSlateGray"
+        Background="#C4E9DB"
         Title="Поверка датчиков скорости воздушного потока"
         d:DataContext="{d:DesignInstance Type=viewModel:MainWindowVm}"
-        MinHeight="400"
+        MinHeight="450"
         MinWidth="500"
-        Height="400"
+        Height="450"
         Width="500">
     <Window.DataContext>
         <viewModel:MainWindowVm />
@@ -87,9 +87,9 @@
 
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="70" />
+                <RowDefinition Height="100" />
                 <RowDefinition Height="1*" />
-                <RowDefinition Height="30" />
+                <RowDefinition Height="50" />
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0">
@@ -265,7 +265,7 @@
                     </Grid>
                 </Grid>
                 <Grid Grid.Row="1"
-                      Background="#777F87">
+                      Background="#C4E9DB">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="1*" />
                         <RowDefinition Height="1*" />
@@ -472,7 +472,7 @@
                     </Grid>
                 </Grid>
                 <Grid Grid.Row="1"
-                      Background="#777F87">
+                      Background="#C4E9DB">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="3*" />
                         <RowDefinition Height="1*" />
@@ -656,7 +656,7 @@
 
                     </Border>
                 </Grid>
-                <Grid Grid.Row="1" Background="#777F87">
+                <Grid Grid.Row="1" Background="#C4E9DB">
                     <Border>
                         <DataGrid ItemsSource="{Binding ControlPointSpeed}"
                                   RowBackground="LightGray"
