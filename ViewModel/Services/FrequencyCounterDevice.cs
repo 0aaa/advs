@@ -172,7 +172,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 }
                 catch
                 {
-                    continue;
+                    // ignore
                 }
             }
         }

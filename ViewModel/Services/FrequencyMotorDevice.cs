@@ -46,7 +46,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         private bool _isSendCommand;
 
-        private readonly int _periodInterview = 1000;
         private object _locker = new object();
 
         /// <summary>

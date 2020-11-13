@@ -141,7 +141,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void UpdateAverageSpeedReferenceValue(decimal newValue)
         {
-            if (AverageSpeedReferenceCollection.Count > 5 && AcceptCorrectionReference == false)
+            if (AverageSpeedReferenceCollection.Count > 5 && _acceptCorrectionReference == false)
             {
                 AverageSpeedReferenceCollection.Clear();
             }
@@ -154,7 +154,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// Флаг для включения в колекцию среднего значения эталона , 
         /// всех его значений за время теста скоростной точки после прохождения корректировки.
         /// </summary>
-        private bool AcceptCorrectionReference = false;
+        private bool _acceptCorrectionReference;
 
         /// <summary>
         /// Время ожидания после установки значения частоты, что бы дать аэротрубе стабилизировать значение
@@ -428,7 +428,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 new ControlPointSpeedToFrequency(3, 15, 7750),
                 new ControlPointSpeedToFrequency(4, 20, 10600),
                 new ControlPointSpeedToFrequency(5, 25, 13600),
-                new ControlPointSpeedToFrequency(6, 30, 16384),
+                new ControlPointSpeedToFrequency(6, 30, 16384)
             };
 
         #region Test Method
@@ -497,7 +497,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             foreach (var point in ControlPointSpeed)
             {
-                AcceptCorrectionReference = false;
+                _acceptCorrectionReference = false;
 
                 FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency, point.Speed);
 
@@ -515,7 +515,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                     FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue);
 
 
-                AcceptCorrectionReference = true;
+                _acceptCorrectionReference = true;
 
                 Thread.Sleep(250);
 
