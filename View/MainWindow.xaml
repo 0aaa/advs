@@ -216,6 +216,8 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center" />
 
+                    <TextBlock Text="{Binding SetFrequencyMotor}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,50,0" FontSize="16"/>
+
                     <TextBlock Text="{Binding SpeedReferenceValue}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,50,0" FontSize="16"/>
                 </Grid>
             </Border>

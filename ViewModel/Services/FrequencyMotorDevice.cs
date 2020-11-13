@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO.Ports;
 using System.Linq;
@@ -251,7 +252,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             sendPack[7] = sendPackCrc2;
 
             _serialPort.Write(sendPack, 0, sendPack.Length);
-            while (_serialPort.BytesToRead == 0)
+            while (_serialPort.BytesToRead < 7)
             {
                 Thread.Sleep(100);
             }
@@ -344,10 +345,32 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         {
                             _isSendCommand = true;
 
-                            _referenceSpeedValue = GetReferenceValue();
+                            var sw = new Stopwatch();
+                            sw.Start();
 
-                            UpdateReferenceValueMethod(_referenceSpeedValue);
+                            while (true)
+                            {
+                                try
+                                {
+                                    _referenceSpeedValue = GetReferenceValue();
 
+                                    UpdateReferenceValueMethod(_referenceSpeedValue);
+                                }
+                                catch(Exception e)
+                                {
+                                    Console.WriteLine(e.Message);
+                                    continue;
+                                }
+
+                                break;
+                            }
+                            
+
+                            sw.Stop();
+
+                            var value = sw.ElapsedMilliseconds;
+                            Console.WriteLine(value);
+                           
                             _isSendCommand = false;
                         }
                     }
