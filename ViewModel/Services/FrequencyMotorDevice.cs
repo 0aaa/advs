@@ -457,6 +457,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             {
                 var setFrequencyValue = (SetFrequencyValue * _setSpeed) / averageReferenceSpeedValue;
                 SetFrequencyValue = (int)(Math.Round(setFrequencyValue));
+                SetFrequency(SetFrequencyValue , _setSpeed);
                 Thread.Sleep(5000);
             }
 

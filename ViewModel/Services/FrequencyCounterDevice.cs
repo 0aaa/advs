@@ -127,7 +127,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Запрос на значение частоты
         /// </summary>
         /// <param name="sleepTime"></param>
-        public decimal GetCurrentHzValue(int sleepTime = 250)
+        public decimal GetCurrentHzValue(int sleepTime = 1000)
         {
 
             while (true)
@@ -189,7 +189,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 averageCollection.Add(value);
             }
 
-            return averageCollection.Average();
+            var average = Math.Round(averageCollection.Average() , 2);
+            return average;
         }
 
         /// <summary>
