@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO.Ports;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 
@@ -126,7 +127,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Запрос на значение частоты
         /// </summary>
         /// <param name="sleepTime"></param>
-        public decimal GetCurrentHzValue(int sleepTime = 1000)
+        public decimal GetCurrentHzValue(int sleepTime = 250)
         {
 
             while (true)
@@ -175,6 +176,20 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                     // ignore
                 }
             }
+        }
+
+
+        public decimal GetCurrentHzValueAverage()
+        {
+            var averageCollection = new List<decimal>();
+
+            while (averageCollection.Count != 5)
+            {
+                var value = GetCurrentHzValue();
+                averageCollection.Add(value);
+            }
+
+            return averageCollection.Average();
         }
 
         /// <summary>

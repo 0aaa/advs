@@ -518,16 +518,17 @@ namespace VerificationAirVelocitySensor.ViewModel
                 _acceptCorrectionReference = true;
 
                 Thread.Sleep(250);
-
-                CollectionDvsValue[point.Id].DeviceSpeedValue1 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                
+                //CollectionDvsValue[point.Id].DeviceSpeedValue1 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                CollectionDvsValue[point.Id].DeviceSpeedValue1 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 Thread.Sleep(timeOutCounter);
-                CollectionDvsValue[point.Id].DeviceSpeedValue2 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                CollectionDvsValue[point.Id].DeviceSpeedValue2 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 Thread.Sleep(timeOutCounter);
-                CollectionDvsValue[point.Id].DeviceSpeedValue3 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                CollectionDvsValue[point.Id].DeviceSpeedValue3 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 Thread.Sleep(timeOutCounter);
-                CollectionDvsValue[point.Id].DeviceSpeedValue4 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                CollectionDvsValue[point.Id].DeviceSpeedValue4 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 Thread.Sleep(timeOutCounter);
-                CollectionDvsValue[point.Id].DeviceSpeedValue5 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                CollectionDvsValue[point.Id].DeviceSpeedValue5 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 Thread.Sleep(timeOutCounter);
 
                 CollectionDvsValue[point.Id].ReferenceSpeedValue = _averageSpeedReferenceValue;
