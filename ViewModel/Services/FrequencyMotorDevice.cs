@@ -453,6 +453,13 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             //Разница между установленной скоростью и полученной с эталона
             var differenceValue = _setSpeed - averageReferenceSpeedValue;
 
+            if (0.5m <= differenceValue || differenceValue <= -0.5m)
+            {
+                var setFrequencyValue = (SetFrequencyValue * _setSpeed) / averageReferenceSpeedValue;
+                SetFrequencyValue = (int)(Math.Round(setFrequencyValue));
+                Thread.Sleep(5000);
+            }
+
             //Флаг отвечающий за совпадение скоростей эталона и выставленной с учетом допустиомй погрешности. 
             var isValidSpeed = errorValue >= differenceValue && differenceValue >= -errorValue;
 
