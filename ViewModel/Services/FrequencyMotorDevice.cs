@@ -208,8 +208,10 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 commandWord[2] = (byte) (CommandWordRegister / 256);
                 commandWord[3] = (byte) CommandWordRegister;
 
-                commandWord[4] = 4;
-                commandWord[5] = 124;
+                //commandWord[4] = 4;
+                //commandWord[5] = 124;
+                commandWord[4] = 0b_1000_0000;
+                commandWord[5] = 0b_1101_1000;
                 var (wordCrc1, wordCrc2) = GetCrc16(commandWord, 6);
                 commandWord[6] = wordCrc1;
                 commandWord[7] = wordCrc2;
@@ -355,7 +357,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                                     UpdateReferenceValueMethod(_referenceSpeedValue);
                                 }
-                                catch(Exception e)
+                                catch (Exception e)
                                 {
                                     Console.WriteLine(e.Message);
                                     continue;
@@ -363,13 +365,13 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                                 break;
                             }
-                            
+
 
                             sw.Stop();
 
                             var value = sw.ElapsedMilliseconds;
                             Console.WriteLine(value);
-                           
+
                             _isSendCommand = false;
                         }
                     }
@@ -422,9 +424,11 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Выкл при снятии серии значений на одинй скорости.</param>
         public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue, bool isOnWait = true)
         {
+            var offCorrectInValueErrorValidation = true;
+
             while (true)
             {
-                if (IsValueErrorValidation(ref averageReferenceSpeedValue)) return;
+                if (IsValueErrorValidation(ref averageReferenceSpeedValue,ref offCorrectInValueErrorValidation)) return;
 
                 const int stepValue = 10;
                 var differenceValue = _setSpeed - averageReferenceSpeedValue;
@@ -445,7 +449,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Проверка валидности эталонной скорости, относительно выставленной
         /// </summary>
         /// <returns></returns>
-        private bool IsValueErrorValidation(ref decimal averageReferenceSpeedValue)
+        private bool IsValueErrorValidation(ref decimal averageReferenceSpeedValue,
+            ref bool offCorrectInValueErrorValidation)
         {
             //Допустимая погрешность (0,02 или 0,1)
             var errorValue = GetErrorValue();
@@ -453,13 +458,19 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             //Разница между установленной скоростью и полученной с эталона
             var differenceValue = _setSpeed - averageReferenceSpeedValue;
 
-            if (0.5m <= differenceValue || differenceValue <= -0.5m)
+            if (offCorrectInValueErrorValidation)
             {
-                var setFrequencyValue = (SetFrequencyValue * _setSpeed) / averageReferenceSpeedValue;
-                SetFrequencyValue = (int)(Math.Round(setFrequencyValue));
-                SetFrequency(SetFrequencyValue , _setSpeed);
-                Thread.Sleep(5000);
+                if (0.5m <= differenceValue || differenceValue <= -0.5m)
+                {
+                    var setFrequencyValue = (SetFrequencyValue * _setSpeed) / averageReferenceSpeedValue;
+                    SetFrequencyValue = (int) (Math.Round(setFrequencyValue));
+                    SetFrequency(SetFrequencyValue, _setSpeed);
+                    Thread.Sleep(5000);
+                }
+
+                offCorrectInValueErrorValidation = false;
             }
+
 
             //Флаг отвечающий за совпадение скоростей эталона и выставленной с учетом допустиомй погрешности. 
             var isValidSpeed = errorValue >= differenceValue && differenceValue >= -errorValue;
