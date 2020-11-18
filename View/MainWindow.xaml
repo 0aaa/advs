@@ -76,7 +76,11 @@
                 <MenuItem Header="Режимы">
                     <MenuItem Header="Отладка"
                               Command="{Binding OpenCloseDebuggingMenuCommand}" />
-                    <MenuItem Header="Изменения" />
+                    <MenuItem Header="Тип тестируемого устройства" >
+                        <MenuItem Header="ДВС1" Command="{Binding ChangeTypeTestOnDvs1Command}"/>
+                        <MenuItem Header="ДВС2" Command="{Binding ChangeTypeTestOnDvs2Command}"/>
+                    </MenuItem>
+
                 </MenuItem>
                 <MenuItem Header="Справка"
                           Command="{Binding OpenReferenceCommand}" />
@@ -85,7 +89,7 @@
 
         <!--#region Dvs2 Test -->
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" Visibility="{Binding Dvs2ContentVisibility , Converter={StaticResource BoolToVis}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="100" />
                 <RowDefinition Height="1*" />

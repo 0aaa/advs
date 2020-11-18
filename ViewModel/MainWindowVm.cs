@@ -87,6 +87,12 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #endregion
 
+        public RelayCommand ChangeTypeTestOnDvs2Command =>
+            new RelayCommand(() => TypeTest = TypeTest.Dvs02, ChangeTypeTestOnDvs2Validation);
+
+        public RelayCommand ChangeTypeTestOnDvs1Command =>
+            new RelayCommand(() => TypeTest = TypeTest.Dvs01, ChangeTypeTestOnDvs1Validation);
+
         public RelayCommand OpenCloseConnectionMenuCommand => new RelayCommand(OpenCloseConnectionMenu);
 
         public RelayCommand OpenCloseDebuggingMenuCommand =>
@@ -179,9 +185,19 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// </summary>
         public int WaitSetFrequency { get; set; } = 5000;
 
+        /// <summary>
+        /// Флаг для биндинга отображения таблицы разультатов для Dvs1
+        /// </summary>
+        public bool Dvs1ContentVisibility { get; set; }
+
+        /// <summary>
+        /// Флаг для биндинга отображения таблицы разультатов для Dvs2
+        /// </summary>
+        public bool Dvs2ContentVisibility { get; set; } = true;
+
         //Все свойства что ниже, должны сохранятся пре перезапуске.
         //TODO Позже сделать переключатель на интерфейсе.
-        public TypeTest _typeTest = TypeTest.Dvs02;
+        private TypeTest _typeTest = TypeTest.Dvs02;
 
         public TypeTest TypeTest
         {
@@ -192,6 +208,18 @@ namespace VerificationAirVelocitySensor.ViewModel
                 OnPropertyChanged(nameof(TypeTest));
                 _userSettings.TypeTest = value;
                 Serialization();
+
+                switch (value)
+                {
+                    case TypeTest.Dvs01:
+                        Dvs1ContentVisibility = true;
+                        Dvs2ContentVisibility = false;
+                        break;
+                    case TypeTest.Dvs02:
+                        Dvs1ContentVisibility = false;
+                        Dvs2ContentVisibility = true;
+                        break;
+                }
             }
         }
 
@@ -483,6 +511,9 @@ namespace VerificationAirVelocitySensor.ViewModel
         private bool StartTestValidation() =>
             !IsTestActive;
 
+        private bool ChangeTypeTestOnDvs1Validation() => !IsTestActive && TypeTest == TypeTest.Dvs02;
+        private bool ChangeTypeTestOnDvs2Validation() => !IsTestActive && TypeTest == TypeTest.Dvs01;
+
         private void StartTest()
         {
             var isValidation = ValidationIsOpenPorts();
@@ -573,33 +604,37 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 Thread.Sleep(250);
 
-                //CollectionDvsValue[point.Id].DeviceSpeedValue1 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
-                CollectionDvsValue[point.Id].DeviceSpeedValue1 =
-                    FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
+                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage(_ctsTask);
+                if (IsCancellationRequested(_ctsTask)) return;
+                CollectionDvsValue[point.Id].DeviceSpeedValue1 = value1;
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[point.Id].DeviceSpeedValue2 =
-                    FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
+                var value2 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage(_ctsTask);
+                if (IsCancellationRequested(_ctsTask)) return;
+                CollectionDvsValue[point.Id].DeviceSpeedValue2 = value2;
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[point.Id].DeviceSpeedValue3 =
-                    FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
+                var value3 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage(_ctsTask);
+                if (IsCancellationRequested(_ctsTask)) return;
+                CollectionDvsValue[point.Id].DeviceSpeedValue3 = value3;
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[point.Id].DeviceSpeedValue4 =
-                    FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
+                var value4 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage(_ctsTask);
+                if (IsCancellationRequested(_ctsTask)) return;
+                CollectionDvsValue[point.Id].DeviceSpeedValue4 = value4;
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[point.Id].DeviceSpeedValue5 =
-                    FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
+                var value5 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage(_ctsTask);
+                if (IsCancellationRequested(_ctsTask)) return;
+                CollectionDvsValue[point.Id].DeviceSpeedValue5 = value5;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
@@ -756,7 +791,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
-            SpeedReferenceValue = (decimal)e.ReferenceValue;
+            SpeedReferenceValue = (decimal) e.ReferenceValue;
             UpdateAverageSpeedReferenceValue(SpeedReferenceValue);
         }
 
