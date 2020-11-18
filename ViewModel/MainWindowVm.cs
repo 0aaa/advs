@@ -510,9 +510,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                         }
                         catch (Exception e)
                         {
-                            //TODO log
-                            
-                            Console.WriteLine(e.Message);
+                            //GlobalLog.Log.Debug(e, e.Message);
                         }
                         finally
                         {

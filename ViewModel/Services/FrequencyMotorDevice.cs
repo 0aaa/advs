@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO.Ports;
 using System.Linq;
@@ -343,7 +342,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             if (_isInterview)
                 return;
 
-
             _isInterview = true;
 
             Task.Run(async () => await Task.Run(() =>
@@ -365,7 +363,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                                 }
                                 catch (Exception e)
                                 {
-                                    Console.WriteLine(e.Message);
+                                    GlobalLog.Log.Debug(e, e.Message);
                                     continue;
                                 }
 
