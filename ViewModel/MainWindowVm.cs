@@ -95,9 +95,9 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
         public RelayCommand OpenReferenceCommand => new RelayCommand(() => IsReference = !IsReference);
 
-        public RelayCommand StartTestCommand => new RelayCommand(StartTest , StartTestValidation);
+        public RelayCommand StartTestCommand => new RelayCommand(StartTest, StartTestValidation);
 
-        public RelayCommand StopTestCommand => new RelayCommand(StopTest , StopTestValidation);
+        public RelayCommand StopTestCommand => new RelayCommand(StopTest, StopTestValidation);
 
         public RelayCommand OpenCloseSetSpeedPointsMenuCommand => new RelayCommand(OpenCloseSetSpeedPoints);
 
@@ -287,12 +287,24 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             FrequencyCounterDevice.Instance.OpenPort(ComPortFrequencyCounter);
 
-            //TODO Что бы не выглядело как зависание, добавить BusyIndicator
+            if (!FrequencyCounterIsOpen) return;
 
-            FrequencyCounterDevice.Instance.SetChannelFrequency(_userSettings.FrequencyChannel);
-            FrequencyCounterDevice.Instance.SetGateTime(_userSettings.GateTime);
-            FrequencyCounterDevice.Instance.SwitchFilter(1, _userSettings.FilterChannel1);
-            FrequencyCounterDevice.Instance.SwitchFilter(2, _userSettings.FilterChannel2);
+
+            IsBusy = true;
+            BusyContent = "Отправка сохраненных настроек на Частотомер";
+
+            Task.Run(async () => await Task.Run(() =>
+            {
+                FrequencyCounterDevice.Instance.SetChannelFrequency(_userSettings.FrequencyChannel);
+                FrequencyCounterDevice.Instance.SetGateTime(_userSettings.GateTime);
+                FrequencyCounterDevice.Instance.SwitchFilter(1, _userSettings.FilterChannel1);
+                FrequencyCounterDevice.Instance.SwitchFilter(2, _userSettings.FilterChannel2);
+                IsBusy = false;
+                BusyContent = string.Empty;
+            }));
+
+
+            //TODO Что бы не выглядело как зависание, добавить BusyIndicator
         }
 
         private static bool ValidationIsOpenPorts()
@@ -476,6 +488,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private bool StartTestValidation() =>
             !IsTestActive;
+
         private void StartTest()
         {
             var isValidation = ValidationIsOpenPorts();
@@ -566,29 +579,34 @@ namespace VerificationAirVelocitySensor.ViewModel
                 _acceptCorrectionReference = true;
 
                 Thread.Sleep(250);
-                
+
                 //CollectionDvsValue[point.Id].DeviceSpeedValue1 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
-                CollectionDvsValue[point.Id].DeviceSpeedValue1 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
+                CollectionDvsValue[point.Id].DeviceSpeedValue1 =
+                    FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[point.Id].DeviceSpeedValue2 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
+                CollectionDvsValue[point.Id].DeviceSpeedValue2 =
+                    FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[point.Id].DeviceSpeedValue3 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
+                CollectionDvsValue[point.Id].DeviceSpeedValue3 =
+                    FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[point.Id].DeviceSpeedValue4 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
+                CollectionDvsValue[point.Id].DeviceSpeedValue4 =
+                    FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[point.Id].DeviceSpeedValue5 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
+                CollectionDvsValue[point.Id].DeviceSpeedValue5 =
+                    FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
