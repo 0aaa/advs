@@ -208,10 +208,11 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 commandWord[2] = (byte) (CommandWordRegister / 256);
                 commandWord[3] = (byte) CommandWordRegister;
 
-                //commandWord[4] = 4;
-                //commandWord[5] = 124;
-                commandWord[4] = 0b_1000_0000;
-                commandWord[5] = 0b_1101_1000;
+                commandWord[4] = 4;
+                commandWord[5] = 124;
+                //TODO Разобраться с командным словом
+                //commandWord[4] = 0b_1000_0000;
+                //commandWord[5] = 0b_1101_1000;
                 var (wordCrc1, wordCrc2) = GetCrc16(commandWord, 6);
                 commandWord[6] = wordCrc1;
                 commandWord[7] = wordCrc2;
@@ -221,6 +222,15 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                     _serialPort.Write(commandWord, 0, commandWord.Length);
                 }
             }
+        }
+
+        /// <summary>
+        /// Метод для отправки текущей частоты, эксперемент.
+        /// Проверить, повлияет ли это на точность измерений.
+        /// </summary>
+        public void UpdateFrequency()
+        {
+            SetFrequency(SetFrequencyValue, _setSpeed);
         }
 
         /// <summary>
