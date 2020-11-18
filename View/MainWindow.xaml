@@ -208,17 +208,25 @@
             </Border>
             <Border Grid.Row="2">
                 <Grid>
-                    <Button Content="Старт"
-                        Height="25"
-                        Width="100"
-                            Margin="20,0,0,0"
-                        Command="{Binding StartTestCommand}"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <Button Content="Старт"
+                                Height="25"
+                                Width="100"
+                                Margin="20,0,0,0"
+                                Command="{Binding StartTestCommand}"/>
+                        <Button Content="Стоп"
+                                Height="25"
+                                Width="100"
+                                Margin="20,0,0,0"
+                                Command="{Binding StopTestCommand}"/>
+                    </StackPanel>
 
-                    <TextBlock Text="{Binding SetFrequencyMotor}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,50,0" FontSize="16"/>
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
+                        <TextBlock Text="{Binding SetFrequencyMotor}" Width="80" Margin="0,0,10,0" FontSize="16" />
 
-                    <TextBlock Text="{Binding SpeedReferenceValue}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,50,0" FontSize="16"/>
+                        <TextBlock Text="{Binding SpeedReferenceValue}"  Width="80" Margin="0,0,10,0" FontSize="16" />
+                    </StackPanel>
+
                 </Grid>
             </Border>
         </Grid>
@@ -683,6 +691,10 @@
             </Grid>
         </Border>
 
+        <!--#endregion-->
+
+        <!--#region IsBusy-->
+        <!--<xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>-->
         <!--#endregion-->
 
     </Grid>

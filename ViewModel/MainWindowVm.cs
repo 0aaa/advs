@@ -95,7 +95,9 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
         public RelayCommand OpenReferenceCommand => new RelayCommand(() => IsReference = !IsReference);
 
-        public RelayCommand StartTestCommand => new RelayCommand(StartTest);
+        public RelayCommand StartTestCommand => new RelayCommand(StartTest , StartTestValidation);
+
+        public RelayCommand StopTestCommand => new RelayCommand(StopTest , StopTestValidation);
 
         public RelayCommand OpenCloseSetSpeedPointsMenuCommand => new RelayCommand(OpenCloseSetSpeedPoints);
 
@@ -103,6 +105,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region Property
 
+        private CancellationTokenSource _ctsTask;
         private UserSettings _userSettings;
         private readonly object _loker = new object();
 
@@ -112,6 +115,21 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// Флаг для отображения справки :)
         /// </summary>
         public bool IsReference { get; set; }
+
+        /// <summary>
+        /// Активность BusyIndicator
+        /// </summary>
+        public bool IsBusy { get; set; }
+
+        /// <summary>
+        /// Текст busyIndicator
+        /// </summary>
+        public string BusyContent { get; set; }
+
+        /// <summary>
+        /// Флаг показывающий активно ли тестирование.
+        /// </summary>
+        public bool IsTestActive { get; set; }
 
         public decimal FrequencyCounterValue { get; set; }
         public bool VisibilityConnectionMenu { get; set; }
@@ -431,11 +449,33 @@ namespace VerificationAirVelocitySensor.ViewModel
                 new ControlPointSpeedToFrequency(6, 30, 16384)
             };
 
+        /// <summary>
+        /// Проверка запроса на отмену
+        /// </summary>
+        /// <param name="ctSource"></param>
+        /// <returns></returns>
+        private bool IsCancellationRequested(CancellationTokenSource ctSource) =>
+            ctSource.Token.IsCancellationRequested;
+
         #region Test Method
 
         public ObservableCollection<DvsValue> CollectionDvsValue { get; set; }
             = new ObservableCollection<DvsValue>();
 
+        private void StopTest()
+        {
+            BusyContent = "Тестирование прервано пользователем \r\n Ожидание завершение процесса";
+            IsBusy = true;
+            IsTestActive = false;
+
+            _ctsTask.Cancel();
+        }
+
+        private bool StopTestValidation() =>
+            IsTestActive;
+
+        private bool StartTestValidation() =>
+            !IsTestActive;
         private void StartTest()
         {
             var isValidation = ValidationIsOpenPorts();
@@ -444,12 +484,15 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             Task.Run(async () => await Task.Run(() =>
             {
+                _ctsTask = new CancellationTokenSource();
+
                 switch (TypeTest)
                 {
                     case TypeTest.Dvs01:
 
                         break;
                     case TypeTest.Dvs02:
+                        IsTestActive = true;
                         LoadDefaultValueCollectionDvs2Value();
                         try
                         {
@@ -465,6 +508,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                             FrequencyMotorDevice.Instance.SetFrequency(0, 0);
 
                             ResultToXlsxDvs2();
+
+                            IsTestActive = false;
                         }
 
                         break;
@@ -495,6 +540,8 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             var timeOutCounter = FrequencyCounterDevice.Instance.GateTimeToMSec(gateTime) + 1000;
 
+            if (IsCancellationRequested(_ctsTask)) return;
+
             foreach (var point in ControlPointSpeed)
             {
                 _acceptCorrectionReference = false;
@@ -514,6 +561,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (point.Speed != 30)
                     FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue);
 
+                if (IsCancellationRequested(_ctsTask)) return;
 
                 _acceptCorrectionReference = true;
 
@@ -523,21 +571,29 @@ namespace VerificationAirVelocitySensor.ViewModel
                 CollectionDvsValue[point.Id].DeviceSpeedValue1 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
+                if (IsCancellationRequested(_ctsTask)) return;
 
                 CollectionDvsValue[point.Id].DeviceSpeedValue2 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
+                if (IsCancellationRequested(_ctsTask)) return;
 
                 CollectionDvsValue[point.Id].DeviceSpeedValue3 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
+                if (IsCancellationRequested(_ctsTask)) return;
 
                 CollectionDvsValue[point.Id].DeviceSpeedValue4 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
+                if (IsCancellationRequested(_ctsTask)) return;
 
                 CollectionDvsValue[point.Id].DeviceSpeedValue5 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage();
                 Thread.Sleep(timeOutCounter);
+                if (IsCancellationRequested(_ctsTask)) return;
+
+                BusyContent = string.Empty;
+                IsBusy = false;
 
                 CollectionDvsValue[point.Id].ReferenceSpeedValue = _averageSpeedReferenceValue;
             }
