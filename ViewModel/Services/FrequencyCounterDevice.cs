@@ -189,7 +189,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 averageCollection.Add(value);
             }
 
-            var average = Math.Round(averageCollection.Average() , 2);
+            var average = Math.Round(averageCollection.Average(), 2);
             return average;
         }
 
@@ -204,8 +204,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             Thread.Sleep(100);
             var data = _serialPort.ReadExisting();
 
-            return string.IsNullOrEmpty(data) 
-                ? "Error" 
+            return string.IsNullOrEmpty(data)
+                ? "Error"
                 : data;
         }
 
@@ -215,7 +215,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="gateTime"></param>
         public void SetGateTime(GateTime gateTime)
         {
-            WriteCommandAsync($":ARM:TIMer {(int) gateTime} S");
+            WriteCommandAsync($":ARM:TIMer {(int)gateTime} S");
         }
 
         /// <summary>
@@ -224,7 +224,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void SetChannelFrequency(FrequencyChannel frequencyChannel)
         {
-            WriteCommandAsync($":FUNCtion FREQuency {(int) frequencyChannel}");
+            WriteCommandAsync($":FUNCtion FREQuency {(int)frequencyChannel}");
         }
 
 

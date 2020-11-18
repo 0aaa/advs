@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OfficeOpenXml;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Ports;
@@ -6,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using OfficeOpenXml;
 using VerificationAirVelocitySensor.Model;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
@@ -756,7 +756,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
-            SpeedReferenceValue = (decimal) e.ReferenceValue;
+            SpeedReferenceValue = (decimal)e.ReferenceValue;
             UpdateAverageSpeedReferenceValue(SpeedReferenceValue);
         }
 

@@ -118,7 +118,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             try
             {
                 _comPort = comPort;
-                _serialPort = new SerialPort(_comPort, BaudRate) {ReadTimeout = 2000, WriteTimeout = 2000};
+                _serialPort = new SerialPort(_comPort, BaudRate) { ReadTimeout = 2000, WriteTimeout = 2000 };
                 _serialPort.Open();
 
                 IsOpenUpdateMethod(_serialPort.IsOpen);
@@ -151,7 +151,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         {
             SetFrequencyValue = freqInt;
             _setSpeed = speed;
-            var freq = (double) freqInt;
+            var freq = (double)freqInt;
 
             if (freq < 0 || freq > 16384)
             {
@@ -168,8 +168,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (freq == 0)
             {
-                freqArray[2] = (byte) (CommandWordRegister / 256);
-                freqArray[3] = (byte) CommandWordRegister;
+                freqArray[2] = (byte)(CommandWordRegister / 256);
+                freqArray[3] = (byte)CommandWordRegister;
                 //Определенные настроки командного слова для остановки двигателя.
                 freqArray[4] = 132;
                 freqArray[5] = 188;
@@ -177,10 +177,10 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             //Отправка частоты 
             else
             {
-                freqArray[2] = (byte) (FrequencyMotorRegister / 256);
-                freqArray[3] = (byte) FrequencyMotorRegister;
-                freqArray[4] = (byte) (freq / 256);
-                freqArray[5] = (byte) freq;
+                freqArray[2] = (byte)(FrequencyMotorRegister / 256);
+                freqArray[3] = (byte)FrequencyMotorRegister;
+                freqArray[4] = (byte)(freq / 256);
+                freqArray[5] = (byte)freq;
             }
 
             var (freqCrc1, freqCrc2) = GetCrc16(freqArray, 6);
@@ -204,8 +204,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 var commandWord = new byte[8];
                 commandWord[0] = AddressMotorDevice;
                 commandWord[1] = TypeMessage06;
-                commandWord[2] = (byte) (CommandWordRegister / 256);
-                commandWord[3] = (byte) CommandWordRegister;
+                commandWord[2] = (byte)(CommandWordRegister / 256);
+                commandWord[3] = (byte)CommandWordRegister;
 
                 commandWord[4] = 4;
                 commandWord[5] = 124;
@@ -303,7 +303,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             if (value > short.MaxValue)
                 value -= 65536;
 
-            return (double) value / 100;
+            return (double)value / 100;
         }
 
         /// <summary>
@@ -423,7 +423,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
             while (true)
             {
-                if (IsValueErrorValidation(ref averageReferenceSpeedValue,ref offCorrectInValueErrorValidation)) return;
+                if (IsValueErrorValidation(ref averageReferenceSpeedValue, ref offCorrectInValueErrorValidation)) return;
 
                 const int stepValue = 10;
                 var differenceValue = _setSpeed - averageReferenceSpeedValue;
@@ -458,7 +458,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 if (0.5m <= differenceValue || differenceValue <= -0.5m)
                 {
                     var setFrequencyValue = (SetFrequencyValue * _setSpeed) / averageReferenceSpeedValue;
-                    SetFrequencyValue = (int) (Math.Round(setFrequencyValue));
+                    SetFrequencyValue = (int)(Math.Round(setFrequencyValue));
                     SetFrequency(SetFrequencyValue, _setSpeed);
                     Thread.Sleep(5000);
                 }
@@ -490,7 +490,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 for (ushort index = 0; index < 8; ++index)
                 {
                     if ((num1 & 1) != 0)
-                        num1 = (ushort) ((ushort) ((uint) num1 >> 1) ^ 40961U);
+                        num1 = (ushort)((ushort)((uint)num1 >> 1) ^ 40961U);
                     else
                         num1 >>= 1;
                 }
@@ -500,8 +500,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             }
 
 
-            var crc1 = (byte) num1;
-            var crc2 = (byte) (num1 / 256U);
+            var crc1 = (byte)num1;
+            var crc2 = (byte)(num1 / 256U);
 
             return (crc1, crc2);
         }
