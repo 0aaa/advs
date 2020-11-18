@@ -361,9 +361,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                                     UpdateReferenceValueMethod(_referenceSpeedValue);
                                 }
-                                catch (Exception e)
+                                catch
                                 {
-                                    GlobalLog.Log.Debug(e, e.Message);
                                     continue;
                                 }
 

@@ -369,7 +369,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void SetGateTime(GateTime gateTime)
         {
-            //TODO Команда частотомера. Делать ли асинк ? Протестировать
             FrequencyCounterDevice.Instance.SetGateTime(gateTime);
             GateTime = gateTime;
         }
@@ -391,7 +390,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void SetFrequencyChannel(FrequencyChannel frequencyChannel)
         {
-            //TODO Команда частотомера. Делать ли асинк ? Протестировать
             FrequencyCounterDevice.Instance.SetChannelFrequency(frequencyChannel);
             FrequencyChannel = frequencyChannel;
         }
@@ -404,7 +402,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void OnOffFilter(int channel, bool isOn)
         {
-            //TODO Команда частотомера. Делать ли асинк ? Протестировать
             switch (channel)
             {
                 case 1:
@@ -510,7 +507,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                         }
                         catch (Exception e)
                         {
-                            //GlobalLog.Log.Debug(e, e.Message);
+                            GlobalLog.Log.Debug(e, e.Message);
                         }
                         finally
                         {
