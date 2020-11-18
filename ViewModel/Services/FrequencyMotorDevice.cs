@@ -355,10 +355,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         lock (_locker)
                         {
                             _isSendCommand = true;
-
-                            var sw = new Stopwatch();
-                            sw.Start();
-
                             while (true)
                             {
                                 try
@@ -376,17 +372,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                                 break;
                             }
 
-
-                            sw.Stop();
-
-                            var value = sw.ElapsedMilliseconds;
-                            Console.WriteLine(value);
-
                             _isSendCommand = false;
                         }
                     }
-
-                    //Thread.Sleep(_periodInterview);
                 }
             }));
         }

@@ -302,9 +302,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 IsBusy = false;
                 BusyContent = string.Empty;
             }));
-
-
-            //TODO Что бы не выглядело как зависание, добавить BusyIndicator
         }
 
         private static bool ValidationIsOpenPorts()
@@ -514,6 +511,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                         catch (Exception e)
                         {
                             //TODO log
+                            
                             Console.WriteLine(e.Message);
                         }
                         finally
