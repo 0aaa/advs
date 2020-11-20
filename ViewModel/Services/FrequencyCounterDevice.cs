@@ -129,16 +129,15 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public decimal GetCurrentHzValue(int sleepTime = 1000)
         {
+            //Чистка от возможных старых значений
+            _ = _serialPort.ReadExisting();
 
             while (true)
             {
                 try
                 {
-                    _ = _serialPort.ReadExisting();
-
                     WriteCommandAsync("FETC?", sleepTime);
 
-                    Thread.Sleep(500);
                     var data = _serialPort.ReadExisting();
 
 
@@ -147,29 +146,11 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                     data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
 
-                    if (data[0] == '-' || data[0] == '+')
-                    {
-                        data = data.Remove(0, 1);
-                        var value = decimal.Parse(data, NumberStyles.Float | NumberStyles.AllowExponent, CultureInfo.InvariantCulture);
+                    var value = decimal.Parse(data, NumberStyles.Float, CultureInfo.InvariantCulture);
 
-                        var mathValue = Math.Round(value, 3);
+                    var mathValue = Math.Round(value, 3);
 
-                        if (mathValue == 0)
-                            continue;
-
-                        return mathValue;
-                    }
-                    else
-                    {
-                        var value = decimal.Parse(data);
-                        var mathValue = Math.Round(value, 3);
-
-
-                        if (mathValue == 0)
-                            continue;
-
-                        return mathValue;
-                    }
+                    return mathValue;
                 }
                 catch
                 {
