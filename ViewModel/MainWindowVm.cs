@@ -683,6 +683,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                     AddValueInCell(ws.Cells[i + 12, 17], CollectionDvsValue[i].DeviceSpeedValue5);
                 }
 
+                //TODO Позже стереть, если новое заполнение пройдет тесты
+
                 #region Old setvalue
 
                 //#region 0.7
@@ -771,9 +773,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 package.SaveAs(new FileInfo($"{DateTime.Now:dd.MM.yyyy_HH-mm-ss}.xlsx"));
             }
         }
-
-        private string ConvertResultForXlsx(decimal? value) =>
-            value == null ? string.Empty : Convert.ToString(value);
 
         /// <summary>
         /// Метод для добавления значения в ячейку exel и ее обработка

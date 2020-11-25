@@ -160,7 +160,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         }
 
 
-        public decimal GetCurrentHzValueAverage(CancellationTokenSource _ctsTask)
+        public decimal GetCurrentHzValueAverage(CancellationTokenSource ctsTask)
         {
             var averageCollection = new List<decimal>();
 
@@ -170,7 +170,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 averageCollection.Add(value);
 
                 //выход при остановке
-                if (IsCancellationRequested(_ctsTask)) return 0;
+                if (IsCancellationRequested(ctsTask)) return 0;
             }
 
             var average = Math.Round(averageCollection.Average(), 2);
