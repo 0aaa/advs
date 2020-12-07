@@ -171,8 +171,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 freqArray[2] = (byte)(CommandWordRegister / 256);
                 freqArray[3] = (byte)CommandWordRegister;
                 //Определенные настроки командного слова для остановки двигателя.
-                freqArray[4] = 132;
-                freqArray[5] = 188;
+                freqArray[4] = 132;  //0x84
+                freqArray[5] = 188; //0xBC
             }
             //Отправка частоты 
             else
@@ -207,8 +207,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 commandWord[2] = (byte)(CommandWordRegister / 256);
                 commandWord[3] = (byte)CommandWordRegister;
 
-                commandWord[4] = 4;
-                commandWord[5] = 124;
+                commandWord[4] = 4; //0x04
+                commandWord[5] = 124; //0x7C
                 //TODO Разобраться с командным словом
                 //commandWord[4] = 0b_1000_0000;
                 //commandWord[5] = 0b_1101_1000;
@@ -348,7 +348,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             {
                 while (_isInterview)
                 {
-                    if (!_isSendCommand)
+                    if (!_isSendCommand) 
                     {
                         lock (_locker)
                         {

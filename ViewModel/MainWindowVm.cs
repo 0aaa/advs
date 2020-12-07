@@ -167,7 +167,8 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             if (AverageSpeedReferenceCollection.Count > 5 && _acceptCorrectionReference == false)
             {
-                AverageSpeedReferenceCollection.Clear();
+               //AverageSpeedReferenceCollection.RemoveAt(0);
+               AverageSpeedReferenceCollection.Clear();
             }
 
             AverageSpeedReferenceCollection.Add(newValue);
@@ -483,6 +484,65 @@ namespace VerificationAirVelocitySensor.ViewModel
                 new ControlPointSpeedToFrequency(6, 30, 16384)
             };
 
+        #region Работа с коэффициентом для обработки получаемого с анемометра значения
+
+        /// <summary>
+        /// Скоростные точки для расчета коефа . Данные от сотрудников Аэро Трубы
+        /// </summary>
+        private decimal[] v_point = { 0m, 0.72m, 5m, 10m, 15m, 30m };
+        /// <summary>
+        /// Коефы расчитанные для v_point (для каждого диапазона) . Данные от сотрудников Аэро Трубы
+        /// </summary>
+        private decimal[] k_point = { 0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m };
+
+        private decimal[] a_koef = new decimal[5];
+        private decimal[] b_koef = new decimal[5];
+
+        private void Get_a_b_koef()
+        {
+            for (var i = 0; i < 6; i++)
+            {
+                if(i == 0) continue;
+                a_koef[i - 1] = (k_point[i] - k_point[i - 1]) / (v_point[i] - v_point[i - 1]);
+                b_koef[i - 1] = k_point[i] - a_koef[i - 1] * v_point[i];
+            }
+        }
+
+        private decimal SpeedCalculation(decimal rawSpeed)
+        {
+            var rangeValue = GetRange(rawSpeed);
+
+
+            var a = a_koef[rangeValue - 1];
+            var b = b_koef[rangeValue - 1];
+
+            var speedCoefficient = a * rawSpeed + b;
+
+            var newSpeed = Math.Round(rawSpeed * speedCoefficient , 2);
+
+            return newSpeed;
+        }
+
+        private int GetRange(decimal rawSpeed)
+        {
+            if (rawSpeed < v_point[1])
+                return 1;
+            if (rawSpeed >= v_point[4])
+                return 5;
+            if (rawSpeed >= v_point[3])
+                return 4;
+            if (rawSpeed >= v_point[2])
+                return 3;
+            if (rawSpeed >= v_point[1])
+                return 2;
+
+            var errorMessage = "Значение эталона вне диапазона от 0 до 30";
+            throw new ArgumentOutOfRangeException(errorMessage);
+        }
+
+        #endregion
+
+
         /// <summary>
         /// Проверка запроса на отмену
         /// </summary>
@@ -591,7 +651,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 Application.Current.Dispatcher?.Invoke(AverageSpeedReferenceCollection.Clear);
 
                 if (point.Speed == 30)
-                    Thread.Sleep(10000);
+                    Thread.Sleep(15000);
 
                 //Для скоростной точки 30, отключаю коррекцию скорости, так как труба не может разогнаться до 30 м/с . 
                 //А где-то до 27-29 м/с
@@ -803,6 +863,40 @@ namespace VerificationAirVelocitySensor.ViewModel
             GateTime = _userSettings.GateTime;
             ComPortFrequencyMotor = _userSettings.ComPortFrequencyMotor;
             ComPortFrequencyCounter = _userSettings.ComPortFrequencyCounter;
+
+            Get_a_b_koef();
+
+
+
+            //var x1 = SpeedCalculation(0.79m);
+            //var x2 = SpeedCalculation(0.80m);
+            //var x3 = SpeedCalculation(0.81m);
+
+
+            //var x4 = SpeedCalculation(5.13m);
+            //var x5 = SpeedCalculation(5.20m);
+            //var x6 = SpeedCalculation(5.31m);
+
+
+            //var x7 = SpeedCalculation(10.49m);
+            //var x8 = SpeedCalculation(10.60m);
+            //var x9 = SpeedCalculation(10.7m);
+
+            //var x30 = SpeedCalculation(15.65m);
+            //var x40 = SpeedCalculation(15.75m);
+            //var x50 = SpeedCalculation(15.85m);
+
+            //var x10 = SpeedCalculation(20.25m);
+            //var x11 = SpeedCalculation(20.47m);
+            //var x12 = SpeedCalculation(20.52m);
+
+            //var x19 = SpeedCalculation(24.84m);
+            //var x20 = SpeedCalculation(25.00m);
+            //var x21 = SpeedCalculation(25.29m);
+
+            //var x22 = SpeedCalculation(28.01m);
+            //var x23 = SpeedCalculation(28.21m);
+            //var x24 = SpeedCalculation(28.42m);
         }
 
 
@@ -815,7 +909,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
-            SpeedReferenceValue = (decimal) e.ReferenceValue;
+            var newSpeed = SpeedCalculation((decimal)e.ReferenceValue);
+            SpeedReferenceValue = newSpeed;
             UpdateAverageSpeedReferenceValue(SpeedReferenceValue);
         }
 
