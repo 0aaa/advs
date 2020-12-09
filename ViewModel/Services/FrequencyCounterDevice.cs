@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO.Ports;
-using System.Linq;
 using System.Threading;
 using System.Windows;
 
@@ -68,7 +67,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             }
             catch (Exception e)
             {
-                MessageBox.Show($"{e.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"{e.Message}", "Ошибка открытия порта Частотомера", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -126,9 +125,10 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <summary>
         /// Запрос на значение частоты
         /// </summary>
-        /// <param name="sleepTime"></param>
-        public decimal GetCurrentHzValue(int sleepTime = 1000)
+        public decimal GetCurrentHzValue()
         {
+            var attemptRead = 0;
+
             //Чистка от возможных старых значений
             _ = _serialPort.ReadExisting();
 
@@ -136,10 +136,16 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             {
                 try
                 {
-                    WriteCommandAsync("FETC?", sleepTime);
+                    if (attemptRead == 10)
+                    {
+                        _serialPort.Close();
+                        Thread.Sleep(200);
+                        _serialPort.Open();
+                    }
+
+                    WriteCommandAsync("FETC?", 1000);
 
                     var data = _serialPort.ReadExisting();
-
 
                     if (string.IsNullOrEmpty(data))
                         continue;
@@ -154,31 +160,10 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 }
                 catch
                 {
-                    // ignore
+                    attemptRead++;
                 }
             }
         }
-
-
-        public decimal GetCurrentHzValueAverage(CancellationTokenSource ctsTask)
-        {
-            var averageCollection = new List<decimal>();
-
-            while (averageCollection.Count != 5)
-            {
-                var value = GetCurrentHzValue();
-                averageCollection.Add(value);
-
-                //выход при остановке
-                if (IsCancellationRequested(ctsTask)) return 0;
-            }
-
-            var average = Math.Round(averageCollection.Average(), 2);
-            return average;
-        }
-
-        private bool IsCancellationRequested(CancellationTokenSource ctSource) =>
-            ctSource.Token.IsCancellationRequested;
 
         /// <summary>
         /// Запрос версии

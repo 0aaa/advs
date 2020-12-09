@@ -224,15 +224,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         }
 
         /// <summary>
-        /// Метод для отправки текущей частоты, эксперемент.
-        /// Проверить, повлияет ли это на точность измерений.
-        /// </summary>
-        public void UpdateFrequency()
-        {
-            SetFrequency(SetFrequencyValue, _setSpeed);
-        }
-
-        /// <summary>
         /// Получить значение анемометра
         /// </summary>
         /// <returns></returns>

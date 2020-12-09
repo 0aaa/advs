@@ -39,9 +39,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #endregion
 
-        public RelayCommand ReadValueOnFrequencyCounterCommand =>
-            new RelayCommand(ReadValueOnFrequencyCounter, FrequencyCounterDevice.Instance.IsOpen);
-
         public RelayCommand ResetCommand => new RelayCommand(FrequencyCounterDevice.Instance.RstCommand,
             FrequencyCounterDevice.Instance.IsOpen);
 
@@ -391,11 +388,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region Частотомер ЧЗ-85/6
 
-        private void ReadValueOnFrequencyCounter()
-        {
-            FrequencyCounterValue = FrequencyCounterDevice.Instance.GetCurrentHzValue();
-        }
-
         private void SetGateTime(GateTime gateTime)
         {
             FrequencyCounterDevice.Instance.SetGateTime(gateTime);
@@ -662,37 +654,38 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 _acceptCorrectionReference = true;
 
-                Thread.Sleep(250);
+                Thread.Sleep(100);
 
-                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage(_ctsTask);
+                //На данной скорости, датчик вращается очень медленно. 
+                //А значение поступает на частотомер, в момент полного оборота датчика.
+                if (point.Speed == 0.7m)
+                    timeOutCounter = 5000;
+
+                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue1 = value1;
-                FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                var value2 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage(_ctsTask);
+                var value2 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue2 = value2;
-                FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                var value3 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage(_ctsTask);
+                var value3 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue3 = value3;
-                FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                var value4 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage(_ctsTask);
+                var value4 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue4 = value4;
-                FrequencyMotorDevice.Instance.UpdateFrequency();
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                var value5 = FrequencyCounterDevice.Instance.GetCurrentHzValueAverage(_ctsTask);
+                var value5 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue5 = value5;
                 Thread.Sleep(timeOutCounter);
