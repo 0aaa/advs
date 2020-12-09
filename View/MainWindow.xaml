@@ -10,9 +10,9 @@
         Background="#C4E9DB"
         Title="Поверка датчиков скорости воздушного потока"
         d:DataContext="{d:DesignInstance Type=viewModel:MainWindowVm}"
-        MinHeight="450"
+        MinHeight="490"
         MinWidth="500"
-        Height="450"
+        Height="490"
         Width="500">
     <Window.DataContext>
         <viewModel:MainWindowVm />
@@ -33,6 +33,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="20" />
             <RowDefinition Height="1*" />
+            <RowDefinition Height="40" />
         </Grid.RowDefinitions>
         <Border Grid.Row="0">
             <Menu>
@@ -76,15 +77,29 @@
                 <MenuItem Header="Режимы">
                     <MenuItem Header="Отладка"
                               Command="{Binding OpenCloseDebuggingMenuCommand}" />
-                    <MenuItem Header="Тип тестируемого устройства" >
-                        <MenuItem Header="ДВС1" Command="{Binding ChangeTypeTestOnDvs1Command}"/>
-                        <MenuItem Header="ДВС2" Command="{Binding ChangeTypeTestOnDvs2Command}"/>
+                    <MenuItem Header="Тип тестируемого устройства">
+                        <MenuItem Header="ДВС1" Command="{Binding ChangeTypeTestOnDvs1Command}" />
+                        <MenuItem Header="ДВС2" Command="{Binding ChangeTypeTestOnDvs2Command}" />
                     </MenuItem>
 
                 </MenuItem>
                 <MenuItem Header="Справка"
                           Command="{Binding OpenReferenceCommand}" />
             </Menu>
+        </Border>
+
+        <Border Grid.Row="2">
+            <Grid Background="#7FD1B2">
+                <StackPanel Orientation="Horizontal" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="Текущее действие :" 
+                               FontSize="16"
+                               Margin="30,0,30,0"/>
+                    <TextBlock Text="{Binding StatusCurrentAction}" 
+                               FontSize="16"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!--#region Dvs2 Test -->
@@ -217,18 +232,18 @@
                                 Height="25"
                                 Width="100"
                                 Margin="20,0,0,0"
-                                Command="{Binding StartTestCommand}"/>
+                                Command="{Binding StartTestCommand}" />
                         <Button Content="Стоп"
                                 Height="25"
                                 Width="100"
                                 Margin="20,0,0,0"
-                                Command="{Binding StopTestCommand}"/>
+                                Command="{Binding StopTestCommand}" />
                     </StackPanel>
 
                     <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
                         <TextBlock Text="{Binding SetFrequencyMotor}" Width="80" Margin="0,0,10,0" FontSize="16" />
 
-                        <TextBlock Text="{Binding SpeedReferenceValue}"  Width="80" Margin="0,0,10,0" FontSize="16" />
+                        <TextBlock Text="{Binding SpeedReferenceValue}" Width="80" Margin="0,0,10,0" FontSize="16" />
                     </StackPanel>
 
                 </Grid>

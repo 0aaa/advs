@@ -112,6 +112,11 @@ namespace VerificationAirVelocitySensor.ViewModel
         private UserSettings _userSettings;
         private readonly object _loker = new object();
 
+        /// <summary>
+        /// Свойство, для биндинга на интерфейс текущее действие внутри программы
+        /// </summary>
+        public string StatusCurrentAction { get; set; }
+
         private const string PathUserSettings = "UserSettings.txt";
 
         /// <summary>
@@ -627,12 +632,16 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public void StartTestDvs02(GateTime gateTime)
         {
+            StatusCurrentAction = "Запуск тестирования";
+
             var timeOutCounter = FrequencyCounterDevice.Instance.GateTimeToMSec(gateTime) + 1000;
 
             if (IsCancellationRequested(_ctsTask)) return;
 
             foreach (var point in ControlPointSpeed)
             {
+                StatusCurrentAction = $"Точка {point.Speed}";
+
                 _acceptCorrectionReference = false;
 
                 FrequencyMotorDevice.Instance.SetFrequency(point.SetFrequency, point.Speed);
@@ -641,6 +650,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                 Thread.Sleep(WaitSetFrequency);
 
                 Application.Current.Dispatcher?.Invoke(AverageSpeedReferenceCollection.Clear);
+
+                StatusCurrentAction = $"Точка {point.Speed} : Корректировка скорости";
 
                 if (point.Speed == 30)
                     Thread.Sleep(15000);
@@ -661,30 +672,36 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (point.Speed == 0.7m)
                     timeOutCounter = 5000;
 
+
+                StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 1";
                 var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue1 = value1;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
+                StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 2";
                 var value2 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue2 = value2;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
+                StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 3";
                 var value3 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue3 = value3;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
+                StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 4";
                 var value4 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue4 = value4;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
+                StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 5";
                 var value5 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue5 = value5;
@@ -696,6 +713,9 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 CollectionDvsValue[point.Id].ReferenceSpeedValue = _averageSpeedReferenceValue;
             }
+
+
+            StatusCurrentAction = $"Тестирование завершено";
         }
 
         private void ResultToXlsxDvs2()
