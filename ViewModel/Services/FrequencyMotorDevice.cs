@@ -390,7 +390,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
             if (_setSpeed > 0.7m && _setSpeed <= 30m)
             {
-                return 0.1m;
+                //return 0.1m;
+                return 0.05m;
             }
 
             if (_setSpeed > 30m)

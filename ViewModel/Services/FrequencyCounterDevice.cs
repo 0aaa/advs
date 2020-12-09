@@ -136,11 +136,15 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             {
                 try
                 {
+                    attemptRead++;
+
                     if (attemptRead == 10)
                     {
                         _serialPort.Close();
                         Thread.Sleep(200);
                         _serialPort.Open();
+
+                        attemptRead=0;
                     }
 
                     WriteCommandAsync("FETC?", 1000);
@@ -160,7 +164,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 }
                 catch
                 {
-                    attemptRead++;
+                    //ignore
                 }
             }
         }
