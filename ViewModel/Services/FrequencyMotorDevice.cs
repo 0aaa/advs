@@ -413,7 +413,33 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue, decimal speedPoint)
         {
             var countAcceptValueErrorValidation = 0;
-            var stepValue = 50;
+            int stepValue;
+
+            switch (speedPoint)
+            {
+                case 0.7m:
+                    stepValue = 10;
+                    break;
+                case 10:
+                    stepValue = 20;
+                    break;
+                case 15:
+                    stepValue = 25;
+                    break;
+                case 20:
+                    stepValue = 30;
+                    break;
+                case 25:
+                    stepValue = 35;
+                    break;
+                case 30:
+                    stepValue = 40;
+                    break;
+                default:
+                    throw new Exception("Недопустимое значение скорости");
+            }
+
+
             // Переменная для отслеживания смены знака у шага, с помощью которого корректируется частота.
             var countChangeSign = 0;
             //Знак шага , плюс или минус.

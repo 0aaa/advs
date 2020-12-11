@@ -878,38 +878,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             ComPortFrequencyCounter = _userSettings.ComPortFrequencyCounter;
 
             Get_a_b_koef();
-
-
-
-            //var x1 = SpeedCalculation(0.79m);
-            //var x2 = SpeedCalculation(0.80m);
-            //var x3 = SpeedCalculation(0.81m);
-
-
-            //var x4 = SpeedCalculation(5.13m);
-            //var x5 = SpeedCalculation(5.20m);
-            //var x6 = SpeedCalculation(5.31m);
-
-
-            //var x7 = SpeedCalculation(10.49m);
-            //var x8 = SpeedCalculation(10.60m);
-            //var x9 = SpeedCalculation(10.7m);
-
-            //var x30 = SpeedCalculation(15.65m);
-            //var x40 = SpeedCalculation(15.75m);
-            //var x50 = SpeedCalculation(15.85m);
-
-            //var x10 = SpeedCalculation(20.25m);
-            //var x11 = SpeedCalculation(20.47m);
-            //var x12 = SpeedCalculation(20.52m);
-
-            //var x19 = SpeedCalculation(24.84m);
-            //var x20 = SpeedCalculation(25.00m);
-            //var x21 = SpeedCalculation(25.29m);
-
-            //var x22 = SpeedCalculation(28.01m);
-            //var x23 = SpeedCalculation(28.21m);
-            //var x24 = SpeedCalculation(28.42m);
         }
 
 
