@@ -659,7 +659,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 //Для скоростной точки 30, отключаю коррекцию скорости, так как труба не может разогнаться до 30 м/с . 
                 //А где-то до 27-29 м/с
                 if (point.Speed != 30)
-                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue);
+                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue , point.Speed);
 
                 if (IsCancellationRequested(_ctsTask)) return;
 

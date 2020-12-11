@@ -29,6 +29,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private readonly int CommandWordRegister = 49999;
         private readonly int FrequencyMotorRegister = 50009;
 
+
+        private int timeOutBeforeSetFrequencyValue = 300;
+
         /// <summary>
         /// Эталонное значение скорости
         /// </summary>
@@ -406,30 +409,52 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Метод для корректировки скорости эталона к установленному значению скорости
         /// </summary>
         /// <param name="averageReferenceSpeedValue"></param>
-        /// <param name="isOnWait">Флаг отвечает за вкыл/выкл времени ожидания перед проверкой эталона.
-        /// Вкыл нужен при только что измененной скорости.
-        /// Выкл при снятии серии значений на одинй скорости.</param>
-        public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue, bool isOnWait = true)
+        /// <param name="speedPoint"></param>
+        public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue, decimal speedPoint)
         {
             var countAcceptValueErrorValidation = 0;
-            var offCorrectInValueErrorValidation = true;
+            var stepValue = 50;
+            // Переменная для отслеживания смены знака у шага, с помощью которого корректируется частота.
+            var countChangeSign = 0;
+            //Знак шага , плюс или минус.
+            var currentSing = SingValue.Plus;
+            //Флаг для первого прохода, что бы в случае смены знака stepValue, это не пошло в счетчик
+            var isFirstStart = true;
 
             while (true)
             {
+                if (countChangeSign == 2)
+                {
+                    stepValue = 10;
+                }
+
+                //Старое значение для сравнения при изменении нового.
+                var oldSingValue = currentSing;
 
                 //Делаю проверку , на 2 корректировки, что бы в случае первой корректировки значение не уплыло , 
                 //из-за быстрой смены частоты вращения двигателя аэро трубы
-                if (IsValueErrorValidation(ref averageReferenceSpeedValue, ref offCorrectInValueErrorValidation))
+                if (IsValueErrorValidation(ref averageReferenceSpeedValue))
                 {
                     countAcceptValueErrorValidation++;
                     if (countAcceptValueErrorValidation == 2)
                         return;
                 }
 
-                const int stepValue = 10;
+
                 var differenceValue = _setSpeed - averageReferenceSpeedValue;
 
-                var step = (differenceValue > 0)
+                currentSing = (differenceValue > 0)
+                    ? SingValue.Plus
+                    : SingValue.Minus;
+
+                //Если это не первый прогон цикла
+                if (!isFirstStart)
+                {
+                    if (currentSing != oldSingValue)
+                        countChangeSign++;
+                }
+
+                var step = (currentSing == SingValue.Plus)
                     ? stepValue
                     : -stepValue;
 
@@ -437,7 +462,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                 SetFrequency(_setFrequencyValue, _setSpeed);
 
-                Thread.Sleep(2000);
+                Thread.Sleep(timeOutBeforeSetFrequencyValue);
+
+                isFirstStart = false;
             }
         }
 
@@ -445,28 +472,13 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Проверка валидности эталонной скорости, относительно выставленной
         /// </summary>
         /// <returns></returns>
-        private bool IsValueErrorValidation(ref decimal averageReferenceSpeedValue,
-            ref bool offCorrectInValueErrorValidation)
+        private bool IsValueErrorValidation(ref decimal averageReferenceSpeedValue)
         {
             //Допустимая погрешность (0,02 или 0,1)
             var errorValue = GetErrorValue();
 
             //Разница между установленной скоростью и полученной с эталона
             var differenceValue = _setSpeed - averageReferenceSpeedValue;
-
-            if (offCorrectInValueErrorValidation)
-            {
-                if (0.5m <= differenceValue || differenceValue <= -0.5m)
-                {
-                    var setFrequencyValue = (SetFrequencyValue * _setSpeed) / averageReferenceSpeedValue;
-                    SetFrequencyValue = (int) (Math.Round(setFrequencyValue));
-                    SetFrequency(SetFrequencyValue, _setSpeed);
-                    Thread.Sleep(5000);
-                }
-
-                offCorrectInValueErrorValidation = false;
-            }
-
 
             //Флаг отвечающий за совпадение скоростей эталона и выставленной с учетом допустиомй погрешности. 
             var isValidSpeed = errorValue >= differenceValue && differenceValue >= -errorValue;
@@ -528,5 +540,12 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
     public class UpdateSetFrequencyEventArgs : EventArgs
     {
         public int SetFrequency { get; set; }
+    }
+
+
+    public enum SingValue
+    {
+        Plus,
+        Minus
     }
 }
