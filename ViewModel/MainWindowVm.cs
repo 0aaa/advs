@@ -169,8 +169,8 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             if (AverageSpeedReferenceCollection.Count > 5 && _acceptCorrectionReference == false)
             {
-               //AverageSpeedReferenceCollection.RemoveAt(0);
-               AverageSpeedReferenceCollection.Clear();
+               AverageSpeedReferenceCollection.RemoveAt(0);
+               //AverageSpeedReferenceCollection.Clear();
             }
 
             AverageSpeedReferenceCollection.Add(newValue);

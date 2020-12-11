@@ -30,7 +30,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private readonly int FrequencyMotorRegister = 50009;
 
 
-        private int timeOutBeforeSetFrequencyValue = 300;
+        private int timeOutBeforeSetFrequencyValue = 4000;
 
         /// <summary>
         /// Эталонное значение скорости
