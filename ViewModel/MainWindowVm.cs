@@ -1,12 +1,14 @@
 ﻿using OfficeOpenXml;
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xml.Serialization;
 using VerificationAirVelocitySensor.Model;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
@@ -104,6 +106,9 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public RelayCommand OpenCloseSetSpeedPointsMenuCommand => new RelayCommand(OpenCloseSetSpeedPoints);
 
+        public RelayCommand SaveSpeedsPointCommand => new RelayCommand(SaveSpeedPointsCollection);
+        public RelayCommand SetDefaultSpeedPointsCommand => new RelayCommand(SetDefaultSpeedPoints);
+
         #endregion
 
         #region Property
@@ -169,8 +174,8 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             if (AverageSpeedReferenceCollection.Count > 5 && _acceptCorrectionReference == false)
             {
-               AverageSpeedReferenceCollection.RemoveAt(0);
-               //AverageSpeedReferenceCollection.Clear();
+                AverageSpeedReferenceCollection.RemoveAt(0);
+                //AverageSpeedReferenceCollection.Clear();
             }
 
             AverageSpeedReferenceCollection.Add(newValue);
@@ -314,6 +319,24 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region RelayCommand Method
 
+        private void SaveSpeedPointsCollection()
+        {
+            _userSettings.SpeedPointsList.Clear();
+
+            foreach (var speedPoint in SpeedPointsList)
+                _userSettings.SpeedPointsList.Add(speedPoint);
+
+            Serialization();
+        }
+
+        private void SetDefaultSpeedPoints()
+        {
+            SpeedPointsList.Clear();
+
+            foreach (var defaultSpeedPoint in _defaultSpeedPoints)
+                SpeedPointsList.Add(defaultSpeedPoint);
+        }
+
         private void OpenPortFrequencyCounterDevice()
         {
             FrequencyCounterDevice.Instance.OpenPort(ComPortFrequencyCounter);
@@ -387,7 +410,16 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void OpenCloseConnectionMenu() => VisibilityConnectionMenu = !VisibilityConnectionMenu;
         private void OpenCloseDebuggingMenu() => VisibilityDebuggingMenu = !VisibilityDebuggingMenu;
-        private void OpenCloseSetSpeedPoints() => VisibilitySetSpeedPoints = !VisibilitySetSpeedPoints;
+
+        private void OpenCloseSetSpeedPoints()
+        {
+            VisibilitySetSpeedPoints = !VisibilitySetSpeedPoints;
+            //Если закрываем окошко, то выполняем сохранение коллекции скоростей в пользовательские настройки
+            if (VisibilitySetSpeedPoints) return;
+
+            SaveSpeedPointsCollection();
+            Serialization();
+        }
 
         private bool OpenCloseDebuggingMenuValidation() => FrequencyMotorIsOpen;
 
@@ -469,28 +501,50 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// <summary>
         /// Значения скорости на которых нужно считать значения датчика.
         /// </summary>
-        public ObservableCollection<ControlPointSpeedToFrequency> ControlPointSpeed { get; set; } =
-            new ObservableCollection<ControlPointSpeedToFrequency>
+        public ObservableCollection<SpeedPoint> SpeedPointsList { get; set; } =
+            new ObservableCollection<SpeedPoint>
             {
-                new ControlPointSpeedToFrequency(0, 0.7m, 445),
-                new ControlPointSpeedToFrequency(1, 5, 2605),
-                new ControlPointSpeedToFrequency(2, 10, 5650),
-                new ControlPointSpeedToFrequency(3, 15, 7750),
-                new ControlPointSpeedToFrequency(4, 20, 10600),
-                new ControlPointSpeedToFrequency(5, 25, 13600),
-                new ControlPointSpeedToFrequency(6, 30, 16384)
+                new SpeedPoint {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10},
+                new SpeedPoint {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20},
+                new SpeedPoint {Id = 3, Speed = 10m, SetFrequency = 5650, MaxStep = 20},
+                new SpeedPoint {Id = 4, Speed = 15m, SetFrequency = 7750, MaxStep = 20},
+                new SpeedPoint {Id = 5, Speed = 20m, SetFrequency = 10600, MaxStep = 30},
+                new SpeedPoint {Id = 6, Speed = 25m, SetFrequency = 13600, MaxStep = 30},
+                new SpeedPoint {Id = 7, Speed = 30m, SetFrequency = 16384, MaxStep = 30},
+                //new SpeedPoint(1, 0.7m, 445),
+                //new SpeedPoint(2, 5, 2605, 20),
+                //new SpeedPoint(3, 10, 5650, 25),
+                //new SpeedPoint(4, 15, 7750, 30),
+                //new SpeedPoint(5, 20, 10600, 35),
+                //new SpeedPoint(6, 25, 13600, 40),
+                //new SpeedPoint(7, 30, 16384)
             };
+
+        /// <summary>
+        /// коллекция для востановления дефолтных настроек
+        /// </summary>
+        private readonly ObservableCollection<SpeedPoint> _defaultSpeedPoints = new ObservableCollection<SpeedPoint>
+        {
+            new SpeedPoint {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10},
+            new SpeedPoint {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20},
+            new SpeedPoint {Id = 3, Speed = 10m, SetFrequency = 5650, MaxStep = 20},
+            new SpeedPoint {Id = 4, Speed = 15m, SetFrequency = 7750, MaxStep = 20},
+            new SpeedPoint {Id = 5, Speed = 20m, SetFrequency = 10600, MaxStep = 30},
+            new SpeedPoint {Id = 6, Speed = 25m, SetFrequency = 13600, MaxStep = 30},
+            new SpeedPoint {Id = 7, Speed = 30m, SetFrequency = 16384, MaxStep = 30},
+        };
 
         #region Работа с коэффициентом для обработки получаемого с анемометра значения
 
         /// <summary>
         /// Скоростные точки для расчета коефа . Данные от сотрудников Аэро Трубы
         /// </summary>
-        private decimal[] v_point = { 0m, 0.72m, 5m, 10m, 15m, 30m };
+        private decimal[] v_point = {0m, 0.72m, 5m, 10m, 15m, 30m};
+
         /// <summary>
         /// Коефы расчитанные для v_point (для каждого диапазона) . Данные от сотрудников Аэро Трубы
         /// </summary>
-        private decimal[] k_point = { 0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m };
+        private decimal[] k_point = {0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m};
 
         private decimal[] a_koef = new decimal[5];
         private decimal[] b_koef = new decimal[5];
@@ -499,7 +553,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             for (var i = 0; i < 6; i++)
             {
-                if(i == 0) continue;
+                if (i == 0) continue;
                 a_koef[i - 1] = (k_point[i] - k_point[i - 1]) / (v_point[i] - v_point[i - 1]);
                 b_koef[i - 1] = k_point[i] - a_koef[i - 1] * v_point[i];
             }
@@ -515,7 +569,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             var speedCoefficient = a * rawSpeed + b;
 
-            var newSpeed = Math.Round(rawSpeed * speedCoefficient , 2);
+            var newSpeed = Math.Round(rawSpeed * speedCoefficient, 2);
 
             return newSpeed;
         }
@@ -581,13 +635,14 @@ namespace VerificationAirVelocitySensor.ViewModel
             {
                 _ctsTask = new CancellationTokenSource();
 
+                IsTestActive = true;
+
                 switch (TypeTest)
                 {
                     case TypeTest.Dvs01:
 
                         break;
                     case TypeTest.Dvs02:
-                        IsTestActive = true;
                         LoadDefaultValueCollectionDvs2Value();
                         try
                         {
@@ -624,7 +679,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 CollectionDvsValue = new ObservableCollection<DvsValue>();
 
-                foreach (var point in ControlPointSpeed)
+                foreach (var point in SpeedPointsList)
                     CollectionDvsValue.Add(new DvsValue(point.Speed));
             });
         }
@@ -638,7 +693,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             if (IsCancellationRequested(_ctsTask)) return;
 
-            foreach (var point in ControlPointSpeed)
+            foreach (var point in SpeedPointsList)
             {
                 StatusCurrentAction = $"Точка {point.Speed}";
 
@@ -659,7 +714,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 //Для скоростной точки 30, отключаю коррекцию скорости, так как труба не может разогнаться до 30 м/с . 
                 //А где-то до 27-29 м/с
                 if (point.Speed != 30)
-                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue , point.Speed);
+                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue, point);
 
                 if (IsCancellationRequested(_ctsTask)) return;
 
@@ -868,6 +923,9 @@ namespace VerificationAirVelocitySensor.ViewModel
             FrequencyMotorDevice.Instance.UpdateReferenceValue += FrequencyMotor_UpdateReferenceValue;
             FrequencyMotorDevice.Instance.UpdateSetFrequency += FrequencyMotor_UpdateSetFrequency;
 
+
+            SpeedPointsList.CollectionChanged += DefaultSpeedPoints_CollectionChanged;
+
             var deserialization = Deserialization();
             _userSettings = deserialization ?? new UserSettings();
             FilterChannel1 = _userSettings.FilterChannel1;
@@ -877,7 +935,20 @@ namespace VerificationAirVelocitySensor.ViewModel
             ComPortFrequencyMotor = _userSettings.ComPortFrequencyMotor;
             ComPortFrequencyCounter = _userSettings.ComPortFrequencyCounter;
 
+            if (_userSettings.SpeedPointsList != null && _userSettings.SpeedPointsList.Count != 0)
+            {
+                SpeedPointsList.Clear();
+                foreach (var speedPoint in _userSettings.SpeedPointsList)
+                    SpeedPointsList.Add(speedPoint);
+            }
+
             Get_a_b_koef();
+        }
+
+        private void DefaultSpeedPoints_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            for (var i = 0; i < SpeedPointsList.Count; i++)
+                SpeedPointsList[i].Id = i + 1;
         }
 
 
@@ -890,7 +961,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
-            var newSpeed = SpeedCalculation((decimal)e.ReferenceValue);
+            var newSpeed = SpeedCalculation((decimal) e.ReferenceValue);
             SpeedReferenceValue = newSpeed;
             UpdateAverageSpeedReferenceValue(SpeedReferenceValue);
         }
@@ -957,22 +1028,55 @@ namespace VerificationAirVelocitySensor.ViewModel
         #endregion
     }
 
-    public class ControlPointSpeedToFrequency
+    public class SpeedPoint
     {
-        public ControlPointSpeedToFrequency(int id, decimal speed, int setFrequency)
-        {
-            Speed = speed;
-            SetFrequency = setFrequency;
-            Id = id;
-        }
+        //public SpeedPoint(int id, decimal speed, int setFrequency, int maxStep = 10)
+        //{
+        //    Speed = speed;
+        //    SetFrequency = setFrequency;
+        //    Id = id;
+        //    MaxStep = maxStep;
+        //}
 
-        public ControlPointSpeedToFrequency()
-        {
-        }
+        //public SpeedPoint()
+        //{
+        //}
 
+        /// <summary>
+        /// Тестируемая скорость
+        /// </summary>
         public decimal Speed { get; set; }
+
+        /// <summary>
+        /// Примерная частота вращения трубы, для достижения этой скорости
+        /// </summary>
         public int SetFrequency { get; set; }
 
+        /// <summary>
+        /// Максимальный шаг при корректировке частоты, для достижения установленной скорости 
+        /// </summary>
+        public int MaxStep
+        {
+            get => _maxStep;
+            set
+            {
+                if (value < 10 || value > 100)
+                {
+                    MessageBox.Show("Выберети значение в диапазоне от 10 до 100 Гц");
+
+                    MaxStep = _maxStep;
+                    return;
+                }
+
+                _maxStep = value;
+            }
+        }
+
+        [XmlIgnore] private int _maxStep = 10;
+
+        /// <summary>
+        /// Номер в списке
+        /// </summary>
         public int Id { get; set; }
     }
 

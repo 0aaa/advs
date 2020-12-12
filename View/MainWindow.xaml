@@ -11,9 +11,9 @@
         Title="Поверка датчиков скорости воздушного потока"
         d:DataContext="{d:DesignInstance Type=viewModel:MainWindowVm}"
         MinHeight="490"
-        MinWidth="500"
+        MinWidth="560"
         Height="490"
-        Width="500">
+        Width="560">
     <Window.DataContext>
         <viewModel:MainWindowVm />
     </Window.DataContext>
@@ -90,14 +90,14 @@
 
         <Border Grid.Row="2">
             <Grid Background="#7FD1B2">
-                <StackPanel Orientation="Horizontal" 
+                <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center">
-                    <TextBlock Text="Текущее действие :" 
+                    <TextBlock Text="Текущее действие :"
                                FontSize="16"
-                               Margin="30,0,30,0"/>
-                    <TextBlock Text="{Binding StatusCurrentAction}" 
-                               FontSize="16"/>
+                               Margin="30,0,30,0" />
+                    <TextBlock Text="{Binding StatusCurrentAction}"
+                               FontSize="16" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -644,7 +644,7 @@
 
         <!--#region SetSpeedPoints -->
 
-        <Border Grid.Row="1"
+        <Border Grid.Row="1" 
                 Visibility="{Binding VisibilitySetSpeedPoints , Converter= {StaticResource BoolToVis}}">
             <Button Style="{StaticResource OnlyBackgroundButtonStyle}"
                     Command="{Binding OpenCloseSetSpeedPointsMenuCommand}"
@@ -652,7 +652,7 @@
                     Background="Black" />
         </Border>
 
-        <Border Grid.Row="1" Margin="100,30"
+        <Border Grid.Row="1" Margin="20,30"
                 BorderBrush="Black"
                 Visibility="{Binding VisibilitySetSpeedPoints , Converter= {StaticResource BoolToVis}}"
                 BorderThickness="1">
@@ -666,19 +666,14 @@
                     <Border BorderBrush="Black"
                             BorderThickness="0,0,0,1">
                         <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*" />
-                                <ColumnDefinition Width="1*" />
-                            </Grid.ColumnDefinitions>
                             <TextBlock Text="Скоростные точки"
-                                       HorizontalAlignment="Left"
+                                       HorizontalAlignment="Center"
                                        Margin="20,0,0,0"
                                        VerticalAlignment="Center"
-                                       FontSize="15" Grid.Column="0" />
+                                       FontSize="15" />
 
                             <Button Style="{StaticResource CloseSettingsMenuButtonStyle}"
                                     Command="{Binding OpenCloseSetSpeedPointsMenuCommand}"
-                                    Grid.Column="1"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center" />
                         </Grid>
@@ -687,23 +682,85 @@
                 </Grid>
                 <Grid Grid.Row="1" Background="#C4E9DB">
                     <Border>
-                        <DataGrid ItemsSource="{Binding ControlPointSpeed}"
-                                  RowBackground="LightGray"
-                                  AlternatingRowBackground="White"
-                                  CanUserAddRows="True"
-                                  CanUserDeleteRows="True"
-                                  CanUserReorderColumns="False"
-                                  CanUserSortColumns="False"
-                                  AutoGenerateColumns="False"
-                                  Margin="20,10"
-                                  Width="300"
-                                  HorizontalAlignment="Left">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="30" />
-                                <DataGridTextColumn Header="м/с" Binding="{Binding Speed}" Width="50" />
-                                <DataGridTextColumn Header="герц" Binding="{Binding SetFrequency}" Width="80" />
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="100" />
+                            </Grid.ColumnDefinitions>
+                            <DataGrid ItemsSource="{Binding SpeedPointsList}"
+                                      RowBackground="LightGray"
+                                      AlternatingRowBackground="White"
+                                      Grid.Column="0"
+                                      CanUserAddRows="True"
+                                      CanUserDeleteRows="True"
+                                      CanUserReorderColumns="False"
+                                      CanUserSortColumns="False"
+                                      AutoGenerateColumns="False"
+                                      Margin="5,10 , 10 ,10">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <Border HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center">
+                                                        <WrapPanel>
+                                                            <TextBlock Text="{Binding}"
+                                                                       TextAlignment="Center"
+                                                                       TextWrapping="Wrap"
+                                                                       Height="60"
+                                                                       Width="95"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center" />
+                                                        </WrapPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                                    <Grid Background="{TemplateBinding Background}">
+                                                        <ContentPresenter VerticalAlignment="Center"
+                                                                          HorizontalAlignment="Center"
+                                                                          Margin="2" />
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGrid.CellStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Номер" Binding="{Binding Id}" Width="55" />
+                                    <DataGridTextColumn Header="Скорость возд.потока"
+                                                        Binding="{Binding Speed , StringFormat={}{0:0 м/с}}" />
+                                    <DataGridTextColumn Header="Частота вращения Двигателя"
+                                                        Binding="{Binding SetFrequency , StringFormat={}{0:0 Гц}}" />
+                                    <DataGridTextColumn Header="Макс. шаг коррекции частоты"
+                                                        Binding="{Binding MaxStep , StringFormat={}{0:0 Гц}}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <StackPanel Grid.Column="1" 
+                                        Margin="0,10"                                      
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Top">
+                                <Button Height="30"
+                                        Margin="0,20"
+                                        Command="{Binding SaveSpeedsPointCommand}"
+                                        Content="Сохранить"
+                                        ToolTip="Сброс до настроек по умолчанию"/>
+                                <Button Height="30"
+                                        Command="{Binding SetDefaultSpeedPointsCommand}"
+                                        Margin="0,20"
+                                        Content="По умолчанию"
+                                        ToolTip="Сброс до настроек по умолчанию"/>
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
 

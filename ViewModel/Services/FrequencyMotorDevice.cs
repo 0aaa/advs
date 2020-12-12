@@ -410,35 +410,11 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         /// <param name="averageReferenceSpeedValue"></param>
         /// <param name="speedPoint"></param>
-        public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue, decimal speedPoint)
+        public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue, SpeedPoint speedPoint)
         {
             var countAcceptValueErrorValidation = 0;
-            int stepValue;
-
-            switch (speedPoint)
-            {
-                case 0.7m:
-                    stepValue = 10;
-                    break;
-                case 10:
-                    stepValue = 20;
-                    break;
-                case 15:
-                    stepValue = 25;
-                    break;
-                case 20:
-                    stepValue = 30;
-                    break;
-                case 25:
-                    stepValue = 35;
-                    break;
-                case 30:
-                    stepValue = 40;
-                    break;
-                default:
-                    throw new Exception("Недопустимое значение скорости");
-            }
-
+            var stepValue = speedPoint.MaxStep;
+            const int minStep = 10;
 
             // Переменная для отслеживания смены знака у шага, с помощью которого корректируется частота.
             var countChangeSign = 0;
@@ -451,7 +427,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             {
                 if (countChangeSign == 2)
                 {
-                    stepValue = 10;
+                    stepValue = minStep;
                 }
 
                 //Старое значение для сравнения при изменении нового.
