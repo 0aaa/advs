@@ -67,7 +67,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             }
             catch (Exception e)
             {
-                MessageBox.Show($"{e.Message}", "Ошибка открытия порта Частотомера", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"{e.Message}", "Ошибка открытия порта Частотомера", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
@@ -125,7 +126,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <summary>
         /// Запрос на значение частоты
         /// </summary>
-        public decimal GetCurrentHzValue()
+        /// <param name="speedPoint"></param>
+        /// <returns></returns>
+        public decimal GetCurrentHzValue(SpeedPoint speedPoint)
         {
             var attemptRead = 0;
 
@@ -144,7 +147,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         Thread.Sleep(200);
                         _serialPort.Open();
 
-                        attemptRead=0;
+                        attemptRead = 0;
                     }
 
                     WriteCommandAsync("FETC?", 1000);
@@ -160,7 +163,12 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                     var mathValue = Math.Round(value, 3);
 
-                    return mathValue;
+                    var isValidation = ValidationHzValue(mathValue, speedPoint);
+
+                    if (isValidation)
+                        return mathValue;
+
+                    throw new Exception("Невалидное значение частоты полученное с частотометра");
                 }
                 catch
                 {
@@ -168,6 +176,15 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 }
             }
         }
+
+        /// <summary>
+        /// Метод для проверки полученного значения на вброс ( баги со стороны частотометра)
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="speedPoint"></param>
+        /// <returns></returns>
+        private bool ValidationHzValue(decimal value, SpeedPoint speedPoint)
+            => value >= speedPoint.MinEdge || value <= speedPoint.MaxEdge;
 
         /// <summary>
         /// Запрос версии
@@ -191,7 +208,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="gateTime"></param>
         public void SetGateTime(GateTime gateTime)
         {
-            WriteCommandAsync($":ARM:TIMer {(int)gateTime} S");
+            WriteCommandAsync($":ARM:TIMer {(int) gateTime} S");
         }
 
         /// <summary>
@@ -200,10 +217,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void SetChannelFrequency(FrequencyChannel frequencyChannel)
         {
-            WriteCommandAsync($":FUNCtion FREQuency {(int)frequencyChannel}");
+            WriteCommandAsync($":FUNCtion FREQuency {(int) frequencyChannel}");
         }
-
-
 
 
         public int GateTimeToMSec(GateTime gateTime)

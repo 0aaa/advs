@@ -504,20 +504,19 @@ namespace VerificationAirVelocitySensor.ViewModel
         public ObservableCollection<SpeedPoint> SpeedPointsList { get; set; } =
             new ObservableCollection<SpeedPoint>
             {
-                new SpeedPoint {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10},
-                new SpeedPoint {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20},
-                new SpeedPoint {Id = 3, Speed = 10m, SetFrequency = 5650, MaxStep = 20},
-                new SpeedPoint {Id = 4, Speed = 15m, SetFrequency = 7750, MaxStep = 20},
-                new SpeedPoint {Id = 5, Speed = 20m, SetFrequency = 10600, MaxStep = 30},
-                new SpeedPoint {Id = 6, Speed = 25m, SetFrequency = 13600, MaxStep = 30},
-                new SpeedPoint {Id = 7, Speed = 30m, SetFrequency = 16384, MaxStep = 30},
-                //new SpeedPoint(1, 0.7m, 445),
-                //new SpeedPoint(2, 5, 2605, 20),
-                //new SpeedPoint(3, 10, 5650, 25),
-                //new SpeedPoint(4, 15, 7750, 30),
-                //new SpeedPoint(5, 20, 10600, 35),
-                //new SpeedPoint(6, 25, 13600, 40),
-                //new SpeedPoint(7, 30, 16384)
+                new SpeedPoint {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10, MinEdge = 0m, MaxEdge = 3.007m},
+                new SpeedPoint
+                    {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20, MinEdge = 3.320m, MaxEdge = 8.837m},
+                new SpeedPoint
+                    {Id = 3, Speed = 10m, SetFrequency = 5650, MaxStep = 20, MinEdge = 9.634m, MaxEdge = 15.595m},
+                new SpeedPoint
+                    {Id = 4, Speed = 15m, SetFrequency = 7750, MaxStep = 20, MinEdge = 15.935m, MaxEdge = 22.366m},
+                new SpeedPoint
+                    {Id = 5, Speed = 20m, SetFrequency = 10600, MaxStep = 30, MinEdge = 22.248m, MaxEdge = 29.124m},
+                new SpeedPoint
+                    {Id = 6, Speed = 25m, SetFrequency = 13600, MaxStep = 30, MinEdge = 28.549m, MaxEdge = 35.895m},
+                new SpeedPoint
+                    {Id = 7, Speed = 30m, SetFrequency = 16384, MaxStep = 30, MinEdge = 32.340m, MaxEdge = 39.948m}
             };
 
         /// <summary>
@@ -525,13 +524,18 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// </summary>
         private readonly ObservableCollection<SpeedPoint> _defaultSpeedPoints = new ObservableCollection<SpeedPoint>
         {
-            new SpeedPoint {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10},
-            new SpeedPoint {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20},
-            new SpeedPoint {Id = 3, Speed = 10m, SetFrequency = 5650, MaxStep = 20},
-            new SpeedPoint {Id = 4, Speed = 15m, SetFrequency = 7750, MaxStep = 20},
-            new SpeedPoint {Id = 5, Speed = 20m, SetFrequency = 10600, MaxStep = 30},
-            new SpeedPoint {Id = 6, Speed = 25m, SetFrequency = 13600, MaxStep = 30},
-            new SpeedPoint {Id = 7, Speed = 30m, SetFrequency = 16384, MaxStep = 30},
+            new SpeedPoint {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10, MinEdge = 0m, MaxEdge = 3.007m},
+            new SpeedPoint {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20, MinEdge = 3.320m, MaxEdge = 8.837m},
+            new SpeedPoint
+                {Id = 3, Speed = 10m, SetFrequency = 5650, MaxStep = 20, MinEdge = 9.634m, MaxEdge = 15.595m},
+            new SpeedPoint
+                {Id = 4, Speed = 15m, SetFrequency = 7750, MaxStep = 20, MinEdge = 15.935m, MaxEdge = 22.366m},
+            new SpeedPoint
+                {Id = 5, Speed = 20m, SetFrequency = 10600, MaxStep = 30, MinEdge = 22.248m, MaxEdge = 29.124m},
+            new SpeedPoint
+                {Id = 6, Speed = 25m, SetFrequency = 13600, MaxStep = 30, MinEdge = 28.549m, MaxEdge = 35.895m},
+            new SpeedPoint
+                {Id = 7, Speed = 30m, SetFrequency = 16384, MaxStep = 30, MinEdge = 32.340m, MaxEdge = 39.948m}
         };
 
         #region Работа с коэффициентом для обработки получаемого с анемометра значения
@@ -627,6 +631,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void StartTest()
         {
+
             var isValidation = ValidationIsOpenPorts();
 
             if (isValidation == false) return;
@@ -729,35 +734,35 @@ namespace VerificationAirVelocitySensor.ViewModel
 
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 1";
-                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue1 = value1;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 2";
-                var value2 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                var value2 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue2 = value2;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 3";
-                var value3 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                var value3 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue3 = value3;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 4";
-                var value4 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                var value4 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue4 = value4;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 5";
-                var value5 = FrequencyCounterDevice.Instance.GetCurrentHzValue();
+                var value5 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[point.Id].DeviceSpeedValue5 = value5;
                 Thread.Sleep(timeOutCounter);
@@ -1030,18 +1035,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
     public class SpeedPoint
     {
-        //public SpeedPoint(int id, decimal speed, int setFrequency, int maxStep = 10)
-        //{
-        //    Speed = speed;
-        //    SetFrequency = setFrequency;
-        //    Id = id;
-        //    MaxStep = maxStep;
-        //}
-
-        //public SpeedPoint()
-        //{
-        //}
-
         /// <summary>
         /// Тестируемая скорость
         /// </summary>
@@ -1068,6 +1061,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                     return;
                 }
 
+                //MaxStep = value;
                 _maxStep = value;
             }
         }
@@ -1078,6 +1072,10 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// Номер в списке
         /// </summary>
         public int Id { get; set; }
+
+        public decimal MaxEdge { get; set; }
+
+        public decimal MinEdge { get; set; }
     }
 
     public enum TypeTest
