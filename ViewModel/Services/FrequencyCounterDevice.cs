@@ -5,7 +5,6 @@ using System.IO;
 using System.IO.Ports;
 using System.Threading;
 using System.Windows;
-using VerificationAirVelocitySensor.Properties;
 using YamlDotNet.Serialization;
 
 namespace VerificationAirVelocitySensor.ViewModel.Services
