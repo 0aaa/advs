@@ -347,15 +347,10 @@ namespace VerificationAirVelocitySensor.ViewModel
             IsBusy = true;
             BusyContent = "Отправка сохраненных настроек на Частотомер";
 
-            Task.Run(async () => await Task.Run(() =>
-            {
-                FrequencyCounterDevice.Instance.SetChannelFrequency(_userSettings.FrequencyChannel);
-                FrequencyCounterDevice.Instance.SetGateTime(_userSettings.GateTime);
-                FrequencyCounterDevice.Instance.SwitchFilter(1, _userSettings.FilterChannel1);
-                FrequencyCounterDevice.Instance.SwitchFilter(2, _userSettings.FilterChannel2);
-                IsBusy = false;
-                BusyContent = string.Empty;
-            }));
+
+            FrequencyCounterDevice.Instance.SetUserSettings();
+
+            BusyContent = string.Empty;
         }
 
         private static bool ValidationIsOpenPorts()
@@ -631,10 +626,12 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void StartTest()
         {
-
             var isValidation = ValidationIsOpenPorts();
 
             if (isValidation == false) return;
+
+            FrequencyCounterDevice.Instance.RstCommand();
+            FrequencyCounterDevice.Instance.SetUserSettings();
 
             Task.Run(async () => await Task.Run(() =>
             {

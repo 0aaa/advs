@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.IO.Ports;
 using System.Threading;
 using System.Windows;
+using VerificationAirVelocitySensor.Properties;
+using YamlDotNet.Serialization;
 
 namespace VerificationAirVelocitySensor.ViewModel.Services
 {
@@ -15,6 +18,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private SerialPort _serialPort;
         private string _comPort;
         private const int BaudRate = 9600;
+        private const string PathUserSettings = "UserSettings.txt";
 
         #region EventHandler Open/Close Port
 
@@ -89,7 +93,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #endregion
 
-        private void WriteCommandAsync(string command, int sleepTime = 2000)
+        private void WriteCommand(string command, int sleepTime = 2000)
         {
             _serialPort.WriteLine(command);
             Thread.Sleep(sleepTime);
@@ -100,7 +104,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void RstCommand()
         {
-            WriteCommandAsync("*RST");
+            WriteCommand("*RST");
         }
 
         /// <summary>
@@ -120,7 +124,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
             var command = $":INPut{channel}:FILTer {stringIsOn}";
 
-            WriteCommandAsync(command, sleepTime);
+            WriteCommand(command, sleepTime);
         }
 
         /// <summary>
@@ -150,7 +154,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         attemptRead = 0;
                     }
 
-                    WriteCommandAsync("FETC?", 1000);
+                    WriteCommand("FETC?", 1000);
 
                     var data = _serialPort.ReadExisting();
 
@@ -192,7 +196,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public string GetModelVersion(int sleepTime = 1000)
         {
-            WriteCommandAsync("*IDN?");
+            WriteCommand("*IDN?");
 
             Thread.Sleep(100);
             var data = _serialPort.ReadExisting();
@@ -208,7 +212,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="gateTime"></param>
         public void SetGateTime(GateTime gateTime)
         {
-            WriteCommandAsync($":ARM:TIMer {(int) gateTime} S");
+            WriteCommand($":ARM:TIMer {(int) gateTime} S");
         }
 
         /// <summary>
@@ -217,7 +221,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void SetChannelFrequency(FrequencyChannel frequencyChannel)
         {
-            WriteCommandAsync($":FUNCtion FREQuency {(int) frequencyChannel}");
+            WriteCommand($":FUNCtion FREQuency {(int) frequencyChannel}");
         }
 
 
@@ -237,6 +241,38 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                     return 100000;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(gateTime), gateTime, null);
+            }
+        }
+
+        public void SetUserSettings()
+        {
+            var userSettings = Deserialization();
+
+            SetChannelFrequency(userSettings.FrequencyChannel);
+            SetGateTime(userSettings.GateTime);
+            SwitchFilter(1, userSettings.FilterChannel1);
+            SwitchFilter(2, userSettings.FilterChannel2);
+        }
+
+        private UserSettings Deserialization()
+        {
+            var deserializer = new Deserializer();
+
+            using (var file = File.Open(PathUserSettings, FileMode.OpenOrCreate, FileAccess.Read))
+            {
+                using (var reader = new StreamReader(file))
+                {
+                    try
+                    {
+                        var userSettings = deserializer.Deserialize<UserSettings>(reader);
+
+                        return userSettings;
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                }
             }
         }
     }
