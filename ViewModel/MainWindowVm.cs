@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -794,27 +795,31 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void ResultToXlsxDvs2()
         {
-            var pathExampleXlsxFile = @"Resources\Dvs2.xlsx";
-            while (true)
-            {
-                if (File.Exists(pathExampleXlsxFile))
-                    break;
+            //var pathExampleXlsxFile = @"Resources\Dvs2.xlsx";
+            var resourceName = "VerificationAirVelocitySensor.Resources.Dvs2.xlsx";
+            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
 
-                var errorMessage =
-                    "Отсутствует файл образец test_cs_protocol.xlsx  " +
-                    "Пожалуйста поместите файл и повторите попытку(ОК). Или нажмите отмена для пропуска создания .xlsx";
 
-                var mb = MessageBox.Show(errorMessage, "Ошибка", MessageBoxButton.OKCancel);
+            //while (true)
+            //{
+            //    if (File.Exists(pathExampleXlsxFile))
+            //        break;
 
-                //Если было нажато ОК
-                if (mb == MessageBoxResult.OK)
-                    continue;
+            //    var errorMessage =
+            //        "Отсутствует файл образец test_cs_protocol.xlsx  " +
+            //        "Пожалуйста поместите файл и повторите попытку(ОК). Или нажмите отмена для пропуска создания .xlsx";
 
-                //Если была нажата отмена
-                return;
-            }
+            //    var mb = MessageBox.Show(errorMessage, "Ошибка", MessageBoxButton.OKCancel);
 
-            using (var package = new ExcelPackage(new FileInfo(pathExampleXlsxFile)))
+            //    //Если было нажато ОК
+            //    if (mb == MessageBoxResult.OK)
+            //        continue;
+
+            //    //Если была нажата отмена
+            //    return;
+            //}
+
+            using (var package = new ExcelPackage(stream))
             {
                 var ws = package.Workbook.Worksheets.First();
 
