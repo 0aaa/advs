@@ -108,7 +108,7 @@
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center">
-                    <TextBlock Text="Текущее действие :"
+                    <TextBlock Text="Статус :"
                                Style="{StaticResource GridRowHeaderTextBlock}"
                                Margin="30,0,30,0" />
                     <TextBlock Text="{Binding StatusCurrentAction}"

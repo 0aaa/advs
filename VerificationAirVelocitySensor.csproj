@@ -129,6 +129,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="View\SetMeasurementsData.xaml.cs">
+      <DependentUpon>SetMeasurementsData.xaml</DependentUpon>
+    </Compile>
     <Page Include="Style\Converter\Converter.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -150,6 +153,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Model\DvsValue.cs" />
+    <Compile Include="Model\MeasurementsData.cs" />
     <Compile Include="Style\Converter\BooleanConverter.cs" />
     <Compile Include="ViewModel\BaseVm\BaseVm.cs" />
     <Compile Include="ViewModel\BaseVm\RelayCommand.cs" />
@@ -158,10 +162,15 @@
     <Compile Include="ViewModel\Services\FrequencyMotorDevice.cs" />
     <Compile Include="ViewModel\Services\GlobalLog.cs" />
     <Compile Include="ViewModel\Services\UserSettings.cs" />
+    <Compile Include="ViewModel\SetMeasurementsDataVm.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="View\SetMeasurementsData.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

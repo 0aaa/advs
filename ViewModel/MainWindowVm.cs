@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Serialization;
 using VerificationAirVelocitySensor.Model;
+using VerificationAirVelocitySensor.View;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
 using YamlDotNet.Serialization;
@@ -116,6 +117,11 @@ namespace VerificationAirVelocitySensor.ViewModel
         private CancellationTokenSource _ctsTask;
         private UserSettings _userSettings;
         private readonly object _loker = new object();
+
+        /// <summary>
+        /// Свойство для хранения условий поверки
+        /// </summary>
+        private MeasurementsData _measurementsData = new MeasurementsData();
 
         /// <summary>
         /// Свойство, для биндинга на интерфейс текущее действие внутри программы
@@ -626,9 +632,9 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void StartTest()
         {
-            var isValidation = ValidationIsOpenPorts();
+            if (!ValidationIsOpenPorts()) return;
 
-            if (isValidation == false) return;
+            if (OpenMeasurementsData()) return;
 
             FrequencyCounterDevice.Instance.RstCommand();
             FrequencyCounterDevice.Instance.SetUserSettings();
@@ -668,6 +674,17 @@ namespace VerificationAirVelocitySensor.ViewModel
                         throw new ArgumentOutOfRangeException();
                 }
             }));
+        }
+
+        private bool OpenMeasurementsData()
+        {
+            var setMeasurementsDataVm = new SetMeasurementsDataVm(ref _measurementsData);
+            var setMeasurementsData = new SetMeasurementsData(setMeasurementsDataVm);
+            setMeasurementsData.ShowDialog();
+            var isContinue = setMeasurementsData.ViewModel.IsContinue;
+            setMeasurementsData.Close();
+
+            return !isContinue;
         }
 
         /// <summary>
@@ -813,92 +830,19 @@ namespace VerificationAirVelocitySensor.ViewModel
                     AddValueInCell(ws.Cells[i + 12, 17], CollectionDvsValue[i].DeviceSpeedValue5);
                 }
 
-                //TODO Позже стереть, если новое заполнение пройдет тесты
 
-                #region Old setvalue
+                //Условия поверки
 
-                //#region 0.7
+                ws.Cells[47, 14].Value = _measurementsData.Verifier;
+                ws.Cells[47, 21].Value = $"{DateTime.Now:dd.MM.yyyy}";
 
-                //AddValueInCell(ws.Cells[12, 12], CollectionDvsValue[0].ReferenceSpeedValue);
-                //AddValueInCell(ws.Cells[12, 12], CollectionDvsValue[0].DeviceSpeedValue1);
-                //AddValueInCell(ws.Cells[12, 12], CollectionDvsValue[0].DeviceSpeedValue2);
-                //AddValueInCell(ws.Cells[12, 12], CollectionDvsValue[0].DeviceSpeedValue3);
-                //AddValueInCell(ws.Cells[12, 12], CollectionDvsValue[0].DeviceSpeedValue4);
-                //AddValueInCell(ws.Cells[12, 12], CollectionDvsValue[0].DeviceSpeedValue5);
+                ws.Cells[23, 5].Value = _measurementsData.Temperature;
+                ws.Cells[24, 5].Value = _measurementsData.Humidity;
+                ws.Cells[25, 5].Value = _measurementsData.Pressure;
 
-                //#endregion
-
-                //#region 5
-
-                //ws.Cells[13, 12].Value = ConvertResultForXlsx(CollectionDvsValue[1].ReferenceSpeedValue);
-                //ws.Cells[13, 13].Value = ConvertResultForXlsx(CollectionDvsValue[1].DeviceSpeedValue1);
-                //ws.Cells[13, 14].Value = ConvertResultForXlsx(CollectionDvsValue[1].DeviceSpeedValue2);
-                //ws.Cells[13, 15].Value = ConvertResultForXlsx(CollectionDvsValue[1].DeviceSpeedValue3);
-                //ws.Cells[13, 16].Value = ConvertResultForXlsx(CollectionDvsValue[1].DeviceSpeedValue4);
-                //ws.Cells[13, 17].Value = ConvertResultForXlsx(CollectionDvsValue[1].DeviceSpeedValue5);
-
-                //#endregion
-
-                //#region 10
-
-                //ws.Cells[14, 12].Value = ConvertResultForXlsx(CollectionDvsValue[2].ReferenceSpeedValue);
-                //ws.Cells[14, 13].Value = ConvertResultForXlsx(CollectionDvsValue[2].DeviceSpeedValue1);
-                //ws.Cells[14, 14].Value = ConvertResultForXlsx(CollectionDvsValue[2].DeviceSpeedValue2);
-                //ws.Cells[14, 15].Value = ConvertResultForXlsx(CollectionDvsValue[2].DeviceSpeedValue3);
-                //ws.Cells[14, 16].Value = ConvertResultForXlsx(CollectionDvsValue[2].DeviceSpeedValue4);
-                //ws.Cells[14, 17].Value = ConvertResultForXlsx(CollectionDvsValue[2].DeviceSpeedValue5);
-
-                //#endregion
-
-                //#region 15
-
-                //ws.Cells[15, 12].Value = ConvertResultForXlsx(CollectionDvsValue[3].ReferenceSpeedValue);
-                //ws.Cells[15, 13].Value = ConvertResultForXlsx(CollectionDvsValue[3].DeviceSpeedValue1);
-                //ws.Cells[15, 14].Value = ConvertResultForXlsx(CollectionDvsValue[3].DeviceSpeedValue2);
-                //ws.Cells[15, 15].Value = ConvertResultForXlsx(CollectionDvsValue[3].DeviceSpeedValue3);
-                //ws.Cells[15, 16].Value = ConvertResultForXlsx(CollectionDvsValue[3].DeviceSpeedValue4);
-                //ws.Cells[15, 17].Value = ConvertResultForXlsx(CollectionDvsValue[3].DeviceSpeedValue5);
-
-                //#endregion
-
-                //#region 20
-
-                //ws.Cells[16, 12].Value = ConvertResultForXlsx(CollectionDvsValue[4].ReferenceSpeedValue);
-                //ws.Cells[16, 13].Value = ConvertResultForXlsx(CollectionDvsValue[4].DeviceSpeedValue1);
-                //ws.Cells[16, 14].Value = ConvertResultForXlsx(CollectionDvsValue[4].DeviceSpeedValue2);
-                //ws.Cells[16, 15].Value = ConvertResultForXlsx(CollectionDvsValue[4].DeviceSpeedValue3);
-                //ws.Cells[16, 16].Value = ConvertResultForXlsx(CollectionDvsValue[4].DeviceSpeedValue4);
-                //ws.Cells[16, 17].Value = ConvertResultForXlsx(CollectionDvsValue[4].DeviceSpeedValue5);
-
-                //#endregion
-
-                //#region 25
-
-                //ws.Cells[17, 12].Value = ConvertResultForXlsx(CollectionDvsValue[5].ReferenceSpeedValue);
-                //ws.Cells[17, 13].Value = ConvertResultForXlsx(CollectionDvsValue[5].DeviceSpeedValue1);
-                //ws.Cells[17, 14].Value = ConvertResultForXlsx(CollectionDvsValue[5].DeviceSpeedValue2);
-                //ws.Cells[17, 15].Value = ConvertResultForXlsx(CollectionDvsValue[5].DeviceSpeedValue3);
-                //ws.Cells[17, 16].Value = ConvertResultForXlsx(CollectionDvsValue[5].DeviceSpeedValue4);
-                //ws.Cells[17, 17].Value = ConvertResultForXlsx(CollectionDvsValue[5].DeviceSpeedValue5);
-
-                //#endregion
-
-                //#region 30
-
-                //ws.Cells[18, 12].Value = ConvertResultForXlsx(CollectionDvsValue[6].ReferenceSpeedValue);
-                //ws.Cells[18, 13].Value = ConvertResultForXlsx(CollectionDvsValue[6].DeviceSpeedValue1);
-                //ws.Cells[18, 14].Value = ConvertResultForXlsx(CollectionDvsValue[6].DeviceSpeedValue2);
-                //ws.Cells[18, 15].Value = ConvertResultForXlsx(CollectionDvsValue[6].DeviceSpeedValue3);
-                //ws.Cells[18, 16].Value = ConvertResultForXlsx(CollectionDvsValue[6].DeviceSpeedValue4);
-                //ws.Cells[18, 17].Value = ConvertResultForXlsx(CollectionDvsValue[6].DeviceSpeedValue5);
-
-                //#endregion
 
                 #endregion
 
-                #endregion
-
-                //var xlsxCombinePath = Path.Combine(folderPath, $"{NameSc}.xlsx");
 
                 package.SaveAs(new FileInfo($"{DateTime.Now:dd.MM.yyyy_HH-mm-ss}.xlsx"));
             }
