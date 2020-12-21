@@ -795,31 +795,27 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void ResultToXlsxDvs2()
         {
-            //var pathExampleXlsxFile = @"Resources\Dvs2.xlsx";
-            var resourceName = "VerificationAirVelocitySensor.Resources.Dvs2.xlsx";
-            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+            var pathExampleXlsxFile = @"Resources\Dvs2.xlsx";
+            while (true)
+            {
+                if (File.Exists(pathExampleXlsxFile))
+                    break;
 
+                var errorMessage =
+                    "Отсутствует файл образец test_cs_protocol.xlsx  " +
+                    "Пожалуйста поместите файл и повторите попытку(ОК). Или нажмите отмена для пропуска создания .xlsx";
 
-            //while (true)
-            //{
-            //    if (File.Exists(pathExampleXlsxFile))
-            //        break;
+                var mb = MessageBox.Show(errorMessage, "Ошибка", MessageBoxButton.OKCancel);
 
-            //    var errorMessage =
-            //        "Отсутствует файл образец test_cs_protocol.xlsx  " +
-            //        "Пожалуйста поместите файл и повторите попытку(ОК). Или нажмите отмена для пропуска создания .xlsx";
+                //Если было нажато ОК
+                if (mb == MessageBoxResult.OK)
+                    continue;
 
-            //    var mb = MessageBox.Show(errorMessage, "Ошибка", MessageBoxButton.OKCancel);
+                //Если была нажата отмена
+                return;
+            }
 
-            //    //Если было нажато ОК
-            //    if (mb == MessageBoxResult.OK)
-            //        continue;
-
-            //    //Если была нажата отмена
-            //    return;
-            //}
-
-            using (var package = new ExcelPackage(stream))
+            using (var package = new ExcelPackage(new FileInfo(pathExampleXlsxFile)))
             {
                 var ws = package.Workbook.Worksheets.First();
 
