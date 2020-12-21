@@ -746,47 +746,51 @@ namespace VerificationAirVelocitySensor.ViewModel
                 //А значение поступает на частотомер, в момент полного оборота датчика.
                 if (point.Speed == 0.7m)
                     timeOutCounter = 5000;
+                
+                //Так как номеровка идет с 1 , а коллекция с 0
+                var id = point.Id - 1;
+
 
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 1";
                 var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[point.Id].DeviceSpeedValue1 = value1;
+                CollectionDvsValue[id].DeviceSpeedValue1 = value1;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 2";
                 var value2 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[point.Id].DeviceSpeedValue2 = value2;
+                CollectionDvsValue[id].DeviceSpeedValue2 = value2;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 3";
                 var value3 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[point.Id].DeviceSpeedValue3 = value3;
+                CollectionDvsValue[id].DeviceSpeedValue3 = value3;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 4";
                 var value4 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[point.Id].DeviceSpeedValue4 = value4;
+                CollectionDvsValue[id].DeviceSpeedValue4 = value4;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 5";
                 var value5 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[point.Id].DeviceSpeedValue5 = value5;
+                CollectionDvsValue[id].DeviceSpeedValue5 = value5;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 BusyContent = string.Empty;
                 IsBusy = false;
 
-                CollectionDvsValue[point.Id].ReferenceSpeedValue = _averageSpeedReferenceValue;
+                CollectionDvsValue[id].ReferenceSpeedValue = _averageSpeedReferenceValue;
             }
 
 
