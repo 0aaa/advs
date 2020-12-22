@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -506,7 +505,8 @@ namespace VerificationAirVelocitySensor.ViewModel
         public ObservableCollection<SpeedPoint> SpeedPointsList { get; set; } =
             new ObservableCollection<SpeedPoint>
             {
-                new SpeedPoint {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10, MinEdge = 0m, MaxEdge = 3.007m},
+                new SpeedPoint 
+                    {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10, MinEdge = 0m, MaxEdge = 3.007m},
                 new SpeedPoint
                     {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20, MinEdge = 3.320m, MaxEdge = 8.837m},
                 new SpeedPoint
@@ -526,8 +526,10 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// </summary>
         private readonly ObservableCollection<SpeedPoint> _defaultSpeedPoints = new ObservableCollection<SpeedPoint>
         {
-            new SpeedPoint {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10, MinEdge = 0m, MaxEdge = 3.007m},
-            new SpeedPoint {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20, MinEdge = 3.320m, MaxEdge = 8.837m},
+            new SpeedPoint 
+                {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10, MinEdge = 0m, MaxEdge = 3.007m},
+            new SpeedPoint 
+                {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20, MinEdge = 3.320m, MaxEdge = 8.837m},
             new SpeedPoint
                 {Id = 3, Speed = 10m, SetFrequency = 5650, MaxStep = 20, MinEdge = 9.634m, MaxEdge = 15.595m},
             new SpeedPoint
