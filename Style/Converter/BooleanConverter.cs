@@ -19,12 +19,14 @@ namespace VerificationAirVelocitySensor.Style.Converter
 
         public virtual object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is bool && ((bool)value) ? True : False;
+            return value is bool b && b ? True : False; 
+            //return value is bool && ((bool)value) ? True : False;
         }
 
         public virtual object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is T && EqualityComparer<T>.Default.Equals((T)value, True);
+            return value is T o && EqualityComparer<T>.Default.Equals(o, True);
+            //return value is T && EqualityComparer<T>.Default.Equals((T)value, True);
         }
     }
 
