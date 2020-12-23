@@ -19,7 +19,7 @@ namespace VerificationAirVelocitySensor.Style.Converter
 
         public virtual object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is bool b && b ? True : False; 
+            return value is bool b && b ? True : False;
             //return value is bool && ((bool)value) ? True : False;
         }
 

@@ -195,7 +195,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public string GetModelVersion(int sleepTime = 1000)
         {
-            WriteCommand("*IDN?" , sleepTime);
+            WriteCommand("*IDN?", sleepTime);
 
             Thread.Sleep(100);
             var data = _serialPort.ReadExisting();
@@ -212,7 +212,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public void SetGateTime(GateTime gateTime, int sleepTime = 2000)
         {
-            WriteCommand($":ARM:TIMer {(int) gateTime} S", sleepTime);
+            WriteCommand($":ARM:TIMer {(int)gateTime} S", sleepTime);
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void SetChannelFrequency(FrequencyChannel frequencyChannel, int sleepTime = 2000)
         {
-            WriteCommand($":FUNCtion FREQuency {(int) frequencyChannel}", sleepTime);
+            WriteCommand($":FUNCtion FREQuency {(int)frequencyChannel}", sleepTime);
         }
 
 
