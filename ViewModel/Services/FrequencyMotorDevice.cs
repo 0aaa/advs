@@ -30,7 +30,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private readonly int FrequencyMotorRegister = 50009;
 
 
-        private int timeOutBeforeSetFrequencyValue = 4000;
+        private const int TimeOutBeforeSetFrequencyValue = 4000;
 
         /// <summary>
         /// Эталонное значение скорости
@@ -48,7 +48,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         private bool _isSendCommand;
 
-        private object _locker = new object();
+        private readonly object _locker = new object();
 
         /// <summary>
         /// Флаг отвечающий за выставленную в данный момент скорость. Которая должна соотвествовать эталону.
@@ -464,7 +464,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                 SetFrequency(_setFrequencyValue, _setSpeed);
 
-                Thread.Sleep(timeOutBeforeSetFrequencyValue);
+                Thread.Sleep(TimeOutBeforeSetFrequencyValue);
 
                 isFirstStart = false;
             }

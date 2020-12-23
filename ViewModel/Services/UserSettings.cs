@@ -3,6 +3,9 @@ using System.Collections.ObjectModel;
 
 namespace VerificationAirVelocitySensor.ViewModel.Services
 {
+    /// <summary>
+    /// Пользовательские настройки
+    /// </summary>
     public class UserSettings
     {
         public bool FilterChannel1 { get; set; }

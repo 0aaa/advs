@@ -5,6 +5,9 @@ using VerificationAirVelocitySensor.ViewModel.BaseVm;
 
 namespace VerificationAirVelocitySensor.ViewModel
 {
+    /// <summary>
+    /// Vm страницы с условиями поверки
+    /// </summary>
     public class SetMeasurementsDataVm : BaseVm.BaseVm
     {
         public Action CloseWindow;

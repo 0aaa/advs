@@ -3,6 +3,9 @@ using System.Windows.Input;
 
 namespace VerificationAirVelocitySensor.ViewModel.BaseVm
 {
+    /// <summary>
+    /// Управление командами для биндинга на интерфейс
+    /// </summary>
     public class RelayCommand : ICommand
     {
         private readonly Action<object> _execute;
@@ -20,6 +23,11 @@ namespace VerificationAirVelocitySensor.ViewModel.BaseVm
             _canExecute = canExecute;
         }
 
+        /// <summary>
+        /// Конструктор команды
+        /// </summary>
+        /// <param name="execute"></param>
+        /// <param name="canExecute"></param>
         public RelayCommand(Action execute, Func<object, bool> canExecute = null)
         {
             _execute = o => execute();

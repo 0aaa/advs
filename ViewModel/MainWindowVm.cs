@@ -115,6 +115,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         #region Property
 
         private CancellationTokenSource _ctsTask;
+        // ReSharper disable once FieldCanBeMadeReadOnly.Local
         private UserSettings _userSettings;
         private readonly object _locker = new object();
 

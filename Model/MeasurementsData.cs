@@ -2,9 +2,21 @@
 {
     public class MeasurementsData
     {
+        /// <summary>
+        /// Температура
+        /// </summary>
         public decimal Temperature { get; set; }
+        /// <summary>
+        /// Влажность
+        /// </summary>
         public decimal Humidity { get; set; }
+        /// <summary>
+        /// Давление
+        /// </summary>
         public decimal Pressure { get; set; }
+        /// <summary>
+        /// Настройка на будущее, тип поверки
+        /// </summary>
         public TypeVerification TypeVerification { get; set; }
         /// <summary>
         /// Поверитель , в месте использования будет сделана коллекция имен или типо того
