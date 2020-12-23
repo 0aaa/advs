@@ -666,7 +666,7 @@
                            FontSize="20"
                            TextWrapping="Wrap"
                            Width="250"
-                           Margin="29,40,0,0"
+                           Margin="100,40,0,0"
                            VerticalAlignment="Top"
                            HorizontalAlignment="Left" />
             </Grid>
@@ -806,7 +806,7 @@
         <!--#endregion-->
 
         <!--#region IsBusy-->
-        <!--<xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>-->
+        <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>
         <!--#endregion-->
 
     </Grid>

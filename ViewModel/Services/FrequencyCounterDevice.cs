@@ -112,7 +112,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="channel">1 , 2 , 3 only</param>
         /// <param name="isOn"></param>
         /// <param name="sleepTime"></param>
-        public void SwitchFilter(int channel, bool isOn, int sleepTime = 1000)
+        public void SwitchFilter(int channel, bool isOn, int sleepTime = 2000)
         {
             if (channel != 1 && channel != 2 && channel != 3)
                 throw new ArgumentOutOfRangeException();
@@ -195,7 +195,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public string GetModelVersion(int sleepTime = 1000)
         {
-            WriteCommand("*IDN?");
+            WriteCommand("*IDN?" , sleepTime);
 
             Thread.Sleep(100);
             var data = _serialPort.ReadExisting();
@@ -209,18 +209,19 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Установка времени опроса частотомером
         /// </summary>
         /// <param name="gateTime"></param>
-        public void SetGateTime(GateTime gateTime)
+        /// <param name="sleepTime"></param>
+        public void SetGateTime(GateTime gateTime, int sleepTime = 2000)
         {
-            WriteCommand($":ARM:TIMer {(int) gateTime} S");
+            WriteCommand($":ARM:TIMer {(int) gateTime} S", sleepTime);
         }
 
         /// <summary>
         /// Устанавливает выбранный канал для считывания значения частоты.
         /// Доступных каналы : 1, 2, 3
         /// </summary>
-        public void SetChannelFrequency(FrequencyChannel frequencyChannel)
+        public void SetChannelFrequency(FrequencyChannel frequencyChannel, int sleepTime = 2000)
         {
-            WriteCommand($":FUNCtion FREQuency {(int) frequencyChannel}");
+            WriteCommand($":FUNCtion FREQuency {(int) frequencyChannel}", sleepTime);
         }
 
 
@@ -247,10 +248,12 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         {
             var userSettings = Deserialization();
 
-            SetChannelFrequency(userSettings.FrequencyChannel);
-            SetGateTime(userSettings.GateTime);
-            SwitchFilter(1, userSettings.FilterChannel1);
-            SwitchFilter(2, userSettings.FilterChannel2);
+            const int sleepTime = 3000;
+
+            SetChannelFrequency(userSettings.FrequencyChannel, sleepTime);
+            SetGateTime(userSettings.GateTime, sleepTime);
+            SwitchFilter(1, userSettings.FilterChannel1, sleepTime);
+            SwitchFilter(2, userSettings.FilterChannel2, sleepTime);
         }
 
         private UserSettings Deserialization()

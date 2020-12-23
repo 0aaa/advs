@@ -5,11 +5,11 @@ using System.Windows;
 // Общие сведения об этой сборке предоставляются следующим набором
 // набор атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
-[assembly: AssemblyTitle("VerificationAirVelocitySensor")]
+[assembly: AssemblyTitle("ПО для поверки ДВС 01-02")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("VerificationAirVelocitySensor")]
+[assembly: AssemblyCompany("Лаборатория Минимакс")]
+[assembly: AssemblyProduct("ПО для поверки ДВС 01-02")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

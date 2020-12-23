@@ -116,7 +116,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private CancellationTokenSource _ctsTask;
         private UserSettings _userSettings;
-        private readonly object _loker = new object();
+        private readonly object _locker = new object();
 
         /// <summary>
         /// Свойство для хранения условий поверки
@@ -350,13 +350,17 @@ namespace VerificationAirVelocitySensor.ViewModel
             if (!FrequencyCounterIsOpen) return;
 
 
-            IsBusy = true;
-            BusyContent = "Отправка сохраненных настроек на Частотомер";
+            Task.Run(async () => await Task.Run(() =>
+            {
+                IsBusy = true;
+                BusyContent = "Отправка сохраненных настроек на Частотомер";
 
+                FrequencyCounterDevice.Instance.SetUserSettings();
 
-            FrequencyCounterDevice.Instance.SetUserSettings();
+                BusyContent = string.Empty;
 
-            BusyContent = string.Empty;
+                IsBusy = false;
+            }));
         }
 
         private static bool ValidationIsOpenPorts()
@@ -505,7 +509,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         public ObservableCollection<SpeedPoint> SpeedPointsList { get; set; } =
             new ObservableCollection<SpeedPoint>
             {
-                new SpeedPoint 
+                new SpeedPoint
                     {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10, MinEdge = 0m, MaxEdge = 3.007m},
                 new SpeedPoint
                     {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20, MinEdge = 3.320m, MaxEdge = 8.837m},
@@ -526,9 +530,9 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// </summary>
         private readonly ObservableCollection<SpeedPoint> _defaultSpeedPoints = new ObservableCollection<SpeedPoint>
         {
-            new SpeedPoint 
+            new SpeedPoint
                 {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10, MinEdge = 0m, MaxEdge = 3.007m},
-            new SpeedPoint 
+            new SpeedPoint
                 {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20, MinEdge = 3.320m, MaxEdge = 8.837m},
             new SpeedPoint
                 {Id = 3, Speed = 10m, SetFrequency = 5650, MaxStep = 20, MinEdge = 9.634m, MaxEdge = 15.595m},
@@ -547,23 +551,23 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// <summary>
         /// Скоростные точки для расчета коефа . Данные от сотрудников Аэро Трубы
         /// </summary>
-        private decimal[] v_point = {0m, 0.72m, 5m, 10m, 15m, 30m};
+        private readonly decimal[] _vPoint = {0m, 0.72m, 5m, 10m, 15m, 30m};
 
         /// <summary>
         /// Коефы расчитанные для v_point (для каждого диапазона) . Данные от сотрудников Аэро Трубы
         /// </summary>
-        private decimal[] k_point = {0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m};
+        private readonly decimal[] _kPoint = {0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m};
 
-        private decimal[] a_koef = new decimal[5];
-        private decimal[] b_koef = new decimal[5];
+        private readonly decimal[] _aKoef = new decimal[5];
+        private readonly decimal[] _bKoef = new decimal[5];
 
         private void Get_a_b_koef()
         {
             for (var i = 0; i < 6; i++)
             {
                 if (i == 0) continue;
-                a_koef[i - 1] = (k_point[i] - k_point[i - 1]) / (v_point[i] - v_point[i - 1]);
-                b_koef[i - 1] = k_point[i] - a_koef[i - 1] * v_point[i];
+                _aKoef[i - 1] = (_kPoint[i] - _kPoint[i - 1]) / (_vPoint[i] - _vPoint[i - 1]);
+                _bKoef[i - 1] = _kPoint[i] - _aKoef[i - 1] * _vPoint[i];
             }
         }
 
@@ -572,8 +576,8 @@ namespace VerificationAirVelocitySensor.ViewModel
             var rangeValue = GetRange(rawSpeed);
 
 
-            var a = a_koef[rangeValue - 1];
-            var b = b_koef[rangeValue - 1];
+            var a = _aKoef[rangeValue - 1];
+            var b = _bKoef[rangeValue - 1];
 
             var speedCoefficient = a * rawSpeed + b;
 
@@ -584,15 +588,15 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private int GetRange(decimal rawSpeed)
         {
-            if (rawSpeed < v_point[1])
+            if (rawSpeed < _vPoint[1])
                 return 1;
-            if (rawSpeed >= v_point[4])
+            if (rawSpeed >= _vPoint[4])
                 return 5;
-            if (rawSpeed >= v_point[3])
+            if (rawSpeed >= _vPoint[3])
                 return 4;
-            if (rawSpeed >= v_point[2])
+            if (rawSpeed >= _vPoint[2])
                 return 3;
-            if (rawSpeed >= v_point[1])
+            if (rawSpeed >= _vPoint[1])
                 return 2;
 
             var errorMessage = "Значение эталона вне диапазона от 0 до 30";
@@ -639,14 +643,18 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             if (OpenMeasurementsData()) return;
 
-            FrequencyCounterDevice.Instance.RstCommand();
-            FrequencyCounterDevice.Instance.SetUserSettings();
+            IsTestActive = true;
 
             Task.Run(async () => await Task.Run(() =>
             {
                 _ctsTask = new CancellationTokenSource();
 
-                IsTestActive = true;
+                IsBusy = true;
+                BusyContent = "Отправка сохраненных настроек на Частотомер";
+                FrequencyCounterDevice.Instance.RstCommand();
+                FrequencyCounterDevice.Instance.SetUserSettings();
+                IsBusy = false;
+                BusyContent = string.Empty;
 
                 switch (TypeTest)
                 {
@@ -748,10 +756,9 @@ namespace VerificationAirVelocitySensor.ViewModel
                 //А значение поступает на частотомер, в момент полного оборота датчика.
                 if (point.Speed == 0.7m)
                     timeOutCounter = 5000;
-                
+
                 //Так как номеровка идет с 1 , а коллекция с 0
                 var id = point.Id - 1;
-
 
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 1";
@@ -847,7 +854,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[24, 5].Value = _measurementsData.Humidity;
                 ws.Cells[25, 5].Value = _measurementsData.Pressure;
 
-
                 #endregion
 
 
@@ -939,7 +945,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             {
                 var serializer = new Serializer();
 
-                lock (_loker)
+                lock (_locker)
                 {
                     using (var file = File.Open(PathUserSettings, FileMode.Create))
                     {
