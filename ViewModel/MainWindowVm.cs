@@ -116,7 +116,9 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private CancellationTokenSource _ctsTask;
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
+#pragma warning disable IDE0044 // Добавить модификатор только для чтения
         private UserSettings _userSettings;
+#pragma warning restore IDE0044 // Добавить модификатор только для чтения
         private readonly object _locker = new object();
 
         /// <summary>
