@@ -130,8 +130,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// Запрос на значение частоты
         /// </summary>
         /// <param name="speedPoint"></param>
+        /// <param name="whileWait"></param>
         /// <returns></returns>
-        public decimal GetCurrentHzValue(SpeedPoint speedPoint)
+        public decimal GetCurrentHzValue(SpeedPoint speedPoint , int whileWait)
         {
             var attemptRead = 0;
 
@@ -175,7 +176,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 }
                 catch
                 {
-                    //ignore
+                    Thread.Sleep(whileWait);
                 }
             }
         }
