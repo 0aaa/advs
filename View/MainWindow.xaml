@@ -7,7 +7,6 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Background="#C4E9DB"
         Title="Поверка датчиков скорости воздушного потока"
         d:DataContext="{d:DesignInstance Type=viewModel:MainWindowVm}"
         MinHeight="490"
@@ -48,9 +47,9 @@
             <RowDefinition Height="400*" />
             <RowDefinition Height="40*" />
         </Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="#EFEFEF">
+        <Border Grid.Row="0" Background="#70808F">
             <Viewbox HorizontalAlignment="Left">
-                <Menu>
+                <Menu Background="#70808F">
                     <MenuItem Header="Настройки">
                         <MenuItem Header="Подключения"
                                   Command="{Binding OpenCloseConnectionMenuCommand}" />
@@ -95,16 +94,13 @@
                             <MenuItem Header="ДВС1" Command="{Binding ChangeTypeTestOnDvs1Command}" />
                             <MenuItem Header="ДВС2" Command="{Binding ChangeTypeTestOnDvs2Command}" />
                         </MenuItem>
-
                     </MenuItem>
-                    <MenuItem Header="Справка"
-                              Command="{Binding OpenReferenceCommand}" />
                 </Menu>
             </Viewbox>
         </Border>
 
         <Border Grid.Row="2">
-            <Grid Background="#7FD1B2">
+            <Grid Background="#E2E1E1">
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center">
@@ -119,7 +115,7 @@
 
         <!--#region Dvs2 Test -->
 
-        <Grid Grid.Row="1" Visibility="{Binding Dvs2ContentVisibility , Converter={StaticResource BoolToVis}}">
+        <Grid Grid.Row="1" Visibility="{Binding Dvs2ContentVisibility , Converter={StaticResource BoolToVis}}" Background="#EEEEEE">
             <Grid.RowDefinitions>
                 <RowDefinition Height="100" />
                 <RowDefinition Height="1*" />
@@ -264,11 +260,11 @@
 
                     <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
                         <Viewbox>
-                            <TextBlock Text="{Binding SetFrequencyMotor}" Width="80" Margin="0,5,10,5" FontSize="16" />
+                            <TextBlock Text="{Binding SetFrequencyMotor , StringFormat={}{0:0 n}}" Width="80" Margin="0,5,10,5" FontSize="16" />
                         </Viewbox>
 
                         <Viewbox>
-                            <TextBlock Text="{Binding SpeedReferenceValue}" Width="80" Margin="0,5,10,5" FontSize="16" />
+                            <TextBlock Text="{Binding SpeedReferenceValue , StringFormat={}{0:0 м/с}}" Width="80" Margin="0,5,10,5" FontSize="16" />
                         </Viewbox>
                     </StackPanel>
 
@@ -655,24 +651,6 @@
         </Border>
         <!--#endregion-->
 
-        <!--#region Reference-->
-        <Border Grid.Row="1"
-                Visibility="{Binding IsReference , Converter={StaticResource BoolToVis}}">
-            <Grid>
-                <Image Source="../Style/b0e1b7cd6ed3c0b4f98e1b9385ad6b4d.jpg" />
-                <TextBlock Text="Нельзя так просто взять и сделать справку !!!"
-                           Foreground="White"
-                           FontWeight="Bold"
-                           FontSize="20"
-                           TextWrapping="Wrap"
-                           Width="250"
-                           Margin="100,40,0,0"
-                           VerticalAlignment="Top"
-                           HorizontalAlignment="Left" />
-            </Grid>
-        </Border>
-        <!--#endregion-->
-
         <!--#region SetSpeedPoints -->
 
         <Border Grid.Row="1"
@@ -806,7 +784,7 @@
         <!--#endregion-->
 
         <!--#region IsBusy-->
-        <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>
+        <!--<xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>-->
         <!--#endregion-->
 
     </Grid>

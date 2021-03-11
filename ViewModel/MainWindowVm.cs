@@ -99,7 +99,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             new RelayCommand(OpenCloseDebuggingMenu, OpenCloseDebuggingMenuValidation);
 
         public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
-        public RelayCommand OpenReferenceCommand => new RelayCommand(() => IsReference = !IsReference);
 
         public RelayCommand StartTestCommand => new RelayCommand(StartTest, StartTestValidation);
 
@@ -132,11 +131,6 @@ namespace VerificationAirVelocitySensor.ViewModel
         public string StatusCurrentAction { get; set; }
 
         private const string PathUserSettings = "UserSettings.txt";
-
-        /// <summary>
-        /// Флаг для отображения справки :)
-        /// </summary>
-        public bool IsReference { get; set; }
 
         /// <summary>
         /// Активность BusyIndicator
@@ -554,12 +548,12 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// <summary>
         /// Скоростные точки для расчета коефа . Данные от сотрудников Аэро Трубы
         /// </summary>
-        private readonly decimal[] _vPoint = { 0m, 0.72m, 5m, 10m, 15m, 30m };
+        private readonly decimal[] _vPoint = {0m, 0.72m, 5m, 10m, 15m, 30m};
 
         /// <summary>
         /// Коефы расчитанные для v_point (для каждого диапазона) . Данные от сотрудников Аэро Трубы
         /// </summary>
-        private readonly decimal[] _kPoint = { 0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m };
+        private readonly decimal[] _kPoint = {0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m};
 
         private readonly decimal[] _aKoef = new decimal[5];
         private readonly decimal[] _bKoef = new decimal[5];
@@ -765,7 +759,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
 
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 1";
-                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point , timeOutCounter);
+                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[id].DeviceSpeedValue1 = value1;
                 Thread.Sleep(timeOutCounter);
@@ -923,7 +917,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
-            var newSpeed = SpeedCalculation((decimal)e.ReferenceValue);
+            var newSpeed = SpeedCalculation((decimal) e.ReferenceValue);
             SpeedReferenceValue = newSpeed;
             UpdateAverageSpeedReferenceValue(SpeedReferenceValue);
         }
