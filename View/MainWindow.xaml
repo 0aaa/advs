@@ -259,9 +259,9 @@
                     </StackPanel>
 
                     <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
-                        <Viewbox>
+                        <!--<Viewbox>
                             <TextBlock Text="{Binding SetFrequencyMotor , StringFormat={}{0:0 n}}" Width="80" Margin="0,5,10,5" FontSize="16" />
-                        </Viewbox>
+                        </Viewbox>-->
 
                         <Viewbox>
                             <TextBlock Text="{Binding SpeedReferenceValue , StringFormat={}{0:0 м/с}}" Width="80" Margin="0,5,10,5" FontSize="16" />

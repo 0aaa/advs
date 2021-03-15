@@ -352,7 +352,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 IsBusy = true;
                 BusyContent = "Отправка сохраненных настроек на Частотомер";
 
-                FrequencyCounterDevice.Instance.SetUserSettings();
+                //FrequencyCounterDevice.Instance.SetUserSettings();
 
                 BusyContent = string.Empty;
 

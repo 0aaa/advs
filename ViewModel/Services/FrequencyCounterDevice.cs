@@ -249,7 +249,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         {
             var userSettings = Deserialization();
 
-            const int sleepTime = 3000;
+            const int sleepTime = 5000;
 
             SetChannelFrequency(userSettings.FrequencyChannel, sleepTime);
             SetGateTime(userSettings.GateTime, sleepTime);
