@@ -43,7 +43,15 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public SetMeasurementsDataVm(MainWindowVm mainWindowVm)
         {
-            MeasurementsData = mainWindowVm.MeasurementsData;
+            if (mainWindowVm.MeasurementsData != null)
+            {
+                MeasurementsData = mainWindowVm.MeasurementsData;
+            }
+            else
+            {
+                mainWindowVm.MeasurementsData = new MeasurementsData();
+                MeasurementsData = mainWindowVm.MeasurementsData;
+            }
         }
 
         private void Cancel()

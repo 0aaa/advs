@@ -120,7 +120,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 #pragma warning restore IDE0044 // Добавить модификатор только для чтения
         private readonly object _locker = new object();
 
-        private MeasurementsData _measurementsData = new MeasurementsData();
+        private MeasurementsData _measurementsData;
         /// <summary>
         /// Свойство для хранения условий поверки
         /// </summary>
@@ -702,6 +702,8 @@ namespace VerificationAirVelocitySensor.ViewModel
             setMeasurementsData.ShowDialog();
             var isContinue = setMeasurementsData.ViewModel.IsContinue;
             setMeasurementsData.Close();
+            
+            Serialization();
 
             return !isContinue;
         }
