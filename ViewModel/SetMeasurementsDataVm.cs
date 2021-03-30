@@ -11,17 +11,7 @@ namespace VerificationAirVelocitySensor.ViewModel
     public class SetMeasurementsDataVm : BaseVm.BaseVm
     {
         public Action CloseWindow;
-        private MeasurementsData _measurementsData;
-
-        public MeasurementsData MeasurementsData
-        {
-            get => _measurementsData;
-            set
-            {
-                _measurementsData = value;
-                OnPropertyChanged(nameof(MeasurementsData));
-            }
-        }
+        public MeasurementsData MeasurementsData { get; set; }
 
         public bool IsContinue { get; set; }
 
@@ -41,9 +31,9 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand ContinueCommand => new RelayCommand(Continue);
         public RelayCommand CancelCommand => new RelayCommand(Cancel);
 
-        public SetMeasurementsDataVm(MainWindowVm mainWindowVm)
+        public SetMeasurementsDataVm(ref MeasurementsData measurementsData)
         {
-            MeasurementsData = mainWindowVm.MeasurementsData;
+            MeasurementsData = measurementsData;
         }
 
         private void Cancel()

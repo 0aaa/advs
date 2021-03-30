@@ -120,21 +120,10 @@ namespace VerificationAirVelocitySensor.ViewModel
 #pragma warning restore IDE0044 // Добавить модификатор только для чтения
         private readonly object _locker = new object();
 
-        private MeasurementsData _measurementsData = new MeasurementsData();
         /// <summary>
         /// Свойство для хранения условий поверки
         /// </summary>
-        public MeasurementsData MeasurementsData
-        {
-            get => _measurementsData;
-            set
-            {
-                _measurementsData = value;
-                OnPropertyChanged(nameof(MeasurementsData));
-                _userSettings.MeasurementsData = value;
-                Serialization();
-            }
-        }
+        private MeasurementsData _measurementsData = new MeasurementsData();
 
         /// <summary>
         /// Свойство, для биндинга на интерфейс текущее действие внутри программы
@@ -647,7 +636,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void StartTest()
         {
-            //if (!ValidationIsOpenPorts()) return;
+            if (!ValidationIsOpenPorts()) return;
 
             if (OpenMeasurementsData()) return;
 
@@ -697,7 +686,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private bool OpenMeasurementsData()
         {
-            var setMeasurementsDataVm = new SetMeasurementsDataVm(this);
+            var setMeasurementsDataVm = new SetMeasurementsDataVm(ref _measurementsData);
             var setMeasurementsData = new SetMeasurementsData(setMeasurementsDataVm);
             setMeasurementsData.ShowDialog();
             var isContinue = setMeasurementsData.ViewModel.IsContinue;
@@ -855,12 +844,12 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 //Условия поверки
 
-                ws.Cells[47, 14].Value = MeasurementsData.Verifier;
+                ws.Cells[47, 14].Value = _measurementsData.Verifier;
                 ws.Cells[47, 21].Value = $"{DateTime.Now:dd.MM.yyyy}";
 
-                ws.Cells[23, 5].Value = MeasurementsData.Temperature;
-                ws.Cells[24, 5].Value = MeasurementsData.Humidity;
-                ws.Cells[25, 5].Value = MeasurementsData.Pressure;
+                ws.Cells[23, 5].Value = _measurementsData.Temperature;
+                ws.Cells[24, 5].Value = _measurementsData.Humidity;
+                ws.Cells[25, 5].Value = _measurementsData.Pressure;
 
                 #endregion
 
@@ -901,7 +890,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             GateTime = _userSettings.GateTime;
             ComPortFrequencyMotor = _userSettings.ComPortFrequencyMotor;
             ComPortFrequencyCounter = _userSettings.ComPortFrequencyCounter;
-            MeasurementsData = _userSettings.MeasurementsData;
 
             if (_userSettings.SpeedPointsList != null && _userSettings.SpeedPointsList.Count != 0)
             {

@@ -1,6 +1,5 @@
 ﻿
 using System.Collections.ObjectModel;
-using VerificationAirVelocitySensor.Model;
 
 namespace VerificationAirVelocitySensor.ViewModel.Services
 {
@@ -17,11 +16,5 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public string ComPortFrequencyCounter { get; set; } = string.Empty;
         public TypeTest TypeTest { get; set; }
         public ObservableCollection<SpeedPoint> SpeedPointsList { get; set; } = new ObservableCollection<SpeedPoint>();
-        /// <summary>
-        /// Путь сохранения результата
-        /// </summary>
-        public string PathSave { get; set; }
-
-        public MeasurementsData MeasurementsData { get; set; }
     }
 }
