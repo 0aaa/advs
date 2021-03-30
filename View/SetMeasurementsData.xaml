@@ -45,9 +45,32 @@
                     <RowDefinition Height="1*" />
                     <RowDefinition Height="1*" />
                     <RowDefinition Height="1*" />
+                    <RowDefinition Height="1*" />
                 </Grid.RowDefinitions>
-
                 <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0"
+                            Margin="2,2,0,2"
+                            CornerRadius="5,0,0,5"
+                            BorderThickness="1"
+                            BorderBrush="Black">
+                        <TextBlock Text="Серийный номер" Style="{StaticResource HeaderGridColumnTextBlock}" />
+                    </Border>
+                    <Border Grid.Column="1"
+                            Margin="0,2,2,2"
+                            CornerRadius="0,5,5,0"
+                            BorderThickness="0,1,1,1"
+                            BorderBrush="Black" >
+                        <TextBox Text="{Binding MeasurementsData.DeviceId}"
+                                 Style="{StaticResource HeaderGridColumnTextBox}" />
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="2*" />
@@ -70,7 +93,7 @@
                     </Border>
                 </Grid>
 
-                <Grid Grid.Row="1">
+                <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="2*" />
@@ -93,10 +116,11 @@
                     </Border>
                 </Grid>
 
-                <Grid Grid.Row="2">
+                <Grid Grid.Row="3">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="203*" />
+                        <ColumnDefinition Width="16*" />
+                        <ColumnDefinition Width="389*"/>
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0"
@@ -110,13 +134,13 @@
                             Margin="0,2,2,2"
                             CornerRadius="0,5,5,0"
                             BorderThickness="0,1,1,1"
-                            BorderBrush="Black">
+                            BorderBrush="Black" Grid.ColumnSpan="2">
                         <TextBox Text="{Binding MeasurementsData.Humidity}"
                                  Style="{StaticResource HeaderGridColumnTextBox}" />
                     </Border>
                 </Grid>
 
-                <Grid Grid.Row="3">
+                <Grid Grid.Row="4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="2*" />

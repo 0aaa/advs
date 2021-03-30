@@ -1,7 +1,13 @@
-﻿namespace VerificationAirVelocitySensor.Model
+﻿using VerificationAirVelocitySensor.ViewModel.BaseVm;
+
+namespace VerificationAirVelocitySensor.Model
 {
-    public class MeasurementsData
+    public class MeasurementsData :  BaseVm
     {
+        /// <summary>
+        /// Серийный номер
+        /// </summary>
+        public string DeviceId { get; set; }
         /// <summary>
         /// Температура
         /// </summary>
