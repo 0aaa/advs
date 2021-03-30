@@ -235,6 +235,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             //Чистка буфера от старых трейдов.
             Thread.Sleep(250);
             if (_serialPort.BytesToRead != 0)
+                // ReSharper disable once AssignmentIsFullyDiscarded
                 _ = _serialPort.ReadExisting();
 
             //Запрос значения эталон

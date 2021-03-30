@@ -5,3 +5,6 @@ GateTime: S1
 ComPortFrequencyMotor: ''
 ComPortFrequencyCounter: ''
 TypeTest: 0
+SpeedPointsList: []
+PathSave: 
+MeasurementsData: 

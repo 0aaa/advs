@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.30406.217
+VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VerificationAirVelocitySensor", "VerificationAirVelocitySensor.csproj", "{AED516FA-9B1F-4E8F-92FB-F289977327ED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VerificationAirVelocitySensor", "VerificationAirVelocitySensor.csproj", "{38EA3BAF-6D4A-42AD-B026-C36133BA3929}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AED516FA-9B1F-4E8F-92FB-F289977327ED}.Debug|Any CPU.ActiveCfg = Release|Any CPU
-		{AED516FA-9B1F-4E8F-92FB-F289977327ED}.Debug|Any CPU.Build.0 = Release|Any CPU
-		{AED516FA-9B1F-4E8F-92FB-F289977327ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AED516FA-9B1F-4E8F-92FB-F289977327ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38EA3BAF-6D4A-42AD-B026-C36133BA3929}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38EA3BAF-6D4A-42AD-B026-C36133BA3929}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38EA3BAF-6D4A-42AD-B026-C36133BA3929}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38EA3BAF-6D4A-42AD-B026-C36133BA3929}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {BE353306-EC75-43AC-A9B8-2E6C2580883D}
+		SolutionGuid = {E09DE10B-94A5-4BE3-AA1D-D91F339656D1}
 	EndGlobalSection
 EndGlobal

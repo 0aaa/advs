@@ -2,7 +2,7 @@
 
 namespace VerificationAirVelocitySensor.Model
 {
-    public class MeasurementsData :  BaseVm
+    public class MeasurementsData : BaseVm
     {
         /// <summary>
         /// Серийный номер

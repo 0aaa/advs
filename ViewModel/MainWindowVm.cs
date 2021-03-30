@@ -559,12 +559,12 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// <summary>
         /// Скоростные точки для расчета коефа . Данные от сотрудников Аэро Трубы
         /// </summary>
-        private readonly decimal[] _vPoint = {0m, 0.72m, 5m, 10m, 15m, 30m};
+        private readonly decimal[] _vPoint = { 0m, 0.72m, 5m, 10m, 15m, 30m };
 
         /// <summary>
         /// Коефы расчитанные для v_point (для каждого диапазона) . Данные от сотрудников Аэро Трубы
         /// </summary>
-        private readonly decimal[] _kPoint = {0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m};
+        private readonly decimal[] _kPoint = { 0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m };
 
         private readonly decimal[] _aKoef = new decimal[5];
         private readonly decimal[] _bKoef = new decimal[5];
@@ -890,7 +890,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             FrequencyMotorDevice.Instance.UpdateReferenceValue += FrequencyMotor_UpdateReferenceValue;
             FrequencyMotorDevice.Instance.UpdateSetFrequency += FrequencyMotor_UpdateSetFrequency;
 
-
             SpeedPointsList.CollectionChanged += DefaultSpeedPoints_CollectionChanged;
 
             var deserialization = Deserialization();
@@ -929,7 +928,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
-            var newSpeed = SpeedCalculation((decimal) e.ReferenceValue);
+            var newSpeed = SpeedCalculation((decimal)e.ReferenceValue);
             SpeedReferenceValue = newSpeed;
             UpdateAverageSpeedReferenceValue(SpeedReferenceValue);
         }

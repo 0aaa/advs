@@ -132,11 +132,12 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="speedPoint"></param>
         /// <param name="whileWait"></param>
         /// <returns></returns>
-        public decimal GetCurrentHzValue(SpeedPoint speedPoint , int whileWait)
+        public decimal GetCurrentHzValue(SpeedPoint speedPoint, int whileWait)
         {
             var attemptRead = 0;
 
             //Чистка от возможных старых значений
+            // ReSharper disable once AssignmentIsFullyDiscarded
             _ = _serialPort.ReadExisting();
 
             while (true)
