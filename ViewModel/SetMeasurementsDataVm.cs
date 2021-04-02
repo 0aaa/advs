@@ -12,7 +12,6 @@ namespace VerificationAirVelocitySensor.ViewModel
     {
         public Action CloseWindow;
 
-
         public MainWindowVm MainWindowVm { get; set; }
 
         private MeasurementsData _measurementsData;
@@ -45,6 +44,8 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand ContinueCommand => new RelayCommand(Continue);
         public RelayCommand CancelCommand => new RelayCommand(Cancel);
 
+        public RelayCommand SetLogSaveWay => new RelayCommand(SaveLogDialogPath);
+
         public SetMeasurementsDataVm(MainWindowVm mainWindowVm)
         {
             if (mainWindowVm.MeasurementsData != null)
@@ -70,6 +71,18 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             IsContinue = true;
             CloseWindow();
+        }
+
+        private void SaveLogDialogPath()
+        {
+            var folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
+
+            folderBrowser.ShowDialog();
+
+            if (!string.IsNullOrWhiteSpace(folderBrowser.SelectedPath))
+            {
+                MainWindowVm.PathSave = folderBrowser.SelectedPath;
+            }
         }
     }
 }

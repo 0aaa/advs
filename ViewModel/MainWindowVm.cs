@@ -661,7 +661,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void StartTest()
         {
-            //if (!ValidationIsOpenPorts()) return;
+            if (!ValidationIsOpenPorts()) return;
 
             if (OpenMeasurementsData()) return;
 
@@ -887,6 +887,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[23, 5].Value = MeasurementsData.Temperature;
                 ws.Cells[24, 5].Value = MeasurementsData.Humidity;
                 ws.Cells[25, 5].Value = MeasurementsData.Pressure;
+                ws.Cells[14, 6].Value = MeasurementsData.DeviceId;
+                ws.Cells[5, 4].Value = "Протокол ДВС-02 №00212522 от 10.01.2021";
 
                 #endregion
 

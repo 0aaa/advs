@@ -115,8 +115,8 @@
 
         <!--#region Dvs2 Test -->
 
-        <!--Visibility="{Binding Dvs2ContentVisibility , Converter={StaticResource BoolToVis}}"-->
-        <Grid Grid.Row="1" Background="#EEEEEE">
+
+        <Grid Grid.Row="1" Background="#EEEEEE" Visibility="{Binding Dvs2ContentVisibility , Converter={StaticResource BoolToVis}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="100" />
                 <RowDefinition Height="1*" />
@@ -850,7 +850,7 @@
         <!--#endregion-->
 
         <!--#region IsBusy-->
-        <!--<xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>-->
+        <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>
         <!--#endregion-->
 
     </Grid>
