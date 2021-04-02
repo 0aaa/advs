@@ -19,10 +19,10 @@ namespace VerificationAirVelocitySensor.Model
         /// </summary>
         public decimal? ReferenceSpeedValue { get; set; }
 
-        public decimal? DeviceSpeedValue1 { get; set; }
-        public decimal? DeviceSpeedValue2 { get; set; }
-        public decimal? DeviceSpeedValue3 { get; set; }
-        public decimal? DeviceSpeedValue4 { get; set; }
-        public decimal? DeviceSpeedValue5 { get; set; }
+        public SpeedValue DeviceSpeedValue1 { get; set; }
+        public SpeedValue DeviceSpeedValue2 { get; set; }
+        public SpeedValue DeviceSpeedValue3 { get; set; }
+        public SpeedValue DeviceSpeedValue4 { get; set; }
+        public SpeedValue DeviceSpeedValue5 { get; set; }
     }
 }

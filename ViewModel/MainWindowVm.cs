@@ -136,6 +136,20 @@ namespace VerificationAirVelocitySensor.ViewModel
             }
         }
 
+        private string _pathSave;
+
+        public string PathSave
+        {
+            get => _pathSave;
+            set
+            {
+                _pathSave = value;
+                OnPropertyChanged(nameof(PathSave));
+                _userSettings.PathSave = value;
+                Serialization();
+            }
+        }
+
         /// <summary>
         /// Свойство, для биндинга на интерфейс текущее действие внутри программы
         /// </summary>
@@ -771,38 +785,48 @@ namespace VerificationAirVelocitySensor.ViewModel
                 var id = point.Id - 1;
 
 
+                CollectionDvsValue[id].DeviceSpeedValue1.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 1";
                 var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[id].DeviceSpeedValue1 = value1;
+                CollectionDvsValue[id].DeviceSpeedValue1.ResultValue = value1;
+                CollectionDvsValue[id].DeviceSpeedValue1.IsVerified = true;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
+                CollectionDvsValue[id].DeviceSpeedValue2.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 2";
                 var value2 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[id].DeviceSpeedValue2 = value2;
+                CollectionDvsValue[id].DeviceSpeedValue2.ResultValue = value2;
+                CollectionDvsValue[id].DeviceSpeedValue2.IsVerified = true;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
+                CollectionDvsValue[id].DeviceSpeedValue3.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 3";
                 var value3 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[id].DeviceSpeedValue3 = value3;
+                CollectionDvsValue[id].DeviceSpeedValue3.ResultValue = value3;
+                CollectionDvsValue[id].DeviceSpeedValue3.IsVerified = true;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
+                CollectionDvsValue[id].DeviceSpeedValue4.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 4";
                 var value4 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[id].DeviceSpeedValue4 = value4;
+                CollectionDvsValue[id].DeviceSpeedValue4.ResultValue = value4;
+                CollectionDvsValue[id].DeviceSpeedValue4.IsVerified = true;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
+                CollectionDvsValue[id].DeviceSpeedValue5.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 5";
                 var value5 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[id].DeviceSpeedValue5 = value5;
+                CollectionDvsValue[id].DeviceSpeedValue5.ResultValue = value5;
+                CollectionDvsValue[id].DeviceSpeedValue5.IsVerified = true;
                 Thread.Sleep(timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
 
@@ -847,11 +871,11 @@ namespace VerificationAirVelocitySensor.ViewModel
                 for (var i = 0; i < 7; i++)
                 {
                     AddValueInCell(ws.Cells[i + 12, 12], CollectionDvsValue[i].ReferenceSpeedValue);
-                    AddValueInCell(ws.Cells[i + 12, 13], CollectionDvsValue[i].DeviceSpeedValue1);
-                    AddValueInCell(ws.Cells[i + 12, 14], CollectionDvsValue[i].DeviceSpeedValue2);
-                    AddValueInCell(ws.Cells[i + 12, 15], CollectionDvsValue[i].DeviceSpeedValue3);
-                    AddValueInCell(ws.Cells[i + 12, 16], CollectionDvsValue[i].DeviceSpeedValue4);
-                    AddValueInCell(ws.Cells[i + 12, 17], CollectionDvsValue[i].DeviceSpeedValue5);
+                    AddValueInCell(ws.Cells[i + 12, 13], CollectionDvsValue[i].DeviceSpeedValue1.ResultValue);
+                    AddValueInCell(ws.Cells[i + 12, 14], CollectionDvsValue[i].DeviceSpeedValue2.ResultValue);
+                    AddValueInCell(ws.Cells[i + 12, 15], CollectionDvsValue[i].DeviceSpeedValue3.ResultValue);
+                    AddValueInCell(ws.Cells[i + 12, 16], CollectionDvsValue[i].DeviceSpeedValue4.ResultValue);
+                    AddValueInCell(ws.Cells[i + 12, 17], CollectionDvsValue[i].DeviceSpeedValue5.ResultValue);
                 }
 
 
@@ -903,6 +927,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             ComPortFrequencyMotor = _userSettings.ComPortFrequencyMotor;
             ComPortFrequencyCounter = _userSettings.ComPortFrequencyCounter;
             MeasurementsData = _userSettings.MeasurementsData;
+            PathSave = _userSettings.PathSave;
 
             if (_userSettings.SpeedPointsList != null && _userSettings.SpeedPointsList.Count != 0)
             {
@@ -912,6 +937,29 @@ namespace VerificationAirVelocitySensor.ViewModel
             }
 
             Get_a_b_koef();
+
+
+            //var dvsValue1 = new DvsValue(5)
+            //{
+            //    DeviceSpeedValue1 = new SpeedValue {IsVerified = true, IsСheckedNow = true, ResultValue = 4.32m}
+            //};
+
+            //var dvsValue2 = new DvsValue(10)
+            //{
+            //    DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m }
+            //};
+
+            //var dvsValue3 = new DvsValue(15)
+            //{
+            //    DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = true, ResultValue = 24.32m }
+            //};
+
+            //CollectionDvsValue.Add(dvsValue1);
+            //CollectionDvsValue.Add(dvsValue2);
+            //CollectionDvsValue.Add(dvsValue3);
+
+
+
         }
 
         private void DefaultSpeedPoints_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

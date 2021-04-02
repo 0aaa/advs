@@ -115,7 +115,8 @@
 
         <!--#region Dvs2 Test -->
 
-        <Grid Grid.Row="1" Visibility="{Binding Dvs2ContentVisibility , Converter={StaticResource BoolToVis}}" Background="#EEEEEE">
+        <!--Visibility="{Binding Dvs2ContentVisibility , Converter={StaticResource BoolToVis}}"-->
+        <Grid Grid.Row="1" Background="#EEEEEE">
             <Grid.RowDefinitions>
                 <RowDefinition Height="100" />
                 <RowDefinition Height="1*" />
@@ -211,24 +212,89 @@
                                                 <ColumnDefinition Width="1*" />
                                             </Grid.ColumnDefinitions>
                                             <Grid Grid.Column="0">
-                                                <TextBox Text="{Binding DeviceSpeedValue1}"
-                                                         Style="{StaticResource TextBoxStyle}" />
+                                                <TextBox Text="{Binding DeviceSpeedValue1.ResultValue}" Height="20" Width="55" TextAlignment="Center">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="TextBox">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DeviceSpeedValue1.IsСheckedNow}" Value="True">
+                                                                    <Setter Property="Background" Value="Yellow"/>
+                                                                </DataTrigger>
+
+                                                                <DataTrigger Binding="{Binding DeviceSpeedValue1.IsVerified}" Value="True">
+                                                                    <Setter Property="Background" Value="Green"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
                                             </Grid>
                                             <Grid Grid.Column="1">
-                                                <TextBox Text="{Binding DeviceSpeedValue2}"
-                                                         Style="{StaticResource TextBoxStyle}" />
+                                                <TextBox Text="{Binding DeviceSpeedValue2.ResultValue}" Height="20" Width="55" TextAlignment="Center">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="TextBox">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DeviceSpeedValue1.IsСheckedNow}" Value="True">
+                                                                    <Setter Property="Background" Value="Yellow"/>
+                                                                </DataTrigger>
+
+                                                                <DataTrigger Binding="{Binding DeviceSpeedValue1.IsVerified}" Value="True">
+                                                                    <Setter Property="Background" Value="Green"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
                                             </Grid>
                                             <Grid Grid.Column="2">
-                                                <TextBox Text="{Binding DeviceSpeedValue3}"
-                                                         Style="{StaticResource TextBoxStyle}" />
+                                                <TextBox Text="{Binding DeviceSpeedValue3.ResultValue}" Height="20" Width="55" TextAlignment="Center">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="TextBox">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DeviceSpeedValue1.IsСheckedNow}" Value="True">
+                                                                    <Setter Property="Background" Value="Yellow"/>
+                                                                </DataTrigger>
+
+                                                                <DataTrigger Binding="{Binding DeviceSpeedValue1.IsVerified}" Value="True">
+                                                                    <Setter Property="Background" Value="Green"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
                                             </Grid>
                                             <Grid Grid.Column="3">
-                                                <TextBox Text="{Binding DeviceSpeedValue4}"
-                                                         Style="{StaticResource TextBoxStyle}" />
+                                                <TextBox Text="{Binding DeviceSpeedValue4.ResultValue}" Height="20" Width="55" TextAlignment="Center">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="TextBox">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DeviceSpeedValue1.IsСheckedNow}" Value="True">
+                                                                    <Setter Property="Background" Value="Yellow"/>
+                                                                </DataTrigger>
+
+                                                                <DataTrigger Binding="{Binding DeviceSpeedValue1.IsVerified}" Value="True">
+                                                                    <Setter Property="Background" Value="Green"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
                                             </Grid>
                                             <Grid Grid.Column="4">
-                                                <TextBox Text="{Binding DeviceSpeedValue5}"
-                                                         Style="{StaticResource TextBoxStyle}" />
+                                                <TextBox Text="{Binding DeviceSpeedValue5.ResultValue}" Height="20" Width="55" TextAlignment="Center">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="TextBox">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DeviceSpeedValue1.IsСheckedNow}" Value="True">
+                                                                    <Setter Property="Background" Value="Yellow"/>
+                                                                </DataTrigger>
+
+                                                                <DataTrigger Binding="{Binding DeviceSpeedValue1.IsVerified}" Value="True">
+                                                                    <Setter Property="Background" Value="Green"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
                                             </Grid>
                                         </Grid>
                                     </Grid>

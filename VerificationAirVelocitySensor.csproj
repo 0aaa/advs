@@ -279,6 +279,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\SpeedValue.cs" />
     <Compile Include="Style\Converter\BooleanConverter.cs" />
     <Compile Include="ViewModel\BaseVm\BaseVm.cs" />
     <Compile Include="ViewModel\BaseVm\RelayCommand.cs" />

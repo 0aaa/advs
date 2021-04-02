@@ -11,6 +11,10 @@ namespace VerificationAirVelocitySensor.ViewModel
     public class SetMeasurementsDataVm : BaseVm.BaseVm
     {
         public Action CloseWindow;
+
+
+        public MainWindowVm MainWindowVm { get; set; }
+
         private MeasurementsData _measurementsData;
 
         public MeasurementsData MeasurementsData
@@ -45,12 +49,14 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             if (mainWindowVm.MeasurementsData != null)
             {
+                MainWindowVm = mainWindowVm;
                 MeasurementsData = mainWindowVm.MeasurementsData;
             }
             else
             {
                 mainWindowVm.MeasurementsData = new MeasurementsData();
                 MeasurementsData = mainWindowVm.MeasurementsData;
+                MainWindowVm = mainWindowVm;
             }
         }
 
