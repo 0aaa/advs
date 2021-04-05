@@ -131,7 +131,7 @@
 
                     <Border Grid.Row="0">
                        <Viewbox>
-                           <TextBlock Text="{Binding MeasurementsData.DeviceId}"
+                           <TextBlock Text="ДВС-02"
                                       Margin="0,1"
                                       Style="{StaticResource HeaderPageTextBlock}"
                                       HorizontalAlignment="Center" />
