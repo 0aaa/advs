@@ -197,6 +197,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public string GetModelVersion(int sleepTime = 1000)
         {
+            //TODO сделать возвращаемый тип bool. Поместить в метод проверку на валидность устройства.
             WriteCommand("*IDN?", sleepTime);
 
             Thread.Sleep(100);

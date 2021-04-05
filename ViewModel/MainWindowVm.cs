@@ -376,12 +376,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             Task.Run(async () => await Task.Run(() =>
             {
                 IsBusy = true;
-                BusyContent = "Отправка сохраненных настроек на Частотомер";
-
-                //FrequencyCounterDevice.Instance.SetUserSettings();
-
-                BusyContent = string.Empty;
-
+                var x = FrequencyCounterDevice.Instance.GetModelVersion();
                 IsBusy = false;
             }));
         }
@@ -662,7 +657,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void StartTest()
         {
-            //if (!ValidationIsOpenPorts()) return;
+            if (!ValidationIsOpenPorts()) return;
 
             if (OpenMeasurementsData()) return;
 
@@ -943,48 +938,51 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             Get_a_b_koef();
 
+            #region Код для теста
 
-            var dvsValue1 = new DvsValue(5)
-            {
-                DeviceSpeedValue1 = new SpeedValue {IsVerified = true, IsСheckedNow = true, ResultValue = 4.32m},
-                DeviceSpeedValue2 = new SpeedValue(),
-                DeviceSpeedValue3 = new SpeedValue(),
-                DeviceSpeedValue4 = new SpeedValue(),
-                DeviceSpeedValue5 = new SpeedValue(),
-                ReferenceSpeedValue = 5
-            };
-            var dvsValue2 = new DvsValue(10)
-            {
-                DeviceSpeedValue1 = new SpeedValue {IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m},
-                ReferenceSpeedValue = 10
-            };
-            var dvsValue3 = new DvsValue(15)
-            {
-                DeviceSpeedValue1 = new SpeedValue {IsVerified = false, IsСheckedNow = true, ResultValue = 24.32m},
-                ReferenceSpeedValue = 15
-            };
-            var dvsValue4 = new DvsValue(20)
-            {
-                DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m },
-                ReferenceSpeedValue = 20
-            };
-            var dvsValue5 = new DvsValue(25)
-            {
-                DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = true, ResultValue = 24.32m },
-                ReferenceSpeedValue = 25
-            };
-            var dvsValue6 = new DvsValue(30)
-            {
-                DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m },
-                ReferenceSpeedValue = 30
-            };
+            //var dvsValue1 = new DvsValue(5)
+            //{
+            //    DeviceSpeedValue1 = new SpeedValue {IsVerified = true, IsСheckedNow = true, ResultValue = 4.32m},
+            //    DeviceSpeedValue2 = new SpeedValue(),
+            //    DeviceSpeedValue3 = new SpeedValue(),
+            //    DeviceSpeedValue4 = new SpeedValue(),
+            //    DeviceSpeedValue5 = new SpeedValue(),
+            //    ReferenceSpeedValue = 5
+            //};
+            //var dvsValue2 = new DvsValue(10)
+            //{
+            //    DeviceSpeedValue1 = new SpeedValue {IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m},
+            //    ReferenceSpeedValue = 10
+            //};
+            //var dvsValue3 = new DvsValue(15)
+            //{
+            //    DeviceSpeedValue1 = new SpeedValue {IsVerified = false, IsСheckedNow = true, ResultValue = 24.32m},
+            //    ReferenceSpeedValue = 15
+            //};
+            //var dvsValue4 = new DvsValue(20)
+            //{
+            //    DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m },
+            //    ReferenceSpeedValue = 20
+            //};
+            //var dvsValue5 = new DvsValue(25)
+            //{
+            //    DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = true, ResultValue = 24.32m },
+            //    ReferenceSpeedValue = 25
+            //};
+            //var dvsValue6 = new DvsValue(30)
+            //{
+            //    DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m },
+            //    ReferenceSpeedValue = 30
+            //};
 
-            CollectionDvsValue.Add(dvsValue1);
-            CollectionDvsValue.Add(dvsValue2);
-            CollectionDvsValue.Add(dvsValue3);
-            CollectionDvsValue.Add(dvsValue4);
-            CollectionDvsValue.Add(dvsValue5);
-            CollectionDvsValue.Add(dvsValue6);
+            //CollectionDvsValue.Add(dvsValue1);
+            //CollectionDvsValue.Add(dvsValue2);
+            //CollectionDvsValue.Add(dvsValue3);
+            //CollectionDvsValue.Add(dvsValue4);
+            //CollectionDvsValue.Add(dvsValue5);
+            //CollectionDvsValue.Add(dvsValue6);
+
+            #endregion
         }
 
         private void DefaultSpeedPoints_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
