@@ -121,6 +121,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         private readonly object _locker = new object();
 
         private MeasurementsData _measurementsData;
+
         /// <summary>
         /// Свойство для хранения условий поверки
         /// </summary>
@@ -573,12 +574,12 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// <summary>
         /// Скоростные точки для расчета коефа . Данные от сотрудников Аэро Трубы
         /// </summary>
-        private readonly decimal[] _vPoint = { 0m, 0.72m, 5m, 10m, 15m, 30m };
+        private readonly decimal[] _vPoint = {0m, 0.72m, 5m, 10m, 15m, 30m};
 
         /// <summary>
         /// Коефы расчитанные для v_point (для каждого диапазона) . Данные от сотрудников Аэро Трубы
         /// </summary>
-        private readonly decimal[] _kPoint = { 0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m };
+        private readonly decimal[] _kPoint = {0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m};
 
         private readonly decimal[] _aKoef = new decimal[5];
         private readonly decimal[] _bKoef = new decimal[5];
@@ -661,7 +662,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void StartTest()
         {
-            if (!ValidationIsOpenPorts()) return;
+            //if (!ValidationIsOpenPorts()) return;
 
             if (OpenMeasurementsData()) return;
 
@@ -700,6 +701,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                             ResultToXlsxDvs2();
 
                             IsTestActive = false;
+
+                            MessageBox.Show("Поверка завершена", "Внимание", MessageBoxButton.OK, MessageBoxImage.Asterisk, MessageBoxResult.OK);
                         }
 
                         break;
@@ -716,7 +719,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             setMeasurementsData.ShowDialog();
             var isContinue = setMeasurementsData.ViewModel.IsContinue;
             setMeasurementsData.Close();
-            
+
             Serialization();
 
             return !isContinue;
@@ -941,27 +944,47 @@ namespace VerificationAirVelocitySensor.ViewModel
             Get_a_b_koef();
 
 
-            //var dvsValue1 = new DvsValue(5)
-            //{
-            //    DeviceSpeedValue1 = new SpeedValue {IsVerified = true, IsСheckedNow = true, ResultValue = 4.32m}
-            //};
+            var dvsValue1 = new DvsValue(5)
+            {
+                DeviceSpeedValue1 = new SpeedValue {IsVerified = true, IsСheckedNow = true, ResultValue = 4.32m},
+                DeviceSpeedValue2 = new SpeedValue(),
+                DeviceSpeedValue3 = new SpeedValue(),
+                DeviceSpeedValue4 = new SpeedValue(),
+                DeviceSpeedValue5 = new SpeedValue(),
+                ReferenceSpeedValue = 5
+            };
+            var dvsValue2 = new DvsValue(10)
+            {
+                DeviceSpeedValue1 = new SpeedValue {IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m},
+                ReferenceSpeedValue = 10
+            };
+            var dvsValue3 = new DvsValue(15)
+            {
+                DeviceSpeedValue1 = new SpeedValue {IsVerified = false, IsСheckedNow = true, ResultValue = 24.32m},
+                ReferenceSpeedValue = 15
+            };
+            var dvsValue4 = new DvsValue(20)
+            {
+                DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m },
+                ReferenceSpeedValue = 20
+            };
+            var dvsValue5 = new DvsValue(25)
+            {
+                DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = true, ResultValue = 24.32m },
+                ReferenceSpeedValue = 25
+            };
+            var dvsValue6 = new DvsValue(30)
+            {
+                DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m },
+                ReferenceSpeedValue = 30
+            };
 
-            //var dvsValue2 = new DvsValue(10)
-            //{
-            //    DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m }
-            //};
-
-            //var dvsValue3 = new DvsValue(15)
-            //{
-            //    DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = true, ResultValue = 24.32m }
-            //};
-
-            //CollectionDvsValue.Add(dvsValue1);
-            //CollectionDvsValue.Add(dvsValue2);
-            //CollectionDvsValue.Add(dvsValue3);
-
-
-
+            CollectionDvsValue.Add(dvsValue1);
+            CollectionDvsValue.Add(dvsValue2);
+            CollectionDvsValue.Add(dvsValue3);
+            CollectionDvsValue.Add(dvsValue4);
+            CollectionDvsValue.Add(dvsValue5);
+            CollectionDvsValue.Add(dvsValue6);
         }
 
         private void DefaultSpeedPoints_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -980,7 +1003,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
-            var newSpeed = SpeedCalculation((decimal)e.ReferenceValue);
+            var newSpeed = SpeedCalculation((decimal) e.ReferenceValue);
             SpeedReferenceValue = newSpeed;
             UpdateAverageSpeedReferenceValue(SpeedReferenceValue);
         }
