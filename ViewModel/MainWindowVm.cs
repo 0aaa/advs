@@ -376,9 +376,11 @@ namespace VerificationAirVelocitySensor.ViewModel
             Task.Run(async () => await Task.Run(() =>
             {
                 IsBusy = true;
+                //TODO доделать когда буду работать с устройством.
                 //var x = FrequencyCounterDevice.Instance.GetModelVersion();
                 //OnOffFilter(1, true);
                 //OnOffFilter(2, true);
+                //SetGateTime(GateTime.S4)
                 IsBusy = false;
             }));
         }
