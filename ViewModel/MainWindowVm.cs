@@ -157,6 +157,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         public string StatusCurrentAction { get; set; }
 
         private const string PathUserSettings = "UserSettings.txt";
+        private const string FrequencyCounterId = "43-85/6";
 
         /// <summary>
         /// Активность BusyIndicator
@@ -367,7 +368,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         }
 
         private void OpenPortFrequencyCounterDevice()
-        {
+        {       
             FrequencyCounterDevice.Instance.OpenPort(ComPortFrequencyCounter);
 
             if (!FrequencyCounterIsOpen) return;
@@ -377,10 +378,12 @@ namespace VerificationAirVelocitySensor.ViewModel
             {
                 IsBusy = true;
                 //TODO доделать когда буду работать с устройством.
-                //var x = FrequencyCounterDevice.Instance.GetModelVersion();
-                //OnOffFilter(1, true);
-                //OnOffFilter(2, true);
-                //SetGateTime(GateTime.S4)
+                var answer = FrequencyCounterDevice.Instance.GetModelVersion();
+        
+                // 43-85/6
+                OnOffFilter(1, true);
+                OnOffFilter(2, true);
+                SetGateTime(GateTime.S4);
                 IsBusy = false;
             }));
         }
@@ -671,12 +674,12 @@ namespace VerificationAirVelocitySensor.ViewModel
             {
                 _ctsTask = new CancellationTokenSource();
 
-                IsBusy = true;
-                BusyContent = "Отправка сохраненных настроек на Частотомер";
-                FrequencyCounterDevice.Instance.RstCommand();
-                FrequencyCounterDevice.Instance.SetUserSettings();
-                IsBusy = false;
-                BusyContent = string.Empty;
+                //IsBusy = true;
+                //BusyContent = "Отправка сохраненных настроек на Частотомер";
+                //FrequencyCounterDevice.Instance.RstCommand();
+                //FrequencyCounterDevice.Instance.SetUserSettings();
+                //IsBusy = false;
+                //BusyContent = string.Empty;
 
                 switch (TypeTest)
                 {
@@ -839,7 +842,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             }
 
 
-            StatusCurrentAction = $"Тестирование завершено";
+            StatusCurrentAction = $"Поверка завершена ";
         }
 
         private void ResultToXlsxDvs2()
@@ -883,19 +886,20 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 //Условия поверки
 
-                ws.Cells[47, 14].Value = MeasurementsData.Verifier;
+                ws.Cells[47, 16].Value = MeasurementsData.Verifier;
                 ws.Cells[47, 21].Value = $"{DateTime.Now:dd.MM.yyyy}";
 
                 ws.Cells[23, 5].Value = MeasurementsData.Temperature;
                 ws.Cells[24, 5].Value = MeasurementsData.Humidity;
                 ws.Cells[25, 5].Value = MeasurementsData.Pressure;
                 ws.Cells[14, 6].Value = MeasurementsData.DeviceId;
-                ws.Cells[5, 4].Value = "Протокол ДВС-02 №00212522 от 10.01.2021";
+                //ws.Cells[5, 4].Value = "Протокол ДВС-02 №00212522 от 10.01.2021";
 
                 #endregion
 
+                var path = $"{DateTime.Now:dd.MM.yyyy_HH-mm-ss}.xlsx";
 
-                package.SaveAs(new FileInfo($"{DateTime.Now:dd.MM.yyyy_HH-mm-ss}.xlsx"));
+                package.SaveAs(new FileInfo(Path.Combine(PathSave, path)));
             }
         }
 

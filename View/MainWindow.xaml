@@ -347,7 +347,7 @@
                         </Viewbox>-->
 
                         <Viewbox>
-                            <TextBlock Text="{Binding SpeedReferenceValue , StringFormat={}{0:0 м/с}}" Width="80" Margin="0,5,10,5" FontSize="16" />
+                            <TextBlock Text="{Binding SpeedReferenceValue , StringFormat={}{0:0.00 м/с}}" Width="80" Margin="0,5,10,5" FontSize="16" />
                         </Viewbox>
                     </StackPanel>
 
