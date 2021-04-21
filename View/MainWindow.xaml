@@ -222,7 +222,7 @@
                                                                 </DataTrigger>
 
                                                                 <DataTrigger Binding="{Binding DeviceSpeedValue1.IsVerified}" Value="True">
-                                                                    <Setter Property="Background" Value="Green"/>
+                                                                    <Setter Property="Background" Value="#7BD87B"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
@@ -744,6 +744,7 @@
                     Background="Black" />
         </Border>
 
+
         <Border Grid.Row="1" Margin="20,30"
                 BorderBrush="Black"
                 Visibility="{Binding VisibilitySetSpeedPoints , Converter= {StaticResource BoolToVis}}"
@@ -785,6 +786,8 @@
                                       Grid.Column="0"
                                       CanUserAddRows="True"
                                       CanUserDeleteRows="True"
+                                      CanUserResizeRows="False"
+                                      CanUserResizeColumns="False"
                                       CanUserReorderColumns="False"
                                       CanUserSortColumns="False"
                                       AutoGenerateColumns="False"
@@ -800,7 +803,6 @@
                                                             <TextBlock Text="{Binding}"
                                                                        TextAlignment="Center"
                                                                        TextWrapping="Wrap"
-                                                                       Height="70"
                                                                        Width="95"
                                                                        HorizontalAlignment="Center"
                                                                        VerticalAlignment="Center" />
@@ -828,12 +830,12 @@
                                 </DataGrid.CellStyle>
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Номер" Binding="{Binding Id}" Width="55"/>
-                                    <DataGridTextColumn Header="Скорость возд.потока"
-                                                        Binding="{Binding Speed , StringFormat={}{0:0.0 м/с}}" />
-                                    <DataGridTextColumn Header="Начальная частота вращения двигателя"
-                                                        Binding="{Binding SetFrequency , StringFormat={}{0:0 Hz}}" />
-                                    <DataGridTextColumn Header="Макс. шаг коррекции частоты"
-                                                        Binding="{Binding MaxStep , StringFormat={}{0:0 Hz}}" />
+                                    <DataGridTextColumn Header="Скорость возд.потока м/с"
+                                                        Binding="{Binding Speed , StringFormat={}{0:0.0}}" />
+                                    <DataGridTextColumn Header="Вращения двигателя"
+                                                        Binding="{Binding SetFrequency , StringFormat={}{0:0}}" />
+                                    <DataGridTextColumn Header="Шаг коррекции частоты"
+                                                        Binding="{Binding MaxStep , StringFormat={}{0:0}}" />
                                     <DataGridTextColumn Header="Левый край"
                                                         Binding="{Binding MinEdge}" />
                                     <DataGridTextColumn Header="Правый край"
@@ -867,7 +869,7 @@
         <!--#endregion-->
 
         <!--#region IsBusy-->
-        <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>
+        <!--<xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>-->
         <!--#endregion-->
 
     </Grid>

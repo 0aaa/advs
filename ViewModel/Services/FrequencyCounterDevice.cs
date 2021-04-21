@@ -189,7 +189,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="speedPoint"></param>
         /// <returns></returns>
         private bool ValidationHzValue(decimal value, SpeedPoint speedPoint)
-            => value >= speedPoint.MinEdge || value <= speedPoint.MaxEdge;
+            => value >= speedPoint.MinEdge && value <= speedPoint.MaxEdge;
 
         /// <summary>
         /// Запрос версии

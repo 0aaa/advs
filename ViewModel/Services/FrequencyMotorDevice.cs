@@ -406,12 +406,16 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             throw new ArgumentOutOfRangeException($"{_setSpeed}", message);
         }
 
+        private bool IsCancellationRequested(CancellationTokenSource ctSource) =>
+            ctSource.Token.IsCancellationRequested;
+
         /// <summary>
         /// Метод для корректировки скорости эталона к установленному значению скорости
         /// </summary>
         /// <param name="averageReferenceSpeedValue"></param>
         /// <param name="speedPoint"></param>
-        public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue, SpeedPoint speedPoint)
+        /// <param name="ctsTask"></param>
+        public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue, SpeedPoint speedPoint ,ref CancellationTokenSource ctsTask)
         {
             var countAcceptValueErrorValidation = 0;
             var stepValue = speedPoint.MaxStep;
@@ -426,6 +430,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
             while (true)
             {
+                if (IsCancellationRequested(ctsTask)) return;
+
                 if (countChangeSign == 2)
                 {
                     stepValue = minStep;
