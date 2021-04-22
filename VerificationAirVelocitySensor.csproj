@@ -284,6 +284,9 @@
     <Compile Include="Style\Converter\BooleanConverter.cs" />
     <Compile Include="ViewModel\BaseVm\BaseVm.cs" />
     <Compile Include="ViewModel\BaseVm\RelayCommand.cs" />
+    <Compile Include="ViewModel\ConnectSettingsVm.cs" />
+    <Compile Include="ViewModel\DebugVm.cs" />
+    <Compile Include="ViewModel\FrequencyCounterVm.cs" />
     <Compile Include="ViewModel\MainWindowVm.cs" />
     <Compile Include="ViewModel\Services\FrequencyCounterDevice.cs" />
     <Compile Include="ViewModel\Services\FrequencyMotorDevice.cs" />
@@ -294,6 +297,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ViewModel\SpeedPointsVm.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
