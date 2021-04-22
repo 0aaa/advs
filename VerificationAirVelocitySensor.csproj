@@ -294,7 +294,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="View\MainWindow.xaml.cs" />
+    <Compile Include="View\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\SetMeasurementsData.xaml.cs">
       <DependentUpon>SetMeasurementsData.xaml</DependentUpon>
     </Compile>
@@ -311,8 +313,8 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="View\MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\SetMeasurementsData.xaml">
       <SubType>Designer</SubType>

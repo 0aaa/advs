@@ -130,12 +130,12 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0">
-                       <Viewbox>
-                           <TextBlock Text="ДВС-02"
+                        <Viewbox>
+                            <TextBlock Text="ДВС-02"
                                       Margin="0,1"
                                       Style="{StaticResource HeaderPageTextBlock}"
                                       HorizontalAlignment="Center" />
-                       </Viewbox>
+                        </Viewbox>
                     </Border>
                     <Border Grid.Row="1">
                         <Grid>
@@ -332,13 +332,13 @@
                                     Margin="20,10,0,10"
                                     Command="{Binding StartTestCommand}" />
                         </Viewbox>
-                       <Viewbox>
-                           <Button Content="Стоп"
+                        <Viewbox>
+                            <Button Content="Стоп"
                                    Height="25"
                                    Width="100"
                                    Margin="20,10,0,10"
                                    Command="{Binding StopTestCommand}" />
-                       </Viewbox>
+                        </Viewbox>
                     </StackPanel>
 
                     <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
