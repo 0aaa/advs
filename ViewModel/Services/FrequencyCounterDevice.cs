@@ -160,7 +160,10 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                     var data = _serialPort.ReadExisting();
 
                     if (string.IsNullOrEmpty(data))
+                    {
+                        Thread.Sleep(whileWait);
                         continue;
+                    }
 
                     data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
 
