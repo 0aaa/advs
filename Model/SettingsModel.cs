@@ -1,11 +1,9 @@
-﻿
-
-using System;
+﻿using VerificationAirVelocitySensor.ViewModel.BaseVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
 
 namespace VerificationAirVelocitySensor.Model
 {
-    public class SettingsModel
+    public class SettingsModel : BaseVm
     {
         //Com порты
         public string ComPortFrequencyMotor { get; set; }
@@ -17,13 +15,9 @@ namespace VerificationAirVelocitySensor.Model
         public bool FilterChannel1 { get; set; }
         public bool FilterChannel2 { get; set; }
 
+
         //Режим ручной настройки ПКЛ73
-
         public int SetFrequencyMotor { get; set; }
-        public Action StopFrequencyMotorAction { get; set; }
-        public Action SetSpeedFrequencyMotorAction { get; set; }
-
-
     }
 }
     

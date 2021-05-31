@@ -157,7 +157,6 @@ namespace VerificationAirVelocitySensor.ViewModel
         public string StatusCurrentAction { get; set; }
 
         private const string PathUserSettings = "UserSettings.txt";
-        private const string FrequencyCounterId = "43-85/6";
 
         /// <summary>
         /// Активность BusyIndicator

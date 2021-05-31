@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Ports;
@@ -34,16 +33,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         #endregion
 
 
-        public List<GateTimeDescription> GateTimeList { get; } = new List<GateTimeDescription>
-        {
-            new GateTimeDescription(GateTime.S1, "1 сек"),
-            new GateTimeDescription(GateTime.S4, "4 сек"),
-            new GateTimeDescription(GateTime.S7, "7 сек"),
-            new GateTimeDescription(GateTime.S10, "10 сек"),
-            new GateTimeDescription(GateTime.S100, "100 сек"),
-        };
-
-
         private FrequencyCounterDevice()
         {
         }
@@ -56,7 +45,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public bool IsOpen() => _serialPort != null && _serialPort.IsOpen;
 
 
-        #region Open , Close 
+        #region Open , Close
 
         public void OpenPort(string comPort)
         {
@@ -218,7 +207,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public void SetGateTime(GateTime gateTime, int sleepTime = 2000)
         {
-            WriteCommand($":ARM:TIMer {(int)gateTime} S", sleepTime);
+            WriteCommand($":ARM:TIMer {(int) gateTime} S", sleepTime);
         }
 
         /// <summary>
@@ -227,7 +216,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void SetChannelFrequency(FrequencyChannel frequencyChannel, int sleepTime = 2000)
         {
-            WriteCommand($":FUNCtion FREQuency {(int)frequencyChannel}", sleepTime);
+            WriteCommand($":FUNCtion FREQuency {(int) frequencyChannel}", sleepTime);
         }
 
 
@@ -294,6 +283,18 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         Channel1 = 1,
         Channel2 = 2,
         Channel3 = 3
+    }
+
+    public class FrequencyChannelDescription
+    {
+        public FrequencyChannelDescription(FrequencyChannel frequencyChannel , string description)
+        {
+            FrequencyChannel = frequencyChannel;
+            Description = description;
+        }
+
+        public FrequencyChannel FrequencyChannel { get; }
+        public string Description { get; }
     }
 
     /// <summary>
