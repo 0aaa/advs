@@ -224,8 +224,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         {
             switch (gateTime)
             {
-                case GateTime.S1:
-                    return 1000;
+                //case GateTime.S1:
+                //    return 1000;
                 case GateTime.S4:
                     return 4000;
                 case GateTime.S7:
@@ -302,7 +302,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
     /// </summary>
     public enum GateTime
     {
-        S1 = 1,
+        //S1 = 1,
         S4 = 4,
         S7 = 7,
         S10 = 10,

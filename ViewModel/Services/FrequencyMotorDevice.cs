@@ -212,9 +212,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                 commandWord[4] = 4; //0x04
                 commandWord[5] = 124; //0x7C
-                //TODO Разобраться с командным словом
-                //commandWord[4] = 0b_1000_0000;
-                //commandWord[5] = 0b_1101_1000;
                 var (wordCrc1, wordCrc2) = GetCrc16(commandWord, 6);
                 commandWord[6] = wordCrc1;
                 commandWord[7] = wordCrc2;

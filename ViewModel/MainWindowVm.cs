@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Xml.Serialization;
 using VerificationAirVelocitySensor.Model;
 using VerificationAirVelocitySensor.View;
@@ -23,24 +24,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region Частотомер ЧЗ-85/6
 
-        #region Set Gate Time
-
-        public RelayCommand SetGateTime1SCommand =>
-            new RelayCommand(() => SetGateTime(GateTime.S1), SetGateTime1SValidation);
-
-        public RelayCommand SetGateTime4SCommand =>
-            new RelayCommand(() => SetGateTime(GateTime.S4), SetGateTime4SValidation);
-
-        public RelayCommand SetGateTime7SCommand =>
-            new RelayCommand(() => SetGateTime(GateTime.S7), SetGateTime7SValidation);
-
-        public RelayCommand SetGateTime10SCommand =>
-            new RelayCommand(() => SetGateTime(GateTime.S10), SetGateTime10SValidation);
-
-        public RelayCommand SetGateTime100SCommand =>
-            new RelayCommand(() => SetGateTime(GateTime.S100), SetGateTime100SValidation);
-
-        #endregion
 
         public RelayCommand ResetCommand => new RelayCommand(FrequencyCounterDevice.Instance.RstCommand,
             FrequencyCounterDevice.Instance.IsOpen);
@@ -87,31 +70,32 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #endregion
 
-        public RelayCommand ChangeTypeTestOnDvs2Command =>
-            new RelayCommand(() => TypeTest = TypeTest.Dvs02, ChangeTypeTestOnDvs2Validation);
-
-        public RelayCommand ChangeTypeTestOnDvs1Command =>
-            new RelayCommand(() => TypeTest = TypeTest.Dvs01, ChangeTypeTestOnDvs1Validation);
-
-        public RelayCommand OpenCloseConnectionMenuCommand => new RelayCommand(OpenCloseConnectionMenu);
-
-        public RelayCommand OpenCloseDebuggingMenuCommand =>
-            new RelayCommand(OpenCloseDebuggingMenu, OpenCloseDebuggingMenuValidation);
-
-        public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
 
         public RelayCommand StartTestCommand => new RelayCommand(StartTest, StartTestValidation);
 
         public RelayCommand StopTestCommand => new RelayCommand(StopTest, StopTestValidation);
 
-        public RelayCommand OpenCloseSetSpeedPointsMenuCommand => new RelayCommand(OpenCloseSetSpeedPoints);
-
         public RelayCommand SaveSpeedsPointCommand => new RelayCommand(SaveSpeedPointsCollection);
-        public RelayCommand SetDefaultSpeedPointsCommand => new RelayCommand(SetDefaultSpeedPoints);
+
+        #region Команды смены страницы
+
+        public RelayCommand GoOnMainWindowCommand => new RelayCommand(ChangePageOnMainWindow , o => SelectedPage != SelectedPage.MainWindow);
+
+        public RelayCommand GoOnSettingsCommand => new RelayCommand(ChangePageOnSettings , o => SelectedPage != SelectedPage.Settings);
+
+        public RelayCommand GoOnCheckpointsCommand => new RelayCommand(ChangePageOnCheckPoints , o => SelectedPage != SelectedPage.Checkpoint);
+
+        #endregion
+
 
         #endregion
 
         #region Property
+
+        public UserControl FrameContent { get; set; }
+        public SelectedPage SelectedPage { get; set; }
+
+        public SettingsModel SettingsModel { get; set; }
 
         private CancellationTokenSource _ctsTask;
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
@@ -173,10 +157,6 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// </summary>
         public bool IsTestActive { get; set; }
 
-        public decimal FrequencyCounterValue { get; set; }
-        public bool VisibilityConnectionMenu { get; set; }
-        public bool VisibilityDebuggingMenu { get; set; }
-        public bool VisibilitySetSpeedPoints { get; set; }
 
         public ObservableCollection<string> PortsList { get; set; } =
             new ObservableCollection<string>(SerialPort.GetPortNames());
@@ -348,6 +328,28 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region RelayCommand Method
 
+        #region методы смены страниц
+
+        private void ChangePageOnMainWindow()
+        {
+            FrameContent = null;
+            SelectedPage = SelectedPage.MainWindow;
+        }
+
+        private void ChangePageOnSettings()
+        {
+            FrameContent = new SettingsView(new SettingsVm(SettingsModel));
+            SelectedPage = SelectedPage.Settings;
+        }
+
+        private void ChangePageOnCheckPoints()
+        {
+            FrameContent = new SpeedPointsView(SpeedPointsList , SaveSpeedsPointCommand);
+            SelectedPage = SelectedPage.Checkpoint;
+        }
+
+        #endregion
+
         private void SaveSpeedPointsCollection()
         {
             _userSettings.SpeedPointsList.Clear();
@@ -358,13 +360,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             Serialization();
         }
 
-        private void SetDefaultSpeedPoints()
-        {
-            SpeedPointsList.Clear();
-
-            foreach (var defaultSpeedPoint in _defaultSpeedPoints)
-                SpeedPointsList.Add(defaultSpeedPoint);
-        }
 
         private void OpenPortFrequencyCounterDevice()
         {       
@@ -405,52 +400,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             return true;
         }
 
-        private void UpdateComPortsSource()
-        {
-            var newPortList = new ObservableCollection<string>(SerialPort.GetPortNames());
-
-            //Добавляю новые итемы из полученной коллекции.
-            foreach (var port in newPortList)
-            {
-                if (!PortsList.Contains(port))
-                {
-                    PortsList.Add(port);
-                }
-            }
-
-
-            var deletePorts = new ObservableCollection<string>();
-
-            //Записываю старые итемы в коллекцию на удаление
-            foreach (var port in PortsList)
-            {
-                if (!newPortList.Contains(port))
-                {
-                    deletePorts.Add(port);
-                }
-            }
-
-            //Удаляю лишние элементы
-            foreach (var port in deletePorts)
-            {
-                PortsList.Remove(port);
-            }
-        }
-
-        private void OpenCloseConnectionMenu() => VisibilityConnectionMenu = !VisibilityConnectionMenu;
-        private void OpenCloseDebuggingMenu() => VisibilityDebuggingMenu = !VisibilityDebuggingMenu;
-
-        private void OpenCloseSetSpeedPoints()
-        {
-            VisibilitySetSpeedPoints = !VisibilitySetSpeedPoints;
-            //Если закрываем окошко, то выполняем сохранение коллекции скоростей в пользовательские настройки
-            if (VisibilitySetSpeedPoints) return;
-
-            SaveSpeedPointsCollection();
-            Serialization();
-        }
-
-        private bool OpenCloseDebuggingMenuValidation() => FrequencyMotorIsOpen;
 
         #region Частотомер ЧЗ-85/6
 
@@ -460,20 +409,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             GateTime = gateTime;
         }
 
-        private bool SetGateTime1SValidation() =>
-            GateTime != GateTime.S1 && FrequencyCounterDevice.Instance.IsOpen();
-
-        private bool SetGateTime4SValidation() =>
-            GateTime != GateTime.S4 && FrequencyCounterDevice.Instance.IsOpen();
-
-        private bool SetGateTime7SValidation() =>
-            GateTime != GateTime.S7 && FrequencyCounterDevice.Instance.IsOpen();
-
-        private bool SetGateTime10SValidation() =>
-            GateTime != GateTime.S10 && FrequencyCounterDevice.Instance.IsOpen();
-
-        private bool SetGateTime100SValidation() =>
-            GateTime != GateTime.S100 && FrequencyCounterDevice.Instance.IsOpen();
 
         private void SetFrequencyChannel(FrequencyChannel frequencyChannel)
         {
@@ -549,26 +484,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                     {Id = 7, Speed = 30m, SetFrequency = 16384, MaxStep = 30, MinEdge = 32.340m, MaxEdge = 39.948m}
             };
 
-        /// <summary>
-        /// коллекция для востановления дефолтных настроек
-        /// </summary>
-        private readonly ObservableCollection<SpeedPoint> _defaultSpeedPoints = new ObservableCollection<SpeedPoint>
-        {
-            new SpeedPoint
-                {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10, MinEdge = 0m, MaxEdge = 3.007m},
-            new SpeedPoint
-                {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20, MinEdge = 3.320m, MaxEdge = 8.837m},
-            new SpeedPoint
-                {Id = 3, Speed = 10m, SetFrequency = 5650, MaxStep = 20, MinEdge = 9.634m, MaxEdge = 15.595m},
-            new SpeedPoint
-                {Id = 4, Speed = 15m, SetFrequency = 7750, MaxStep = 20, MinEdge = 15.935m, MaxEdge = 22.366m},
-            new SpeedPoint
-                {Id = 5, Speed = 20m, SetFrequency = 10600, MaxStep = 30, MinEdge = 22.248m, MaxEdge = 29.124m},
-            new SpeedPoint
-                {Id = 6, Speed = 25m, SetFrequency = 13600, MaxStep = 30, MinEdge = 28.549m, MaxEdge = 35.895m},
-            new SpeedPoint
-                {Id = 7, Speed = 30m, SetFrequency = 16384, MaxStep = 30, MinEdge = 32.340m, MaxEdge = 39.948m}
-        };
 
         #region Работа с коэффициентом для обработки получаемого с анемометра значения
 
@@ -1124,5 +1039,12 @@ namespace VerificationAirVelocitySensor.ViewModel
     {
         Dvs01 = 1,
         Dvs02 = 2
+    }
+
+    public enum SelectedPage
+    {
+        MainWindow = 0,
+        Settings = 1,
+        Checkpoint = 3
     }
 }

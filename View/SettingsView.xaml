@@ -9,7 +9,7 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewModel:SettingsVm}"
              d:DesignHeight="300" d:DesignWidth="600">
-    <Grid Background="WhiteSmoke">
+    <Grid Background="#E2E1E1">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
             <ColumnDefinition Width="1*" />
@@ -160,6 +160,7 @@
                         <Grid Grid.Column="1">
                             <ComboBox Margin="8,25,2,25"
                                       ItemsSource="{Binding FrequencyChannelList}"
+                                      DisplayMemberPath="Description"
                                       SelectedValue="{Binding SettingsModel.FrequencyChannel}"
                                       SelectedValuePath="FrequencyChannel"
                                       HorizontalContentAlignment="Center"
@@ -183,6 +184,7 @@
                                       ItemsSource="{Binding GateTimeList}"
                                       SelectedValue="{Binding SettingsModel.GateTime}"
                                       SelectedValuePath="GateTime"
+                                      DisplayMemberPath="Description"
                                       HorizontalContentAlignment="Center"
                                       VerticalContentAlignment="Center"/>
                         </Grid>
