@@ -1,5 +1,6 @@
 ﻿using OfficeOpenXml;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
@@ -9,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Xml.Serialization;
 using VerificationAirVelocitySensor.Model;
 using VerificationAirVelocitySensor.View;
@@ -24,29 +26,9 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region Частотомер ЧЗ-85/6
 
-
         public RelayCommand ResetCommand => new RelayCommand(FrequencyCounterDevice.Instance.RstCommand,
             FrequencyCounterDevice.Instance.IsOpen);
 
-        public RelayCommand SetFrequencyChannel1Command =>
-            new RelayCommand(() => SetFrequencyChannel(FrequencyChannel.Channel1), SetFrequencyChannel1Validation);
-
-        public RelayCommand SetFrequencyChannel2Command =>
-            new RelayCommand(() => SetFrequencyChannel(FrequencyChannel.Channel2), SetFrequencyChannel2Validation);
-
-        public RelayCommand OnFilterChannel1Command =>
-            new RelayCommand(() => OnOffFilter(1, true), OnFilterChannel1Validation);
-
-        public RelayCommand OffFilterChannel1Command =>
-            new RelayCommand(() => OnOffFilter(1, false), OffFilterChannel1Validation);
-
-        public RelayCommand OnFilterChannel2Command =>
-            new RelayCommand(() => OnOffFilter(2, true), OnFilterChannel2Validation);
-
-        public RelayCommand OffFilterChannel2Command =>
-            new RelayCommand(() => OnOffFilter(2, false), OffFilterChannel2Validation);
-
-        public RelayCommand OpenPortFrequencyCounterCommand => new RelayCommand(OpenPortFrequencyCounterDevice);
 
         public RelayCommand ClosePortFrequencyCounterCommand =>
             new RelayCommand(() => FrequencyCounterDevice.Instance.ClosePort(), FrequencyCounterDevice.Instance.IsOpen);
@@ -55,18 +37,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region Анемометр / Частотный двигатель
 
-        public RelayCommand OpenPortFrequencyMotorCommand =>
-            new RelayCommand(() => FrequencyMotorDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyMotor));
-
         public RelayCommand ClosePortFrequencyMotorCommand =>
             new RelayCommand(() => FrequencyMotorDevice.Instance.ClosePort(), FrequencyMotorDevice.Instance.IsOpen);
-
-        public RelayCommand StopFrequencyMotorCommand =>
-            new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0, 0),
-                FrequencyMotorDevice.Instance.IsOpen);
-
-        public RelayCommand SetSpeedFrequencyMotorCommand => new RelayCommand(SetSpeedFrequencyMotorMethodAsync,
-            FrequencyMotorDevice.Instance.IsOpen);
 
         #endregion
 
@@ -79,14 +51,16 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region Команды смены страницы
 
-        public RelayCommand GoOnMainWindowCommand => new RelayCommand(ChangePageOnMainWindow , o => SelectedPage != SelectedPage.MainWindow);
+        public RelayCommand GoOnMainWindowCommand =>
+            new RelayCommand(ChangePageOnMainWindow, o => SelectedPage != SelectedPage.MainWindow);
 
-        public RelayCommand GoOnSettingsCommand => new RelayCommand(ChangePageOnSettings , o => SelectedPage != SelectedPage.Settings);
+        public RelayCommand GoOnSettingsCommand =>
+            new RelayCommand(ChangePageOnSettings, o => SelectedPage != SelectedPage.Settings);
 
-        public RelayCommand GoOnCheckpointsCommand => new RelayCommand(ChangePageOnCheckPoints , o => SelectedPage != SelectedPage.Checkpoint);
+        public RelayCommand GoOnCheckpointsCommand =>
+            new RelayCommand(ChangePageOnCheckPoints, o => SelectedPage != SelectedPage.Checkpoint);
 
         #endregion
-
 
         #endregion
 
@@ -121,7 +95,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             }
         }
 
-        private string _pathSave;
+        private string _pathSave = string.Empty;
 
         public string PathSave
         {
@@ -141,6 +115,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         public string StatusCurrentAction { get; set; }
 
         private const string PathUserSettings = "UserSettings.txt";
+        const string IdFreCounterDevice = "43-85/6";
 
         /// <summary>
         /// Активность BusyIndicator
@@ -249,13 +224,13 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void ChangePageOnSettings()
         {
-            FrameContent = new SettingsView(new SettingsVm(SettingsModel , UpdateSettingsAndSerialization));
+            FrameContent = new SettingsView(new SettingsVm(SettingsModel, UpdateSettingsAndSerialization));
             SelectedPage = SelectedPage.Settings;
         }
 
         private void ChangePageOnCheckPoints()
         {
-            FrameContent = new SpeedPointsView(SpeedPointsList , SaveSpeedsPointCommand);
+            FrameContent = new SpeedPointsView(SpeedPointsList, SaveSpeedsPointCommand);
             SelectedPage = SelectedPage.Checkpoint;
         }
 
@@ -272,25 +247,33 @@ namespace VerificationAirVelocitySensor.ViewModel
         }
 
 
-        private void OpenPortFrequencyCounterDevice()
-        {       
+        private bool OpenPortFrequencyCounterDevice()
+        {
             FrequencyCounterDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyCounter);
 
-            if (!FrequencyCounterIsOpen) return;
+            if (!FrequencyCounterIsOpen) return false;
 
 
-            Task.Run(async () => await Task.Run(() =>
+            IsBusy = true;
+            //TODO доделать когда буду работать с устройством.
+            var answer = FrequencyCounterDevice.Instance.GetModelVersion();
+            var validation = answer.Contains(IdFreCounterDevice);
+
+            if (validation == false)
             {
-                IsBusy = true;
-                //TODO доделать когда буду работать с устройством.
-                var answer = FrequencyCounterDevice.Instance.GetModelVersion();
-        
-                // 43-85/6
-                OnOffFilter(1, true);
-                OnOffFilter(2, true);
-                SetGateTime(GateTime.S4);
-                IsBusy = false;
-            }));
+                MessageBox.Show("Выбранный Com Port не является частотомером",
+                    "Ошибка",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return false;
+            }
+
+            OnOffFilter(1, SettingsModel.FilterChannel1);
+            OnOffFilter(2, SettingsModel.FilterChannel2);
+            SetGateTime(SettingsModel.GateTime);
+            IsBusy = false;
+
+            return true;
         }
 
         private static bool ValidationIsOpenPorts()
@@ -396,6 +379,13 @@ namespace VerificationAirVelocitySensor.ViewModel
             };
 
 
+        public List<TypeTestDescription> TypeTestDescriptionList { get; set; } = new List<TypeTestDescription>
+        {
+            new TypeTestDescription(TypeTest.Dvs01, "ДВС - 01"),
+            new TypeTestDescription(TypeTest.Dvs02, "ДВС - 02")
+        };
+
+
         #region Работа с коэффициентом для обработки получаемого с анемометра значения
 
         /// <summary>
@@ -484,27 +474,27 @@ namespace VerificationAirVelocitySensor.ViewModel
         private bool StartTestValidation() =>
             !IsTestActive;
 
-        private bool ChangeTypeTestOnDvs1Validation() => !IsTestActive && TypeTest == TypeTest.Dvs02;
-        private bool ChangeTypeTestOnDvs2Validation() => !IsTestActive && TypeTest == TypeTest.Dvs01;
+        public bool ChangeTypeTestOnValidation => !IsTestActive;
 
         private void StartTest()
         {
-            if (!ValidationIsOpenPorts()) return;
+            IsTestActive = true;
+
+            var validComMotor = FrequencyMotorDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyMotor);
+            var validComCounter = OpenPortFrequencyCounterDevice();
+
+            if (validComCounter == false || validComMotor == false)
+            {
+                IsTestActive = false;
+                return;
+            }
 
             if (OpenMeasurementsData()) return;
 
-            IsTestActive = true;
 
             Task.Run(async () => await Task.Run(() =>
             {
                 _ctsTask = new CancellationTokenSource();
-
-                //IsBusy = true;
-                //BusyContent = "Отправка сохраненных настроек на Частотомер";
-                //FrequencyCounterDevice.Instance.RstCommand();
-                //FrequencyCounterDevice.Instance.SetUserSettings();
-                //IsBusy = false;
-                //BusyContent = string.Empty;
 
                 switch (TypeTest)
                 {
@@ -529,7 +519,14 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                             IsTestActive = false;
 
-                            MessageBox.Show("Поверка завершена", "Внимание", MessageBoxButton.OK, MessageBoxImage.Asterisk, MessageBoxResult.OK);
+                            if (FrequencyCounterIsOpen)
+                                FrequencyCounterDevice.Instance.ClosePort();
+
+                            if (FrequencyMotorIsOpen)
+                                FrequencyMotorDevice.Instance.ClosePort();
+
+                            MessageBox.Show("Поверка завершена", "Внимание", MessageBoxButton.OK,
+                                MessageBoxImage.Asterisk, MessageBoxResult.OK);
                         }
 
                         break;
@@ -598,7 +595,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                 //Для скоростной точки 30, отключаю коррекцию скорости, так как труба не может разогнаться до 30 м/с . 
                 //А где-то до 27-29 м/с
                 if (point.Speed != 30)
-                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue, point , ref _ctsTask);
+                    FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue, point,
+                        ref _ctsTask);
 
                 if (IsCancellationRequested(_ctsTask)) return;
 
@@ -755,16 +753,16 @@ namespace VerificationAirVelocitySensor.ViewModel
             _userSettings = deserialization ?? new UserSettings();
 
 
-
             SettingsModel.FilterChannel1 = _userSettings.SettingsModel.FilterChannel1;
             SettingsModel.FilterChannel2 = _userSettings.SettingsModel.FilterChannel2;
             SettingsModel.FrequencyChannel = _userSettings.SettingsModel.FrequencyChannel;
             SettingsModel.GateTime = _userSettings.SettingsModel.GateTime;
             SettingsModel.ComPortFrequencyMotor = _userSettings.SettingsModel.ComPortFrequencyMotor;
             SettingsModel.ComPortFrequencyCounter = _userSettings.SettingsModel.ComPortFrequencyCounter;
-            //SettingsModel.SetFrequencyMotor = _userSettings.SettingsModel.SetFrequencyMotor;
+            SettingsModel.SetFrequencyMotor = 0;
             MeasurementsData = _userSettings.MeasurementsData;
             PathSave = _userSettings.PathSave;
+            TypeTest = _userSettings.TypeTest;
 
             if (_userSettings.SpeedPointsList != null && _userSettings.SpeedPointsList.Count != 0)
             {
@@ -954,6 +952,18 @@ namespace VerificationAirVelocitySensor.ViewModel
         public decimal MaxEdge { get; set; }
 
         public decimal MinEdge { get; set; }
+    }
+
+    public class TypeTestDescription
+    {
+        public TypeTestDescription(TypeTest typeTest, string description)
+        {
+            TypeTest = typeTest;
+            Description = description;
+        }
+
+        public TypeTest TypeTest { get; set; }
+        public string Description { get; set; }
     }
 
     public enum TypeTest

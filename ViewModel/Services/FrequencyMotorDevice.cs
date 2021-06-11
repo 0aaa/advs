@@ -116,7 +116,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #region Open , Close
 
-        public void OpenPort(string comPort)
+        public bool OpenPort(string comPort)
         {
             try
             {
@@ -124,13 +124,43 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 _serialPort = new SerialPort(_comPort, BaudRate) { ReadTimeout = 2000, WriteTimeout = 2000 };
                 _serialPort.Open();
 
+                var validation = ValidationComPort();
+                if (validation == false)
+                {
+                    throw new Exception("Выбранный Com Port не является ПЛК 73");
+                }
+
                 IsOpenUpdateMethod(_serialPort.IsOpen);
                 OnInterviewReferenceValue();
+                return true;
             }
             catch (Exception e)
             {
                 MessageBox.Show($"{e.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
             }
+        }
+
+        public bool ValidationComPort()
+        {
+            var attempt = 0;
+            while (true)
+            {
+                try
+                {
+                    GetReferenceValue();
+                    return true;
+                }
+                catch
+                {
+                    attempt++;
+                    if (attempt >= 3)
+                    {
+                        return false;
+                    }
+                }
+            }
+            
         }
 
         public void ClosePort()
@@ -254,9 +284,16 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             sendPack[7] = sendPackCrc2;
 
             _serialPort.Write(sendPack, 0, sendPack.Length);
+
+            var attempt = 0;
             while (_serialPort.BytesToRead < 7)
             {
                 Thread.Sleep(100);
+                attempt++;
+                if (attempt > 10)
+                {
+                    throw new Exception("Нет ответа от устройства");
+                }
             }
 
             var bytesToRead = _serialPort.BytesToRead;
