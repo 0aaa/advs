@@ -10,7 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Xml.Serialization;
 using VerificationAirVelocitySensor.Model;
 using VerificationAirVelocitySensor.View;
@@ -303,19 +302,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             SettingsModel.GateTime = gateTime;
         }
 
-
-        private void SetFrequencyChannel(FrequencyChannel frequencyChannel)
-        {
-            FrequencyCounterDevice.Instance.SetChannelFrequency(frequencyChannel);
-            SettingsModel.FrequencyChannel = frequencyChannel;
-        }
-
-        private bool SetFrequencyChannel1Validation() =>
-            SettingsModel.FrequencyChannel != FrequencyChannel.Channel1 && FrequencyCounterDevice.Instance.IsOpen();
-
-        private bool SetFrequencyChannel2Validation() =>
-            SettingsModel.FrequencyChannel != FrequencyChannel.Channel2 && FrequencyCounterDevice.Instance.IsOpen();
-
         private void OnOffFilter(int channel, bool isOn)
         {
             switch (channel)
@@ -332,18 +318,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-        private bool OnFilterChannel1Validation() =>
-            FrequencyCounterDevice.Instance.IsOpen() && !SettingsModel.FilterChannel1;
-
-        private bool OffFilterChannel1Validation() =>
-            FrequencyCounterDevice.Instance.IsOpen() && SettingsModel.FilterChannel1;
-
-        private bool OnFilterChannel2Validation() =>
-            FrequencyCounterDevice.Instance.IsOpen() && !SettingsModel.FilterChannel2;
-
-        private bool OffFilterChannel2Validation() =>
-            FrequencyCounterDevice.Instance.IsOpen() && SettingsModel.FilterChannel2;
 
         #endregion
 

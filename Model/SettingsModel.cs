@@ -1,6 +1,4 @@
-﻿using System;
-using System.Xml.Serialization;
-using VerificationAirVelocitySensor.ViewModel.BaseVm;
+﻿using VerificationAirVelocitySensor.ViewModel.BaseVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
 
 namespace VerificationAirVelocitySensor.Model
