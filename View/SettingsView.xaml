@@ -46,7 +46,7 @@
                                           HorizontalContentAlignment="Center"
                                           VerticalContentAlignment="Center"
                                           ItemsSource="{Binding PortsList}"
-                                          SelectedItem="{Binding SettingsModel.ComPortFrequencyCounter}">
+                                          SelectedItem="{Binding ComPortFrequencyCounter}">
                                     <b:Interaction.Triggers>
                                         <b:EventTrigger EventName="DropDownOpened">
                                             <b:InvokeCommandAction Command="{Binding UpdateComPortsSourceCommand}" />
@@ -72,7 +72,7 @@
                                           HorizontalContentAlignment="Center"
                                           VerticalContentAlignment="Center"
                                           ItemsSource="{Binding PortsList}"
-                                          SelectedItem="{Binding SettingsModel.ComPortFrequencyMotor}">
+                                          SelectedItem="{Binding ComPortFrequencyMotor}">
                                     <b:Interaction.Triggers>
                                         <b:EventTrigger EventName="DropDownOpened">
                                             <b:InvokeCommandAction Command="{Binding UpdateComPortsSourceCommand}" />
@@ -107,7 +107,7 @@
                             <Grid Grid.Row="1">
                                 <xctk:DecimalUpDown HorizontalAlignment="Center"
                                                     VerticalAlignment="Center"
-                                                    Value="{Binding SettingsModel.SetFrequencyMotor}"
+                                                    Value="{Binding SetFrequencyMotor}"
                                                     FormatString="{}{0:0}"
                                                     TextAlignment="Center"
                                                     ShowButtonSpinner="False"
@@ -161,7 +161,7 @@
                             <ComboBox Margin="8,25,2,25"
                                       ItemsSource="{Binding FrequencyChannelList}"
                                       DisplayMemberPath="Description"
-                                      SelectedValue="{Binding SettingsModel.FrequencyChannel}"
+                                      SelectedValue="{Binding FrequencyChannel}"
                                       SelectedValuePath="FrequencyChannel"
                                       HorizontalContentAlignment="Center"
                                       VerticalContentAlignment="Center"/>
@@ -182,7 +182,7 @@
                         <Grid Grid.Column="1">
                             <ComboBox Margin="5,25"
                                       ItemsSource="{Binding GateTimeList}"
-                                      SelectedValue="{Binding SettingsModel.GateTime}"
+                                      SelectedValue="{Binding GateTime}"
                                       SelectedValuePath="GateTime"
                                       DisplayMemberPath="Description"
                                       HorizontalContentAlignment="Center"
@@ -203,7 +203,7 @@
                         </Grid>
                         <Grid Grid.Column="1">
                             <CheckBox Margin="5,25"
-                                      IsChecked="{Binding SettingsModel.FilterChannel1}"
+                                      IsChecked="{Binding FilterChannel1}"
                                       VerticalAlignment="Center"
                                       HorizontalAlignment="Center"
                                       HorizontalContentAlignment="Center"
@@ -225,7 +225,7 @@
                         </Grid>
                         <Grid Grid.Column="1">
                             <CheckBox Margin="5,25"
-                                      IsChecked="{Binding SettingsModel.FilterChannel2}"
+                                      IsChecked="{Binding FilterChannel2}"
                                       VerticalAlignment="Center"
                                       HorizontalAlignment="Center"
                                       HorizontalContentAlignment="Center"

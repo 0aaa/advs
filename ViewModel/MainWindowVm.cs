@@ -56,7 +56,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         #region Анемометр / Частотный двигатель
 
         public RelayCommand OpenPortFrequencyMotorCommand =>
-            new RelayCommand(() => FrequencyMotorDevice.Instance.OpenPort(ComPortFrequencyMotor));
+            new RelayCommand(() => FrequencyMotorDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyMotor));
 
         public RelayCommand ClosePortFrequencyMotorCommand =>
             new RelayCommand(() => FrequencyMotorDevice.Instance.ClosePort(), FrequencyMotorDevice.Instance.IsOpen);
@@ -95,7 +95,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         public UserControl FrameContent { get; set; }
         public SelectedPage SelectedPage { get; set; }
 
-        public SettingsModel SettingsModel { get; set; }
+        public SettingsModel SettingsModel { get; set; } = new SettingsModel();
 
         private CancellationTokenSource _ctsTask;
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
@@ -163,11 +163,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public bool FrequencyCounterIsOpen { get; set; }
         public bool FrequencyMotorIsOpen { get; set; }
-
-        /// <summary>
-        /// Параметр для установки частотв трубы.
-        /// </summary>
-        public int SetFrequencyMotor { get; set; }
 
         /// <summary>
         /// Эталонное значение скорости с частотной трубы
@@ -240,90 +235,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             }
         }
 
-        private bool _filterChannel1;
-
-        public bool FilterChannel1
-        {
-            get => _filterChannel1;
-            set
-            {
-                _filterChannel1 = value;
-                OnPropertyChanged(nameof(FilterChannel1));
-                _userSettings.FilterChannel1 = value;
-                Serialization();
-            }
-        }
-
-        private bool _filterChannel2;
-
-        public bool FilterChannel2
-        {
-            get => _filterChannel2;
-            set
-            {
-                _filterChannel2 = value;
-                OnPropertyChanged(nameof(FilterChannel2));
-                _userSettings.FilterChannel2 = value;
-                Serialization();
-            }
-        }
-
-        private FrequencyChannel _frequencyChannel;
-
-        public FrequencyChannel FrequencyChannel
-        {
-            get => _frequencyChannel;
-            set
-            {
-                _frequencyChannel = value;
-                OnPropertyChanged(nameof(FrequencyChannel));
-                _userSettings.FrequencyChannel = value;
-                Serialization();
-            }
-        }
-
-        private GateTime _gateTime;
-
-        public GateTime GateTime
-        {
-            get => _gateTime;
-            set
-            {
-                _gateTime = value;
-                OnPropertyChanged(nameof(GateTime));
-                _userSettings.GateTime = value;
-                Serialization();
-            }
-        }
-
-        private string _comPortFrequencyMotor;
-
-        public string ComPortFrequencyMotor
-        {
-            get => _comPortFrequencyMotor;
-            set
-            {
-                _comPortFrequencyMotor = value;
-                OnPropertyChanged(nameof(ComPortFrequencyMotor));
-                _userSettings.ComPortFrequencyMotor = value;
-                Serialization();
-            }
-        }
-
-        private string _comPortFrequencyCounter;
-
-        public string ComPortFrequencyCounter
-        {
-            get => _comPortFrequencyCounter;
-            set
-            {
-                _comPortFrequencyCounter = value;
-                OnPropertyChanged(nameof(ComPortFrequencyCounter));
-                _userSettings.ComPortFrequencyCounter = value;
-                Serialization();
-            }
-        }
-
         #endregion
 
         #region RelayCommand Method
@@ -338,7 +249,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void ChangePageOnSettings()
         {
-            FrameContent = new SettingsView(new SettingsVm(SettingsModel));
+            FrameContent = new SettingsView(new SettingsVm(SettingsModel , UpdateSettingsAndSerialization));
             SelectedPage = SelectedPage.Settings;
         }
 
@@ -363,7 +274,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void OpenPortFrequencyCounterDevice()
         {       
-            FrequencyCounterDevice.Instance.OpenPort(ComPortFrequencyCounter);
+            FrequencyCounterDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyCounter);
 
             if (!FrequencyCounterIsOpen) return;
 
@@ -406,21 +317,21 @@ namespace VerificationAirVelocitySensor.ViewModel
         private void SetGateTime(GateTime gateTime)
         {
             FrequencyCounterDevice.Instance.SetGateTime(gateTime);
-            GateTime = gateTime;
+            SettingsModel.GateTime = gateTime;
         }
 
 
         private void SetFrequencyChannel(FrequencyChannel frequencyChannel)
         {
             FrequencyCounterDevice.Instance.SetChannelFrequency(frequencyChannel);
-            FrequencyChannel = frequencyChannel;
+            SettingsModel.FrequencyChannel = frequencyChannel;
         }
 
         private bool SetFrequencyChannel1Validation() =>
-            FrequencyChannel != FrequencyChannel.Channel1 && FrequencyCounterDevice.Instance.IsOpen();
+            SettingsModel.FrequencyChannel != FrequencyChannel.Channel1 && FrequencyCounterDevice.Instance.IsOpen();
 
         private bool SetFrequencyChannel2Validation() =>
-            FrequencyChannel != FrequencyChannel.Channel2 && FrequencyCounterDevice.Instance.IsOpen();
+            SettingsModel.FrequencyChannel != FrequencyChannel.Channel2 && FrequencyCounterDevice.Instance.IsOpen();
 
         private void OnOffFilter(int channel, bool isOn)
         {
@@ -428,11 +339,11 @@ namespace VerificationAirVelocitySensor.ViewModel
             {
                 case 1:
                     FrequencyCounterDevice.Instance.SwitchFilter(1, isOn);
-                    FilterChannel1 = isOn;
+                    SettingsModel.FilterChannel1 = isOn;
                     break;
                 case 2:
                     FrequencyCounterDevice.Instance.SwitchFilter(2, isOn);
-                    FilterChannel2 = isOn;
+                    SettingsModel.FilterChannel2 = isOn;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -440,23 +351,23 @@ namespace VerificationAirVelocitySensor.ViewModel
         }
 
         private bool OnFilterChannel1Validation() =>
-            FrequencyCounterDevice.Instance.IsOpen() && !FilterChannel1;
+            FrequencyCounterDevice.Instance.IsOpen() && !SettingsModel.FilterChannel1;
 
         private bool OffFilterChannel1Validation() =>
-            FrequencyCounterDevice.Instance.IsOpen() && FilterChannel1;
+            FrequencyCounterDevice.Instance.IsOpen() && SettingsModel.FilterChannel1;
 
         private bool OnFilterChannel2Validation() =>
-            FrequencyCounterDevice.Instance.IsOpen() && !FilterChannel2;
+            FrequencyCounterDevice.Instance.IsOpen() && !SettingsModel.FilterChannel2;
 
         private bool OffFilterChannel2Validation() =>
-            FrequencyCounterDevice.Instance.IsOpen() && FilterChannel2;
+            FrequencyCounterDevice.Instance.IsOpen() && SettingsModel.FilterChannel2;
 
         #endregion
 
         private void SetSpeedFrequencyMotorMethodAsync()
         {
             Task.Run(async () =>
-                await Task.Run(() => FrequencyMotorDevice.Instance.SetFrequency(SetFrequencyMotor, 0)));
+                await Task.Run(() => FrequencyMotorDevice.Instance.SetFrequency(SettingsModel.SetFrequencyMotor, 0)));
         }
 
         #endregion
@@ -604,7 +515,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                         LoadDefaultValueCollectionDvs2Value();
                         try
                         {
-                            StartTestDvs02(GateTime);
+                            StartTestDvs02(SettingsModel.GateTime);
                         }
                         catch (Exception e)
                         {
@@ -842,12 +753,16 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             var deserialization = Deserialization();
             _userSettings = deserialization ?? new UserSettings();
-            FilterChannel1 = _userSettings.FilterChannel1;
-            FilterChannel2 = _userSettings.FilterChannel2;
-            FrequencyChannel = _userSettings.FrequencyChannel;
-            GateTime = _userSettings.GateTime;
-            ComPortFrequencyMotor = _userSettings.ComPortFrequencyMotor;
-            ComPortFrequencyCounter = _userSettings.ComPortFrequencyCounter;
+
+
+
+            SettingsModel.FilterChannel1 = _userSettings.SettingsModel.FilterChannel1;
+            SettingsModel.FilterChannel2 = _userSettings.SettingsModel.FilterChannel2;
+            SettingsModel.FrequencyChannel = _userSettings.SettingsModel.FrequencyChannel;
+            SettingsModel.GateTime = _userSettings.SettingsModel.GateTime;
+            SettingsModel.ComPortFrequencyMotor = _userSettings.SettingsModel.ComPortFrequencyMotor;
+            SettingsModel.ComPortFrequencyCounter = _userSettings.SettingsModel.ComPortFrequencyCounter;
+            //SettingsModel.SetFrequencyMotor = _userSettings.SettingsModel.SetFrequencyMotor;
             MeasurementsData = _userSettings.MeasurementsData;
             PathSave = _userSettings.PathSave;
 
@@ -914,11 +829,17 @@ namespace VerificationAirVelocitySensor.ViewModel
         }
 
 
+        public void UpdateSettingsAndSerialization()
+        {
+            _userSettings.SettingsModel = SettingsModel;
+            Serialization();
+        }
+
         #region EventHandler Method
 
         private void FrequencyMotor_UpdateSetFrequency(object sender, UpdateSetFrequencyEventArgs e)
         {
-            SetFrequencyMotor = e.SetFrequency;
+            SettingsModel.SetFrequencyMotor = e.SetFrequency;
         }
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)

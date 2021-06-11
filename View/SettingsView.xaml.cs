@@ -1,6 +1,8 @@
 ﻿
 
+using System;
 using VerificationAirVelocitySensor.ViewModel;
+using VerificationAirVelocitySensor.ViewModel.Services;
 
 namespace VerificationAirVelocitySensor.View
 {

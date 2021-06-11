@@ -239,18 +239,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             }
         }
 
-        public void SetUserSettings()
-        {
-            var userSettings = Deserialization();
-
-            const int sleepTime = 5000;
-
-            SetChannelFrequency(userSettings.FrequencyChannel, sleepTime);
-            SetGateTime(userSettings.GateTime, sleepTime);
-            SwitchFilter(1, userSettings.FilterChannel1, sleepTime);
-            SwitchFilter(2, userSettings.FilterChannel2, sleepTime);
-        }
-
         private UserSettings Deserialization()
         {
             var deserializer = new Deserializer();
