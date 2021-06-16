@@ -182,7 +182,6 @@ namespace VerificationAirVelocitySensor.ViewModel
         public bool Dvs2ContentVisibility { get; set; } = true;
 
         //Все свойства что ниже, должны сохранятся пре перезапуске.
-        //TODO Позже сделать переключатель на интерфейсе.
         private TypeTest _typeTest = TypeTest.Dvs02;
 
         public TypeTest TypeTest
@@ -261,7 +260,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             if (validation == false)
             {
                 MessageBox.Show("Выбранный Com Port не является частотомером",
-                    "Ошибка",
+                    "Ошибка",   
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return false;
