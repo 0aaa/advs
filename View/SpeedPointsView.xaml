@@ -12,15 +12,17 @@
         <Grid Background="#E2E1E1">
             <Border>
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="100" />
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="60"/>
+                    </Grid.RowDefinitions>
+
                     <DataGrid ItemsSource="{Binding SpeedPointsList}"
                               RowBackground="LightGray"
                               AlternatingRowBackground="White"
                               Background="#E2E1E1"
-                              Grid.Column="0"
+                              Grid.Row="0"
+                              FontSize="16"
                               CanUserAddRows="True"
                               CanUserDeleteRows="True"
                               CanUserResizeRows="False"
@@ -28,7 +30,7 @@
                               CanUserReorderColumns="False"
                               CanUserSortColumns="False"
                               AutoGenerateColumns="False"
-                              Margin="5,10 , 10 ,10">
+                              Margin="5,10 , 10 ,10" >
                         <DataGrid.ColumnHeaderStyle>
                             <Style TargetType="DataGridColumnHeader">
                                 <Setter Property="ContentTemplate">
@@ -66,7 +68,7 @@
                             </Style>
                         </DataGrid.CellStyle>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Номер" Binding="{Binding Id}" Width="55" />
+                            <DataGridTextColumn Header="Номер" Binding="{Binding Id}"  />
                             <DataGridTextColumn Header="Скорость возд.потока м/с"
                                                 Binding="{Binding Speed , StringFormat={}{0:0.0}}" />
                             <DataGridTextColumn Header="Вращения двигателя"
@@ -81,18 +83,23 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <StackPanel Grid.Column="1"
-                                Margin="0,10"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Top">
+                    <StackPanel Grid.Row="1"
+                                Margin="20,0,0,0"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center">
                         <Button Height="30"
-                                Margin="0,20"
+                                Width="120"
+                                FontSize="15"
+                                Margin="0,0"
                                 Command="{Binding SaveSpeedsPointCommand}"
                                 Content="Сохранить"
                                 ToolTip="Сброс до настроек по умолчанию" />
                         <Button Height="30"
+                                Width="120"
+                                FontSize="15"
                                 Command="{Binding SetDefaultSpeedPointsCommand}"
-                                Margin="0,20"
+                                Margin="25,0,0,0"
                                 Content="По умолчанию"
                                 ToolTip="Сброс до настроек по умолчанию" />
                     </StackPanel>

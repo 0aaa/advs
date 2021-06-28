@@ -297,6 +297,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModel\SpeedPointsVm.cs" />
+    <Compile Include="View\DebugView.xaml.cs">
+      <DependentUpon>DebugView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -320,6 +323,10 @@
     <Page Include="Style\Styles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\DebugView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\MainWindow.xaml">
       <SubType>Designer</SubType>

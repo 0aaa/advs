@@ -251,16 +251,13 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             if (!FrequencyCounterIsOpen) return false;
 
-
-            IsBusy = true;
-            //TODO доделать когда буду работать с устройством.
             var answer = FrequencyCounterDevice.Instance.GetModelVersion();
             var validation = answer.Contains(IdFreCounterDevice);
 
             if (validation == false)
             {
                 MessageBox.Show("Выбранный Com Port не является частотомером",
-                    "Ошибка",   
+                    "Ошибка",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return false;
@@ -269,7 +266,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             OnOffFilter(1, SettingsModel.FilterChannel1);
             OnOffFilter(2, SettingsModel.FilterChannel2);
             SetGateTime(SettingsModel.GateTime);
-            IsBusy = false;
+
 
             return true;
         }
@@ -453,20 +450,32 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             IsTestActive = true;
 
-            var validComMotor = FrequencyMotorDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyMotor);
-            var validComCounter = OpenPortFrequencyCounterDevice();
-
-            if (validComCounter == false || validComMotor == false)
+            if (OpenMeasurementsData() == false)
             {
                 IsTestActive = false;
                 return;
             }
 
-            if (OpenMeasurementsData()) return;
 
 
             Task.Run(async () => await Task.Run(() =>
             {
+                IsBusy = true;
+                BusyContent = "Проверка подключенных устройств и их настройка";
+
+
+                var validComMotor = FrequencyMotorDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyMotor);
+                var validComCounter = OpenPortFrequencyCounterDevice();
+
+                if (validComCounter == false || validComMotor == false)
+                {
+                    IsTestActive = false;
+                    return;
+                }
+
+                IsBusy = false;
+                BusyContent = string.Empty;
+
                 _ctsTask = new CancellationTokenSource();
 
                 switch (TypeTest)
@@ -491,6 +500,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                             ResultToXlsxDvs2();
 
                             IsTestActive = false;
+                            IsBusy = false;
 
                             if (FrequencyCounterIsOpen)
                                 FrequencyCounterDevice.Instance.ClosePort();
@@ -517,9 +527,22 @@ namespace VerificationAirVelocitySensor.ViewModel
             var isContinue = setMeasurementsData.ViewModel.IsContinue;
             setMeasurementsData.Close();
 
+            if (isContinue == false)
+            {
+                MessageBox.Show("Отменено пользователем", "Внимание", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
             Serialization();
 
-            return !isContinue;
+            if (string.IsNullOrEmpty(PathSave))
+            {
+                MessageBox.Show("Не указан путь сохранения", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+
+            return isContinue;
         }
 
         /// <summary>

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModel="clr-namespace:VerificationAirVelocitySensor.ViewModel"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="Поверка датчиков скорости воздушного потока"
         d:DataContext="{d:DesignInstance Type=viewModel:MainWindowVm}"
@@ -40,19 +41,24 @@
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
 
                 <Grid Grid.Column="0">
-                    <Button Margin="25,5" Content="Главная страница" FontSize="18"
+                    <Button Margin="15,5" Content="Главная страница" FontSize="18"
                             Command="{Binding GoOnMainWindowCommand}" />
                 </Grid>
                 <Grid Grid.Column="1">
-                    <Button Margin="25,5" Content="Настройки" FontSize="18" Command="{Binding GoOnSettingsCommand}" />
+                    <Button Margin="15,5" Content="Настройки" FontSize="18" Command="{Binding GoOnSettingsCommand}" />
                 </Grid>
                 <Grid Grid.Column="2">
-                    <Button Margin="25,5" Content="Настройка чекпоинтов" FontSize="18"
+                    <Button Margin="15,5" Content="Чекпоинты" FontSize="18"
                             Command="{Binding GoOnCheckpointsCommand}" />
                 </Grid>
+                <Grid Grid.Column="3">
+                    <Button Margin="15,5" Content="Отладка" FontSize="18"
+                            Command="{Binding }" />
+                </Grid>  
 
             </Grid>
         </Border>
@@ -388,7 +394,7 @@
 
 
         <!--#region IsBusy-->
-        <!--<xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>-->
+        <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>
         <!--#endregion-->
 
     </Grid>

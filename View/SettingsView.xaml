@@ -85,54 +85,7 @@
 
                 </Border>
 
-                <!--Меню отладки-->
-
-                <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Margin="5">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*" />
-                            <ColumnDefinition Width="1*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Grid Column="0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="1*" />
-                                <RowDefinition Height="1*" />
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0">
-                                <TextBlock Text="Set Value" VerticalAlignment="Center"
-                                           HorizontalAlignment="Center"
-                                           FontSize="18" />
-                            </Grid>
-                            <Grid Grid.Row="1">
-                                <xctk:DecimalUpDown HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"
-                                                    Value="{Binding SetFrequencyMotor}"
-                                                    FormatString="{}{0:0}"
-                                                    TextAlignment="Center"
-                                                    ShowButtonSpinner="False"
-                                                    Minimum="0"
-                                                    Maximum="16384"
-                                                    Increment="100"
-                                                    Height="25"
-                                                    Width="80" />
-                            </Grid>
-                        </Grid>
-
-                        <Grid Column="1">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="1*" />
-                                <RowDefinition Height="1*" />
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0">
-                                <Button Margin="5,25" Content="Start" Command="{Binding SetSpeedFrequencyMotorCommand}"/>
-                            </Grid>
-                            <Grid Grid.Row="1">
-                                <Button Margin="5,25" Content="Stop" Command="{Binding StopFrequencyMotorCommand}" />
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Border>
+                
 
             </Grid>
         </Border>
