@@ -592,7 +592,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[id].DeviceSpeedValue1.ResultValue = value1;
                 CollectionDvsValue[id].DeviceSpeedValue1.IsVerified = true;
-                Thread.Sleep(timeOutCounter);
+                Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 CollectionDvsValue[id].DeviceSpeedValue2.IsСheckedNow = true;
@@ -601,7 +601,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[id].DeviceSpeedValue2.ResultValue = value2;
                 CollectionDvsValue[id].DeviceSpeedValue2.IsVerified = true;
-                Thread.Sleep(timeOutCounter);
+                Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 CollectionDvsValue[id].DeviceSpeedValue3.IsСheckedNow = true;
@@ -610,7 +610,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[id].DeviceSpeedValue3.ResultValue = value3;
                 CollectionDvsValue[id].DeviceSpeedValue3.IsVerified = true;
-                Thread.Sleep(timeOutCounter);
+                Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 CollectionDvsValue[id].DeviceSpeedValue4.IsСheckedNow = true;
@@ -619,7 +619,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[id].DeviceSpeedValue4.ResultValue = value4;
                 CollectionDvsValue[id].DeviceSpeedValue4.IsVerified = true;
-                Thread.Sleep(timeOutCounter);
+                Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 CollectionDvsValue[id].DeviceSpeedValue5.IsСheckedNow = true;
@@ -628,7 +628,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue[id].DeviceSpeedValue5.ResultValue = value5;
                 CollectionDvsValue[id].DeviceSpeedValue5.IsVerified = true;
-                Thread.Sleep(timeOutCounter);
+                Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 BusyContent = string.Empty;
