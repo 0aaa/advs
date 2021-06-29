@@ -285,6 +285,7 @@
     <Compile Include="Style\Converter\BooleanConverter.cs" />
     <Compile Include="ViewModel\BaseVm\BaseVm.cs" />
     <Compile Include="ViewModel\BaseVm\RelayCommand.cs" />
+    <Compile Include="ViewModel\DebugVm.cs" />
     <Compile Include="ViewModel\SettingsVm.cs" />
     <Compile Include="ViewModel\MainWindowVm.cs" />
     <Compile Include="ViewModel\Services\FrequencyCounterDevice.cs" />

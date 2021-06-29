@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using System.IO;
 using System.IO.Ports;
 using System.Threading;
 using System.Windows;
-using YamlDotNet.Serialization;
 
 namespace VerificationAirVelocitySensor.ViewModel.Services
 {
@@ -16,7 +14,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         private SerialPort _serialPort;
         private string _comPort;
         private const int BaudRate = 9600;
-        private const string PathUserSettings = "UserSettings.txt";
 
         #region EventHandler Open/Close Port
 
@@ -236,28 +233,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                     return 100000;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(gateTime), gateTime, null);
-            }
-        }
-
-        private UserSettings Deserialization()
-        {
-            var deserializer = new Deserializer();
-
-            using (var file = File.Open(PathUserSettings, FileMode.OpenOrCreate, FileAccess.Read))
-            {
-                using (var reader = new StreamReader(file))
-                {
-                    try
-                    {
-                        var userSettings = deserializer.Deserialize<UserSettings>(reader);
-
-                        return userSettings;
-                    }
-                    catch
-                    {
-                        return null;
-                    }
-                }
             }
         }
     }

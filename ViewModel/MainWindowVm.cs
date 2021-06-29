@@ -64,6 +64,9 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand GoOnCheckpointsCommand =>
             new RelayCommand(ChangePageOnCheckPoints, o => SelectedPage != SelectedPage.Checkpoint && !IsTestActive);
 
+        public RelayCommand GoOnDebugCommand =>
+            new RelayCommand(ChangePageOnDebug, o => SelectedPage != SelectedPage.Debug && !IsTestActive);
+
         #endregion
 
         #endregion
@@ -240,6 +243,21 @@ namespace VerificationAirVelocitySensor.ViewModel
             SelectedPage = SelectedPage.Checkpoint;
         }
 
+        private void ChangePageOnDebug()
+        {
+            var validComMotor = FrequencyMotorDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyMotor);
+
+            if (validComMotor == false)
+            {
+                MessageBox.Show("Выбранный Com Port не существует или не является Аэродинамической трубой", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            FrameContent = new DebugView();
+            SelectedPage = SelectedPage.Debug;
+        }
+
         #endregion
 
         private void SaveSpeedPointsCollection()
@@ -279,25 +297,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             return true;
         }
 
-        private static bool ValidationIsOpenPorts()
-        {
-            if (!FrequencyMotorDevice.Instance.IsOpen())
-            {
-                MessageBox.Show("Порт частотного двигателя закрыт", "Error", MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-                return false;
-            }
-
-            if (!FrequencyCounterDevice.Instance.IsOpen())
-            {
-                MessageBox.Show("Порт частотомера закрыт", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-
-            return true;
-        }
-
-
         #region Частотомер ЧЗ-85/6
 
         private void SetGateTime(GateTime gateTime)
@@ -324,12 +323,6 @@ namespace VerificationAirVelocitySensor.ViewModel
         }
 
         #endregion
-
-        private void SetSpeedFrequencyMotorMethodAsync()
-        {
-            Task.Run(async () =>
-                await Task.Run(() => FrequencyMotorDevice.Instance.SetFrequency(SettingsModel.SetFrequencyMotor, 0)));
-        }
 
         #endregion
 
@@ -549,6 +542,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             }
 
 
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             return isContinue;
         }
 
@@ -980,6 +974,7 @@ namespace VerificationAirVelocitySensor.ViewModel
     {
         MainWindow = 0,
         Settings = 1,
-        Checkpoint = 3
+        Checkpoint = 3,
+        Debug = 4
     }
 }

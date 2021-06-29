@@ -1,28 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;
+using VerificationAirVelocitySensor.ViewModel;
 
 namespace VerificationAirVelocitySensor.View
 {
     /// <summary>
     /// Логика взаимодействия для DebugView.xaml
     /// </summary>
-    public partial class DebugView : UserControl
+    public partial class DebugView
     {
+        private readonly DebugVm _debugVm = new DebugVm();
+
         public DebugView()
         {
             InitializeComponent();
+            DataContext = _debugVm;
+        }
+
+        private void DebugView_OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            _debugVm.Unloaded();
         }
     }
 }

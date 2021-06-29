@@ -57,7 +57,7 @@
                 </Grid>
                 <Grid Grid.Column="3">
                     <Button Margin="15,5" Content="Отладка" FontSize="18"
-                            Command="{Binding }" />
+                            Command="{Binding GoOnDebugCommand}" />
                 </Grid>
 
             </Grid>

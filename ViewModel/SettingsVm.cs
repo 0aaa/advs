@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.Ports;
-using System.Threading.Tasks;
 using VerificationAirVelocitySensor.Model;
 using VerificationAirVelocitySensor.ViewModel.BaseVm;
 using VerificationAirVelocitySensor.ViewModel.Services;
@@ -14,13 +13,6 @@ namespace VerificationAirVelocitySensor.ViewModel
         #region RelayCommand
 
         public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
-
-        public RelayCommand StopFrequencyMotorCommand =>
-            new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0, 0),
-                FrequencyMotorDevice.Instance.IsOpen);
-
-        public RelayCommand SetSpeedFrequencyMotorCommand => new RelayCommand(SetSpeedFrequencyMotorMethodAsync,
-            FrequencyMotorDevice.Instance.IsOpen);
 
         #endregion
 
@@ -167,11 +159,6 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         }
 
-        private void SetSpeedFrequencyMotorMethodAsync()
-        {
-            Task.Run(async () =>
-                await Task.Run(() => FrequencyMotorDevice.Instance.SetFrequency(SettingsModel.SetFrequencyMotor, 0)));
-        }
 
         private void UpdateComPortsSource()
         {
