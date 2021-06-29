@@ -82,4 +82,31 @@
         </DrawingImage.Drawing>
     </DrawingImage>
 
+    <DrawingImage x:Key="QuestionMark">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.ClipGeometry>
+                    <RectangleGeometry Rect="0,0,356.62,356.62" />
+                </DrawingGroup.ClipGeometry>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#FF000000">
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry FillRule="Nonzero" Figures="M178.31,0C79.99,0 0,79.99 0,178.311 0,276.632 79.99,356.62 178.31,356.62 276.63,356.62 356.62,276.631 356.62,178.31 356.62,79.989 276.63,0 178.31,0z M178.31,326.62C96.532,326.62 30,260.089 30,178.311 30,96.533 96.532,30 178.31,30 260.088,30 326.62,96.532 326.62,178.311 326.62,260.09 260.088,326.62 178.31,326.62z" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#FF000000">
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry FillRule="Nonzero" Figures="M178.31,66.949C142.73,66.949 113.783,95.896 113.783,131.476 113.783,139.76 120.499,146.476 128.783,146.476 137.067,146.476 143.783,139.76 143.783,131.476 143.783,112.438 159.272,96.949 178.31,96.949 197.348,96.949 212.837,112.438 212.837,131.476 212.837,150.514 197.348,166.003 178.31,166.003 170.026,166.003 163.31,172.719 163.31,181.003L163.31,214.918C163.31,223.202 170.026,229.918 178.31,229.918 186.594,229.918 193.31,223.202 193.31,214.918L193.31,194.243C221.681,187.464 242.837,161.893 242.837,131.475 242.837,95.896 213.89,66.949 178.31,66.949z" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#FF000000">
+                        <GeometryDrawing.Geometry>
+                            <EllipseGeometry RadiusX="20.999" RadiusY="20.999" Center="178.31,265.899" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
 </ResourceDictionary>

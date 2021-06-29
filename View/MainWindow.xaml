@@ -58,7 +58,7 @@
                 <Grid Grid.Column="3">
                     <Button Margin="15,5" Content="Отладка" FontSize="18"
                             Command="{Binding }" />
-                </Grid>  
+                </Grid>
 
             </Grid>
         </Border>
@@ -353,15 +353,32 @@
                         </StackPanel>
 
                         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
-                            <!--<Viewbox>
-                            <TextBlock Text="{Binding SetFrequencyMotor , StringFormat={}{0:0 n}}" Width="80" Margin="0,5,10,5" FontSize="16" />
-                        </Viewbox>-->
+                            <Grid Margin="50,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="15" />
+                                </Grid.ColumnDefinitions>
+                                <Grid Width="80"
+                                      Visibility="{Binding VisibilitySetFrequency , Converter={StaticResource BoolToVis}}"
+                                      Grid.Column="0"
+                                      Margin="0,5,10,5">
+                                    <TextBlock Text="{Binding SetFrequencyMotor , StringFormat={}{0:0 n}}"
+                                               FontSize="16" />
+                                </Grid>
+                                <Grid Grid.Column="1">
+                                    <Button Command="{Binding ChangeVisibilitySetFrequencyCommand}"
+                                            ToolTip="Вывести отображение частоты вращения частотного двигателя в условных еденицах"
+                                            Style="{StaticResource OnlyBackgroundButtonStyle}" >
+                                        <Image Source="{StaticResource QuestionMark}"/>
+                                    </Button>
+                                </Grid>
+                            </Grid>
 
-                            <Viewbox>
-                                <TextBlock Text="{Binding SpeedReferenceValue , StringFormat={}{0:0.00 м/с}}"
-                                           Width="80"
-                                           Margin="0,5,10,5" FontSize="16" />
-                            </Viewbox>
+
+                            <TextBlock Text="{Binding SpeedReferenceValue , StringFormat={}{0:0.00 м/с}}"
+                                       Width="80"
+                                       Margin="0,5,10,5" FontSize="16" />
+
                         </StackPanel>
 
                     </Grid>
@@ -394,7 +411,7 @@
 
 
         <!--#region IsBusy-->
-        <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>
+        <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}" />
         <!--#endregion-->
 
     </Grid>

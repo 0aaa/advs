@@ -48,16 +48,21 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public RelayCommand SaveSpeedsPointCommand => new RelayCommand(SaveSpeedPointsCollection);
 
+        public RelayCommand ChangeVisibilitySetFrequencyCommand => new RelayCommand(o =>
+        {
+            VisibilitySetFrequency = !VisibilitySetFrequency;
+        });
+
         #region Команды смены страницы
 
         public RelayCommand GoOnMainWindowCommand =>
-            new RelayCommand(ChangePageOnMainWindow, o => SelectedPage != SelectedPage.MainWindow);
+            new RelayCommand(ChangePageOnMainWindow, o => SelectedPage != SelectedPage.MainWindow && !IsTestActive);
 
         public RelayCommand GoOnSettingsCommand =>
-            new RelayCommand(ChangePageOnSettings, o => SelectedPage != SelectedPage.Settings);
+            new RelayCommand(ChangePageOnSettings, o => SelectedPage != SelectedPage.Settings && !IsTestActive);
 
         public RelayCommand GoOnCheckpointsCommand =>
-            new RelayCommand(ChangePageOnCheckPoints, o => SelectedPage != SelectedPage.Checkpoint);
+            new RelayCommand(ChangePageOnCheckPoints, o => SelectedPage != SelectedPage.Checkpoint && !IsTestActive);
 
         #endregion
 
@@ -142,6 +147,9 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// Эталонное значение скорости с частотной трубы
         /// </summary>
         public decimal SpeedReferenceValue { get; set; }
+
+        public int SetFrequencyMotor { get; set; }
+        public bool VisibilitySetFrequency { get; set; }
 
         public ObservableCollection<decimal> AverageSpeedReferenceCollection { get; set; } =
             new ObservableCollection<decimal>();
@@ -455,7 +463,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 IsTestActive = false;
                 return;
             }
-
 
 
             Task.Run(async () => await Task.Run(() =>
@@ -834,6 +841,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         private void FrequencyMotor_UpdateSetFrequency(object sender, UpdateSetFrequencyEventArgs e)
         {
             SettingsModel.SetFrequencyMotor = e.SetFrequency;
+            SetFrequencyMotor = e.SetFrequency;
         }
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
