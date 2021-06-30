@@ -21,7 +21,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public void Unloaded()
         {
-            SetSpeedFrequencyMotorMethod();
+            FrequencyMotorDevice.Instance.SetFrequency(0, 0);
             FrequencyMotorDevice.Instance.ClosePort();
         }
 

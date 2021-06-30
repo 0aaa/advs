@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModel="clr-namespace:VerificationAirVelocitySensor.ViewModel"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="Поверка датчиков скорости воздушного потока"
         d:DataContext="{d:DesignInstance Type=viewModel:MainWindowVm}"
@@ -583,17 +584,17 @@
 
         <!--#endregion-->
 
-        <!--#region Дополнительные окна настроек--><!--
+        <!--#region Дополнительные окна настроек-->
         <Grid Grid.Row="1">
             <Frame Content="{Binding FrameContent , UpdateSourceTrigger=PropertyChanged}"
                    NavigationUIVisibility="Hidden" />
         </Grid>
-        --><!--#endregion-->
+        <!--#endregion-->
 
 
-        <!--#region IsBusy--><!--
+        <!--#region IsBusy-->
         <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}" />
-        --><!--#endregion-->
+        <!--#endregion-->
 
     </Grid>
 </Window>

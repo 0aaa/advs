@@ -261,7 +261,11 @@ namespace VerificationAirVelocitySensor.ViewModel
                 IsBusy = false;
                 BusyContent = string.Empty;
 
-                FrameContent = new DebugView();
+                Application.Current.Dispatcher?.Invoke(() =>
+                {
+                    FrameContent = new DebugView();
+                });
+
                 SelectedPage = SelectedPage.Debug;
             }));
         }
@@ -482,6 +486,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (validComCounter == false || validComMotor == false)
                 {
                     IsTestActive = false;
+                    IsBusy = false;
+                    BusyContent = string.Empty;
                     return;
                 }
 
@@ -639,7 +645,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                var id = SpeedPointsList[i].Id - 1;
+                //Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList . Выходит -2
+                var id = SpeedPointsList[i].Id - 2;
 
                 CollectionDvsValue01[id].DeviceSpeedValue1.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
@@ -661,7 +668,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                var id = SpeedPointsList[i].Id - 1;
+                //Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList . Выходит -2
+                var id = SpeedPointsList[i].Id - 2;
 
                 CollectionDvsValue01[id].DeviceSpeedValue2.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
@@ -683,7 +691,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                var id = SpeedPointsList[i].Id - 1;
+                //Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList . Выходит -2
+                var id = SpeedPointsList[i].Id - 2;
 
                 CollectionDvsValue01[id].DeviceSpeedValue3.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";

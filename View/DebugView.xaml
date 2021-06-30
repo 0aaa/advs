@@ -53,7 +53,7 @@
                                                 FontSize="17"
                                                 Maximum="16384"
                                                 Increment="100"
-                                                Height="25"
+                                                Height="30"
                                                 Width="80" />
                             </Grid>
                         </Grid>
