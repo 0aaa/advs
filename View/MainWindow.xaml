@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModel="clr-namespace:VerificationAirVelocitySensor.ViewModel"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="Поверка датчиков скорости воздушного потока"
         d:DataContext="{d:DesignInstance Type=viewModel:MainWindowVm}"
@@ -70,11 +69,193 @@
                 <RowDefinition Height="1*" />
                 <RowDefinition Height="90" />
             </Grid.RowDefinitions>
+            <!--#region Dvs1 Test -->
+            <Grid Grid.Row="0"
+                  Visibility="{Binding Dvs1ContentVisibility , Converter={StaticResource BoolToVis}}">
+                <Border>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="100" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
 
+                        <Border Grid.Row="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="1*" />
+                                </Grid.RowDefinitions>
+
+                                <Border Grid.Row="0">
+                                    <Viewbox>
+                                        <TextBlock Text="ДВС-01"
+                                                   Margin="2,3"
+                                                   Style="{StaticResource HeaderPageTextBlock}"
+                                                   HorizontalAlignment="Center" />
+                                    </Viewbox>
+                                </Border>
+                                <Border Grid.Row="1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="1*" />
+                                            <ColumnDefinition Width="1*" />
+                                            <ColumnDefinition Width="1*" />
+                                            <ColumnDefinition Width="1*" />
+                                            <ColumnDefinition Width="1*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Grid Grid.Column="0">
+                                            <TextBlock Text="Эталон, м/с"
+                                                       Height="25" Width="80" TextAlignment="Center" FontSize="15" />
+                                        </Grid>
+                                        <Grid Grid.Column="1">
+                                            <TextBlock Text="№1"
+                                                       Height="25" Width="80" TextAlignment="Center" FontSize="15" />
+                                        </Grid>
+                                        <Grid Grid.Column="2">
+                                            <TextBlock Text="№2"
+                                                       Height="25" Width="80" TextAlignment="Center" FontSize="15" />
+                                        </Grid>
+                                        <Grid Grid.Column="3">
+                                            <TextBlock Text="№3"
+                                                       Height="25" Width="80" TextAlignment="Center" FontSize="15" />
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+
+                            </Grid>
+                        </Border>
+                        <Border Grid.Row="1">
+                            <Grid>
+                                <Grid>
+                                    <ItemsControl ItemsSource="{Binding CollectionDvsValue01}"
+                                                  BorderThickness="0"
+                                                  Padding="0"
+                                                  Margin="0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="100" />
+                                                        <ColumnDefinition Width="1*" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <Grid Column="0">
+                                                        <TextBox Text="{Binding ReferenceSpeedValue}"
+                                                                 Height="25" Width="80"
+                                                                 TextAlignment="Center"
+                                                                 FontSize="15" Margin="2"
+                                                                 HorizontalContentAlignment="Center"
+                                                                 VerticalContentAlignment="Center" />
+                                                    </Grid>
+                                                    <Grid Grid.Column="1">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="1*" />
+                                                            <ColumnDefinition Width="1*" />
+                                                            <ColumnDefinition Width="1*" />
+                                                            <ColumnDefinition Width="1*" />
+                                                            <ColumnDefinition Width="1*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid Grid.Column="0">
+                                                            <TextBox Text="{Binding DeviceSpeedValue1.ResultValue}"
+                                                                     Height="25" Width="80"
+                                                                     TextAlignment="Center" FontSize="15"
+                                                                     HorizontalContentAlignment="Center"
+                                                                     VerticalContentAlignment="Center">
+                                                                <TextBox.Style>
+                                                                    <Style TargetType="TextBox">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger
+                                                                                Binding="{Binding DeviceSpeedValue1.IsСheckedNow}"
+                                                                                Value="True">
+                                                                                <Setter Property="Background"
+                                                                                        Value="Yellow" />
+                                                                            </DataTrigger>
+
+                                                                            <DataTrigger
+                                                                                Binding="{Binding DeviceSpeedValue1.IsVerified}"
+                                                                                Value="True">
+                                                                                <Setter Property="Background"
+                                                                                        Value="#7BD87B" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBox.Style>
+                                                            </TextBox>
+                                                        </Grid>
+                                                        <Grid Grid.Column="1">
+                                                            <TextBox Text="{Binding DeviceSpeedValue2.ResultValue}"
+                                                                     Height="25" Width="80"
+                                                                     TextAlignment="Center" FontSize="15"
+                                                                     HorizontalContentAlignment="Center"
+                                                                     VerticalContentAlignment="Center">
+                                                                <TextBox.Style>
+                                                                    <Style TargetType="TextBox">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger
+                                                                                Binding="{Binding DeviceSpeedValue2.IsСheckedNow}"
+                                                                                Value="True">
+                                                                                <Setter Property="Background"
+                                                                                        Value="Yellow" />
+                                                                            </DataTrigger>
+
+                                                                            <DataTrigger
+                                                                                Binding="{Binding DeviceSpeedValue2.IsVerified}"
+                                                                                Value="True">
+                                                                                <Setter Property="Background"
+                                                                                        Value="#7BD87B" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBox.Style>
+                                                            </TextBox>
+                                                        </Grid>
+                                                        <Grid Grid.Column="2">
+                                                            <TextBox Text="{Binding DeviceSpeedValue3.ResultValue}"
+                                                                     Height="25" Width="80"
+                                                                     TextAlignment="Center" FontSize="15"
+                                                                     HorizontalContentAlignment="Center"
+                                                                     VerticalContentAlignment="Center">
+                                                                <TextBox.Style>
+                                                                    <Style TargetType="TextBox">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger
+                                                                                Binding="{Binding DeviceSpeedValue3.IsСheckedNow}"
+                                                                                Value="True">
+                                                                                <Setter Property="Background"
+                                                                                        Value="Yellow" />
+                                                                            </DataTrigger>
+
+                                                                            <DataTrigger
+                                                                                Binding="{Binding DeviceSpeedValue3.IsVerified}"
+                                                                                Value="True">
+                                                                                <Setter Property="Background"
+                                                                                        Value="#7BD87B" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBox.Style>
+                                                            </TextBox>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Grid>
+
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+            <!--#endregion-->
+
+            <!--#region Dvs2 Test -->
             <Grid Grid.Row="0"
                   Visibility="{Binding Dvs2ContentVisibility , Converter={StaticResource BoolToVis}}">
                 <Border>
-                    <!--#region Dvs2 Test -->
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="100" />
@@ -312,9 +493,9 @@
                             </Grid>
                         </Border>
                     </Grid>
-                    <!--#endregion-->
                 </Border>
             </Grid>
+            <!--#endregion-->
 
             <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
@@ -368,8 +549,8 @@
                                 <Grid Grid.Column="1">
                                     <Button Command="{Binding ChangeVisibilitySetFrequencyCommand}"
                                             ToolTip="Вывести отображение частоты вращения частотного двигателя в условных еденицах"
-                                            Style="{StaticResource OnlyBackgroundButtonStyle}" >
-                                        <Image Source="{StaticResource QuestionMark}"/>
+                                            Style="{StaticResource OnlyBackgroundButtonStyle}">
+                                        <Image Source="{StaticResource QuestionMark}" />
                                     </Button>
                                 </Grid>
                             </Grid>
@@ -402,17 +583,17 @@
 
         <!--#endregion-->
 
-        <!--#region Дополнительные окна настроек-->
+        <!--#region Дополнительные окна настроек--><!--
         <Grid Grid.Row="1">
             <Frame Content="{Binding FrameContent , UpdateSourceTrigger=PropertyChanged}"
                    NavigationUIVisibility="Hidden" />
         </Grid>
-        <!--#endregion-->
+        --><!--#endregion-->
 
 
-        <!--#region IsBusy-->
+        <!--#region IsBusy--><!--
         <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}" />
-        <!--#endregion-->
+        --><!--#endregion-->
 
     </Grid>
 </Window>
