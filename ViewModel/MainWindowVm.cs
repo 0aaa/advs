@@ -436,8 +436,11 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region Test Method
 
-        public ObservableCollection<DvsValue> CollectionDvsValue { get; set; }
-            = new ObservableCollection<DvsValue>();
+        public ObservableCollection<DvsValue01> CollectionDvsValue01 { get; set; }
+            = new ObservableCollection<DvsValue01>();
+
+        public ObservableCollection<DvsValue02> CollectionDvsValue02 { get; set; }
+            = new ObservableCollection<DvsValue02>();
 
         private void StopTest()
         {
@@ -490,6 +493,34 @@ namespace VerificationAirVelocitySensor.ViewModel
                 switch (TypeTest)
                 {
                     case TypeTest.Dvs01:
+                        LoadDefaultValueCollectionDvs1Value();
+                        try
+                        {
+                            StartTestDvs01(SettingsModel.GateTime);
+                        }
+                        catch (Exception e)
+                        {
+                            GlobalLog.Log.Debug(e, e.Message);
+                        }
+                        finally
+                        {
+                            FrequencyMotorDevice.Instance.SetFrequency(0, 0);
+
+                            //ResultToXlsxDvs2();
+
+                            IsTestActive = false;
+                            IsBusy = false;
+
+                            if (FrequencyCounterIsOpen)
+                                FrequencyCounterDevice.Instance.ClosePort();
+
+                            if (FrequencyMotorIsOpen)
+                                FrequencyMotorDevice.Instance.ClosePort();
+
+                            MessageBox.Show("Поверка завершена", "Внимание", MessageBoxButton.OK,
+                                MessageBoxImage.Asterisk, MessageBoxResult.OK);
+                        }
+
 
                         break;
                     case TypeTest.Dvs02:
@@ -556,23 +587,142 @@ namespace VerificationAirVelocitySensor.ViewModel
         }
 
         /// <summary>
-        /// Метод для очистки от старых значений  CollectionDvsValue и заполнением пустых значений. Для ДВС2
+        /// Метод для очистки от старых значений  CollectionDvsValue02 и заполнением пустых значений. Для ДВС2
         /// </summary>
         public void LoadDefaultValueCollectionDvs2Value()
         {
             Application.Current.Dispatcher?.Invoke(() =>
             {
-                CollectionDvsValue?.Clear();
+                CollectionDvsValue02?.Clear();
 
-                CollectionDvsValue = new ObservableCollection<DvsValue>();
+                CollectionDvsValue02 = new ObservableCollection<DvsValue02>();
 
                 foreach (var point in SpeedPointsList)
-                    CollectionDvsValue.Add(new DvsValue(point.Speed));
+                    CollectionDvsValue02.Add(new DvsValue02(point.Speed));
             });
         }
 
 
-        public void StartTestDvs02(GateTime gateTime)
+        /// <summary>
+        /// Метод для очистки от старых значений  CollectionDvsValue01 и заполнением пустых значений. Для ДВС1
+        /// </summary>
+        public void LoadDefaultValueCollectionDvs1Value()
+        {
+            Application.Current.Dispatcher?.Invoke(() =>
+            {
+                CollectionDvsValue01?.Clear();
+
+                CollectionDvsValue01 = new ObservableCollection<DvsValue01>();
+
+                //Первую точку (0.7) скипаю и последнюю (30) 
+                for (var i = 1; i < SpeedPointsList.Count - 1; i++)
+                {
+                    CollectionDvsValue01.Add(new DvsValue01(SpeedPointsList[i].Speed));
+                }
+            });
+        }
+
+        public void StartTestDvs01(GateTime gateTime)
+        {
+            StatusCurrentAction = "Запуск тестирования";
+
+            var timeOutCounter = FrequencyCounterDevice.Instance.GateTimeToMSec(gateTime) + 1000;
+
+            if (IsCancellationRequested(_ctsTask)) return;
+
+            //Первую точку (0.7) скипаю и последнюю (30) 
+            //Снятие 1-ого значения
+            for (var i = 1; i < SpeedPointsList.Count - 1; i++)
+            {
+                //Метод разгона трубы
+                Preparation(i);
+
+                if (IsCancellationRequested(_ctsTask)) return;
+
+                var id = SpeedPointsList[i].Id - 1;
+
+                CollectionDvsValue01[id].DeviceSpeedValue1.IsСheckedNow = true;
+                StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
+                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter);
+                if (IsCancellationRequested(_ctsTask)) return;
+                CollectionDvsValue01[id].DeviceSpeedValue1.ResultValue = value1;
+                CollectionDvsValue01[id].DeviceSpeedValue1.IsVerified = true;
+                Thread.Sleep(50);
+                if (IsCancellationRequested(_ctsTask)) return;
+
+            }
+
+            //Первую точку (0.7) скипаю и последнюю (30) 
+            //Снятие 2-ого значения
+            for (var i = 1; i < SpeedPointsList.Count - 1; i++)
+            {
+                //Метод разгона трубы
+                Preparation(i);
+
+                if (IsCancellationRequested(_ctsTask)) return;
+
+                var id = SpeedPointsList[i].Id - 1;
+
+                CollectionDvsValue01[id].DeviceSpeedValue2.IsСheckedNow = true;
+                StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
+                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter);
+                if (IsCancellationRequested(_ctsTask)) return;
+                CollectionDvsValue01[id].DeviceSpeedValue2.ResultValue = value1;
+                CollectionDvsValue01[id].DeviceSpeedValue2.IsVerified = true;
+                Thread.Sleep(50);
+                if (IsCancellationRequested(_ctsTask)) return;
+
+            }
+
+            //Первую точку (0.7) скипаю и последнюю (30) 
+            //Снятие 3-его значения
+            for (var i = 1; i < SpeedPointsList.Count - 1; i++)
+            {
+                //Метод разгона трубы
+                Preparation(i);
+
+                if (IsCancellationRequested(_ctsTask)) return;
+
+                var id = SpeedPointsList[i].Id - 1;
+
+                CollectionDvsValue01[id].DeviceSpeedValue3.IsСheckedNow = true;
+                StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
+                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter);
+                if (IsCancellationRequested(_ctsTask)) return;
+                CollectionDvsValue01[id].DeviceSpeedValue3.ResultValue = value1;
+                CollectionDvsValue01[id].DeviceSpeedValue3.IsVerified = true;
+                Thread.Sleep(50);
+                if (IsCancellationRequested(_ctsTask)) return;
+
+            }
+
+
+            StatusCurrentAction = $"Поверка завершена ";
+        }
+
+        private void Preparation(int i)
+        {
+            StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed}";
+
+            _acceptCorrectionReference = false;
+
+            FrequencyMotorDevice.Instance.SetFrequency(SpeedPointsList[i].SetFrequency, SpeedPointsList[i].Speed);
+            //Время ожидания для стабилизации трубы
+            Thread.Sleep(WaitSetFrequency);
+
+            Application.Current.Dispatcher?.Invoke(AverageSpeedReferenceCollection.Clear);
+
+            StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Корректировка скорости";
+
+            FrequencyMotorDevice.Instance.CorrectionSpeedMotor(ref _averageSpeedReferenceValue, SpeedPointsList[i],
+                ref _ctsTask);
+
+            _acceptCorrectionReference = true;
+
+            Thread.Sleep(100);
+        }
+
+        private void StartTestDvs02(GateTime gateTime)
         {
             StatusCurrentAction = "Запуск тестирования";
 
@@ -619,55 +769,55 @@ namespace VerificationAirVelocitySensor.ViewModel
                 var id = point.Id - 1;
 
 
-                CollectionDvsValue[id].DeviceSpeedValue1.IsСheckedNow = true;
+                CollectionDvsValue02[id].DeviceSpeedValue1.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 1";
                 var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[id].DeviceSpeedValue1.ResultValue = value1;
-                CollectionDvsValue[id].DeviceSpeedValue1.IsVerified = true;
+                CollectionDvsValue02[id].DeviceSpeedValue1.ResultValue = value1;
+                CollectionDvsValue02[id].DeviceSpeedValue1.IsVerified = true;
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[id].DeviceSpeedValue2.IsСheckedNow = true;
+                CollectionDvsValue02[id].DeviceSpeedValue2.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 2";
                 var value2 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[id].DeviceSpeedValue2.ResultValue = value2;
-                CollectionDvsValue[id].DeviceSpeedValue2.IsVerified = true;
+                CollectionDvsValue02[id].DeviceSpeedValue2.ResultValue = value2;
+                CollectionDvsValue02[id].DeviceSpeedValue2.IsVerified = true;
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[id].DeviceSpeedValue3.IsСheckedNow = true;
+                CollectionDvsValue02[id].DeviceSpeedValue3.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 3";
                 var value3 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[id].DeviceSpeedValue3.ResultValue = value3;
-                CollectionDvsValue[id].DeviceSpeedValue3.IsVerified = true;
+                CollectionDvsValue02[id].DeviceSpeedValue3.ResultValue = value3;
+                CollectionDvsValue02[id].DeviceSpeedValue3.IsVerified = true;
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[id].DeviceSpeedValue4.IsСheckedNow = true;
+                CollectionDvsValue02[id].DeviceSpeedValue4.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 4";
                 var value4 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[id].DeviceSpeedValue4.ResultValue = value4;
-                CollectionDvsValue[id].DeviceSpeedValue4.IsVerified = true;
+                CollectionDvsValue02[id].DeviceSpeedValue4.ResultValue = value4;
+                CollectionDvsValue02[id].DeviceSpeedValue4.IsVerified = true;
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue[id].DeviceSpeedValue5.IsСheckedNow = true;
+                CollectionDvsValue02[id].DeviceSpeedValue5.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 5";
                 var value5 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
                 if (IsCancellationRequested(_ctsTask)) return;
-                CollectionDvsValue[id].DeviceSpeedValue5.ResultValue = value5;
-                CollectionDvsValue[id].DeviceSpeedValue5.IsVerified = true;
+                CollectionDvsValue02[id].DeviceSpeedValue5.ResultValue = value5;
+                CollectionDvsValue02[id].DeviceSpeedValue5.IsVerified = true;
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 BusyContent = string.Empty;
                 IsBusy = false;
 
-                CollectionDvsValue[id].ReferenceSpeedValue = _averageSpeedReferenceValue;
+                CollectionDvsValue02[id].ReferenceSpeedValue = _averageSpeedReferenceValue;
             }
 
 
@@ -704,12 +854,12 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 for (var i = 0; i < 7; i++)
                 {
-                    AddValueInCell(ws.Cells[i + 12, 12], CollectionDvsValue[i].ReferenceSpeedValue);
-                    AddValueInCell(ws.Cells[i + 12, 13], CollectionDvsValue[i].DeviceSpeedValue1.ResultValue);
-                    AddValueInCell(ws.Cells[i + 12, 14], CollectionDvsValue[i].DeviceSpeedValue2.ResultValue);
-                    AddValueInCell(ws.Cells[i + 12, 15], CollectionDvsValue[i].DeviceSpeedValue3.ResultValue);
-                    AddValueInCell(ws.Cells[i + 12, 16], CollectionDvsValue[i].DeviceSpeedValue4.ResultValue);
-                    AddValueInCell(ws.Cells[i + 12, 17], CollectionDvsValue[i].DeviceSpeedValue5.ResultValue);
+                    AddValueInCell(ws.Cells[i + 12, 12], CollectionDvsValue02[i].ReferenceSpeedValue);
+                    AddValueInCell(ws.Cells[i + 12, 13], CollectionDvsValue02[i].DeviceSpeedValue1.ResultValue);
+                    AddValueInCell(ws.Cells[i + 12, 14], CollectionDvsValue02[i].DeviceSpeedValue2.ResultValue);
+                    AddValueInCell(ws.Cells[i + 12, 15], CollectionDvsValue02[i].DeviceSpeedValue3.ResultValue);
+                    AddValueInCell(ws.Cells[i + 12, 16], CollectionDvsValue02[i].DeviceSpeedValue4.ResultValue);
+                    AddValueInCell(ws.Cells[i + 12, 17], CollectionDvsValue02[i].DeviceSpeedValue5.ResultValue);
                 }
 
 
@@ -781,7 +931,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             #region Код для теста
 
-            //var dvsValue1 = new DvsValue(5)
+            //var dvsValue1 = new DvsValue02(5)
             //{
             //    DeviceSpeedValue1 = new SpeedValue {IsVerified = true, IsСheckedNow = true, ResultValue = 4.32m},
             //    DeviceSpeedValue2 = new SpeedValue(),
@@ -790,38 +940,38 @@ namespace VerificationAirVelocitySensor.ViewModel
             //    DeviceSpeedValue5 = new SpeedValue(),
             //    ReferenceSpeedValue = 5
             //};
-            //var dvsValue2 = new DvsValue(10)
+            //var dvsValue2 = new DvsValue02(10)
             //{
             //    DeviceSpeedValue1 = new SpeedValue {IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m},
             //    ReferenceSpeedValue = 10
             //};
-            //var dvsValue3 = new DvsValue(15)
+            //var dvsValue3 = new DvsValue02(15)
             //{
             //    DeviceSpeedValue1 = new SpeedValue {IsVerified = false, IsСheckedNow = true, ResultValue = 24.32m},
             //    ReferenceSpeedValue = 15
             //};
-            //var dvsValue4 = new DvsValue(20)
+            //var dvsValue4 = new DvsValue02(20)
             //{
             //    DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m },
             //    ReferenceSpeedValue = 20
             //};
-            //var dvsValue5 = new DvsValue(25)
+            //var dvsValue5 = new DvsValue02(25)
             //{
             //    DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = true, ResultValue = 24.32m },
             //    ReferenceSpeedValue = 25
             //};
-            //var dvsValue6 = new DvsValue(30)
+            //var dvsValue6 = new DvsValue02(30)
             //{
             //    DeviceSpeedValue1 = new SpeedValue { IsVerified = false, IsСheckedNow = false, ResultValue = 14.32m },
             //    ReferenceSpeedValue = 30
             //};
 
-            //CollectionDvsValue.Add(dvsValue1);
-            //CollectionDvsValue.Add(dvsValue2);
-            //CollectionDvsValue.Add(dvsValue3);
-            //CollectionDvsValue.Add(dvsValue4);
-            //CollectionDvsValue.Add(dvsValue5);
-            //CollectionDvsValue.Add(dvsValue6);
+            //CollectionDvsValue02.Add(dvsValue1);
+            //CollectionDvsValue02.Add(dvsValue2);
+            //CollectionDvsValue02.Add(dvsValue3);
+            //CollectionDvsValue02.Add(dvsValue4);
+            //CollectionDvsValue02.Add(dvsValue5);
+            //CollectionDvsValue02.Add(dvsValue6);
 
             #endregion
         }

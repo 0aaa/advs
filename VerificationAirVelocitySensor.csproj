@@ -280,6 +280,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\DvsValue01.cs" />
     <Compile Include="Model\SettingsModel.cs" />
     <Compile Include="Model\SpeedValue.cs" />
     <Compile Include="Style\Converter\BooleanConverter.cs" />
@@ -347,7 +348,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\DvsValue.cs" />
+    <Compile Include="Model\DvsValue02.cs" />
     <Compile Include="Model\MeasurementsData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

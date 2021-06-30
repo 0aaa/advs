@@ -139,7 +139,7 @@
                         <Border Grid.Row="1">
                             <Grid>
                                 <Grid>
-                                    <ItemsControl ItemsSource="{Binding CollectionDvsValue}"
+                                    <ItemsControl ItemsSource="{Binding CollectionDvsValue02}"
                                                   BorderThickness="0"
                                                   Padding="0"
                                                   Margin="0">
