@@ -245,17 +245,25 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void ChangePageOnDebug()
         {
-            var validComMotor = FrequencyMotorDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyMotor);
-
-            if (validComMotor == false)
+            Task.Run(async () => await Task.Run(() =>
             {
-                MessageBox.Show("Выбранный Com Port не существует или не является Аэродинамической трубой", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+                IsBusy = true;
+                BusyContent = "Проверка подключения Аэродинамической трубы";
+                var validComMotor = FrequencyMotorDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyMotor);
 
-            FrameContent = new DebugView();
-            SelectedPage = SelectedPage.Debug;
+                if (validComMotor == false)
+                {
+                    IsBusy = false;
+                    BusyContent = string.Empty;
+                    return;
+                }
+
+                IsBusy = false;
+                BusyContent = string.Empty;
+
+                FrameContent = new DebugView();
+                SelectedPage = SelectedPage.Debug;
+            }));
         }
 
         #endregion
@@ -282,6 +290,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             if (validation == false)
             {
+                FrequencyCounterDevice.Instance.ClosePort();
                 MessageBox.Show("Выбранный Com Port не является частотомером",
                     "Ошибка",
                     MessageBoxButton.OK,

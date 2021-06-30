@@ -127,6 +127,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 var validation = ValidationComPort();
                 if (validation == false)
                 {
+                    _serialPort.Close();
                     throw new Exception("Выбранный Com Port не является ПЛК 73");
                 }
 

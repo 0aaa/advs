@@ -56,6 +56,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             }
             catch (Exception e)
             {
+                _serialPort?.Close();
                 MessageBox.Show($"{e.Message}", "Ошибка открытия порта Частотомера", MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
