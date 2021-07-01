@@ -35,6 +35,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1*" />
                                 <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1*" />
                             </Grid.ColumnDefinitions>
 
                             <Grid Grid.Column="0">
@@ -55,6 +56,13 @@
                                                 Increment="100"
                                                 Height="30"
                                                 Width="80" />
+                            </Grid>
+                            <Grid Grid.Column="2">
+                                <TextBlock Text="{Binding SpeedReferenceValue , StringFormat={}{0:0.00 м/с}}"
+                                           Width="80"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontSize="17"/>
                             </Grid>
                         </Grid>
 
