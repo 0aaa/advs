@@ -13,6 +13,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         public RelayCommand SetSpeedFrequencyMotorCommand => new RelayCommand(SetSpeedFrequencyMotorMethod, FrequencyMotorDevice.Instance.IsOpen);
 
         public int SetFrequencyMotor { get; set; }
+        public decimal SpeedReferenceValue { get; set; }
 
         private void SetSpeedFrequencyMotorMethod()
         {

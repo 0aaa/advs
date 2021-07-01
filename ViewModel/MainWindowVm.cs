@@ -149,7 +149,17 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// <summary>
         /// Эталонное значение скорости с частотной трубы
         /// </summary>
-        public decimal SpeedReferenceValue { get; set; }
+        private decimal _speedReferenceValue;
+
+        public decimal SpeedReferenceValue
+        {
+            get => _speedReferenceValue;
+            set
+            {
+                _speedReferenceValue = value;
+                OnPropertyChanged(nameof(SpeedReferenceValue));
+            }
+        }
 
         public int SetFrequencyMotor { get; set; }
         public bool VisibilitySetFrequency { get; set; }
@@ -263,7 +273,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 Application.Current.Dispatcher?.Invoke(() =>
                 {
-                    FrameContent = new DebugView();
+                    FrameContent = new DebugView(ref _speedReferenceValue);
                 });
 
                 SelectedPage = SelectedPage.Debug;
@@ -656,7 +666,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 CollectionDvsValue01[id].DeviceSpeedValue1.IsVerified = true;
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
-
             }
 
             //Первую точку (0.7) скипаю и последнюю (30) 
@@ -679,7 +688,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 CollectionDvsValue01[id].DeviceSpeedValue2.IsVerified = true;
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
-
             }
 
             //Первую точку (0.7) скипаю и последнюю (30) 
@@ -702,7 +710,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 CollectionDvsValue01[id].DeviceSpeedValue3.IsVerified = true;
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
-
             }
 
 
