@@ -5,7 +5,7 @@ using System.Windows;
 // Общие сведения об этой сборке предоставляются следующим набором
 // набор атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
-[assembly: AssemblyTitle("ПО для поверки ДВС 01-02")]
+[assembly: AssemblyTitle("ПО для поверки ДСВ-01 и ДВС-02")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Минимакс-94")]

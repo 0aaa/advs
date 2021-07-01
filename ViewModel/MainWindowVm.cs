@@ -174,7 +174,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             if (AverageSpeedReferenceCollection.Count > 5 && _acceptCorrectionReference == false)
             {
                 AverageSpeedReferenceCollection.RemoveAt(0);
-                //AverageSpeedReferenceCollection.Clear();
             }
 
             AverageSpeedReferenceCollection.Add(newValue);
@@ -357,25 +356,25 @@ namespace VerificationAirVelocitySensor.ViewModel
             new ObservableCollection<SpeedPoint>
             {
                 new SpeedPoint
-                    {Id = 1, Speed = 0.7m, SetFrequency = 445, MaxStep = 10, MinEdge = 0m, MaxEdge = 3.007m},
+                    {Id = 1, Speed = 0.7m, SetFrequency = 500, MaxStep = 10, MinEdge = 0m, MaxEdge = 3.007m},
                 new SpeedPoint
-                    {Id = 2, Speed = 5m, SetFrequency = 2605, MaxStep = 20, MinEdge = 3.320m, MaxEdge = 8.837m},
+                    {Id = 2, Speed = 5m, SetFrequency = 2765, MaxStep = 50, MinEdge = 3.320m, MaxEdge = 8.837m},
                 new SpeedPoint
-                    {Id = 3, Speed = 10m, SetFrequency = 5650, MaxStep = 20, MinEdge = 9.634m, MaxEdge = 15.595m},
+                    {Id = 3, Speed = 10m, SetFrequency = 5390, MaxStep = 50, MinEdge = 9.634m, MaxEdge = 15.595m},
                 new SpeedPoint
-                    {Id = 4, Speed = 15m, SetFrequency = 7750, MaxStep = 20, MinEdge = 15.935m, MaxEdge = 22.366m},
+                    {Id = 4, Speed = 15m, SetFrequency = 8130, MaxStep = 50, MinEdge = 15.935m, MaxEdge = 22.366m},
                 new SpeedPoint
-                    {Id = 5, Speed = 20m, SetFrequency = 10600, MaxStep = 30, MinEdge = 22.248m, MaxEdge = 29.124m},
+                    {Id = 5, Speed = 20m, SetFrequency = 10810, MaxStep = 80, MinEdge = 22.248m, MaxEdge = 29.124m},
                 new SpeedPoint
-                    {Id = 6, Speed = 25m, SetFrequency = 13600, MaxStep = 30, MinEdge = 28.549m, MaxEdge = 35.895m},
+                    {Id = 6, Speed = 25m, SetFrequency = 13570, MaxStep = 90, MinEdge = 28.549m, MaxEdge = 35.895m},
                 new SpeedPoint
-                    {Id = 7, Speed = 30m, SetFrequency = 16384, MaxStep = 30, MinEdge = 32.340m, MaxEdge = 39.948m}
+                    {Id = 7, Speed = 30m, SetFrequency = 16384, MaxStep = 100, MinEdge = 32.340m, MaxEdge = 39.948m}
             };
 
 
         public List<TypeTestDescription> TypeTestDescriptionList { get; set; } = new List<TypeTestDescription>
         {
-            new TypeTestDescription(TypeTest.Dvs01, "ДВС - 01"),
+            new TypeTestDescription(TypeTest.Dvs01, "ДСВ - 01"),
             new TypeTestDescription(TypeTest.Dvs02, "ДВС - 02")
         };
 
@@ -620,7 +619,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
 
         /// <summary>
-        /// Метод для очистки от старых значений  CollectionDvsValue01 и заполнением пустых значений. Для ДВС1
+        /// Метод для очистки от старых значений  CollectionDvsValue01 и заполнением пустых значений. Для ДСВ1
         /// </summary>
         public void LoadDefaultValueCollectionDvs1Value()
         {
@@ -907,9 +906,25 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 #endregion
 
-                var path = $"{DateTime.Now:dd.MM.yyyy_HH-mm-ss}.xlsx";
+                var path = $"Протокол ДВС-02 № {MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}.xlsx";
 
-                package.SaveAs(new FileInfo(Path.Combine(PathSave, path)));
+                var fullPath = Path.Combine(PathSave, path);
+                var attemptSave = 1;
+
+                while (true)
+                {
+                    if (File.Exists(fullPath))
+                    {
+                        path = $"Протокол ДВС-02 № {MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
+                        fullPath = Path.Combine(PathSave, path);
+                        attemptSave++;
+                        continue;
+                    }
+
+                    break;
+                }
+
+                package.SaveAs(new FileInfo(fullPath));
             }
         }
 
@@ -961,9 +976,25 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[14, 6].Value = MeasurementsData.DeviceId;
                 #endregion
 
-                var path = $"{DateTime.Now:dd.MM.yyyy_HH-mm-ss}.xlsx";
+                var path = $"Протокол ДСВ-01 № {MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}.xlsx";
 
-                package.SaveAs(new FileInfo(Path.Combine(PathSave, path)));
+                var fullPath = Path.Combine(PathSave, path);
+                var attemptSave = 1;
+
+                while (true)
+                {
+                    if (File.Exists(fullPath))
+                    {
+                        path = $"Протокол ДСВ-01 № {MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
+                        fullPath = Path.Combine(PathSave, path);
+                        attemptSave++;
+                        continue;
+                    }
+
+                    break;
+                }
+
+                package.SaveAs(new FileInfo(fullPath));
             }
         }
 
