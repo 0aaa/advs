@@ -17,7 +17,11 @@ namespace VerificationAirVelocitySensor.Model
         /// <summary>
         /// Снимаемое значение скорости с эталона
         /// </summary>
-        public decimal? ReferenceSpeedValue { get; set; }
+        public decimal? ReferenceSpeedValue1 { get; set; }
+        public decimal? ReferenceSpeedValue2 { get; set; }
+        public decimal? ReferenceSpeedValue3 { get; set; }
+
+        public decimal? ReferenceSpeedValueMain { get; set; }
 
         public SpeedValue DeviceSpeedValue1 { get; set; } = new SpeedValue();
         public SpeedValue DeviceSpeedValue2 { get; set; } = new SpeedValue();

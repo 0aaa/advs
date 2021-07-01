@@ -666,6 +666,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                 CollectionDvsValue01[id].DeviceSpeedValue1.IsVerified = true;
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
+
+                CollectionDvsValue01[id].ReferenceSpeedValue1 = _averageSpeedReferenceValue;
             }
 
             //Первую точку (0.7) скипаю и последнюю (30) 
@@ -688,6 +690,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                 CollectionDvsValue01[id].DeviceSpeedValue2.IsVerified = true;
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
+
+                CollectionDvsValue01[id].ReferenceSpeedValue1 = _averageSpeedReferenceValue;
             }
 
             //Первую точку (0.7) скипаю и последнюю (30) 
@@ -710,6 +714,17 @@ namespace VerificationAirVelocitySensor.ViewModel
                 CollectionDvsValue01[id].DeviceSpeedValue3.IsVerified = true;
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
+
+                CollectionDvsValue01[id].ReferenceSpeedValue1 = _averageSpeedReferenceValue;
+            }
+
+            foreach (var dvsValue01 in CollectionDvsValue01)
+            {
+                var average = (dvsValue01.ReferenceSpeedValue1 +
+                               dvsValue01.ReferenceSpeedValue2 +
+                               dvsValue01.ReferenceSpeedValue3) / 3;
+
+                if (average != null) dvsValue01.ReferenceSpeedValueMain = Math.Round((decimal) average, 2);
             }
 
 
