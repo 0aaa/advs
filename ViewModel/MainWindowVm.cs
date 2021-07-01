@@ -522,7 +522,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                         {
                             FrequencyMotorDevice.Instance.SetFrequency(0, 0);
 
-                            //ResultToXlsxDvs2();
+                            ResultToXlsxDvs1();
 
                             IsTestActive = false;
                             IsBusy = false;
@@ -864,7 +864,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                     break;
 
                 var errorMessage =
-                    "Отсутствует файл образец test_cs_protocol.xlsx  " +
+                    "Отсутствует файл образец Dvs2.xlsx  " +
                     "Пожалуйста поместите файл и повторите попытку(ОК). Или нажмите отмена для пропуска создания .xlsx";
 
                 var mb = MessageBox.Show(errorMessage, "Ошибка", MessageBoxButton.OKCancel);
@@ -905,6 +905,60 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[14, 6].Value = MeasurementsData.DeviceId;
                 //ws.Cells[5, 4].Value = "Протокол ДВС-02 №00212522 от 10.01.2021";
 
+                #endregion
+
+                var path = $"{DateTime.Now:dd.MM.yyyy_HH-mm-ss}.xlsx";
+
+                package.SaveAs(new FileInfo(Path.Combine(PathSave, path)));
+            }
+        }
+
+        private void ResultToXlsxDvs1()
+        {
+            var pathExampleXlsxFile = @"Resources\Dvs1.xlsx";
+            while (true)
+            {
+                if (File.Exists(pathExampleXlsxFile))
+                    break;
+
+                var errorMessage =
+                    "Отсутствует файл образец Dvs1.xlsx  " +
+                    "Пожалуйста поместите файл и повторите попытку(ОК). Или нажмите отмена для пропуска создания .xlsx";
+
+                var mb = MessageBox.Show(errorMessage, "Ошибка", MessageBoxButton.OKCancel);
+
+                //Если было нажато ОК
+                if (mb == MessageBoxResult.OK)
+                    continue;
+
+                //Если была нажата отмена
+                return;
+            }
+
+            using (var package = new ExcelPackage(new FileInfo(pathExampleXlsxFile)))
+            {
+                var ws = package.Workbook.Worksheets.First();
+
+                #region Заполнение значений
+
+                for (var i = 0; i < 5; i++)
+                {
+                    AddValueInCell(ws.Cells[i + 12, 16], CollectionDvsValue01[i].ReferenceSpeedValueMain);
+                    AddValueInCell(ws.Cells[i + 12, 17], CollectionDvsValue01[i].DeviceSpeedValue1.ResultValue);
+                    AddValueInCell(ws.Cells[i + 12, 18], CollectionDvsValue01[i].DeviceSpeedValue2.ResultValue);
+                    AddValueInCell(ws.Cells[i + 12, 19], CollectionDvsValue01[i].DeviceSpeedValue3.ResultValue);
+                }
+
+
+                //Условия поверки
+
+                ws.Cells[47, 16].Value = MeasurementsData.Verifier;
+                ws.Cells[47, 21].Value = $"{DateTime.Now:dd.MM.yyyy}";
+
+                ws.Cells[23, 5].Value = MeasurementsData.Temperature;
+                ws.Cells[24, 5].Value = MeasurementsData.Humidity;
+                ws.Cells[25, 5].Value = MeasurementsData.Pressure;
+                ws.Cells[14, 6].Value = MeasurementsData.DeviceId;
                 #endregion
 
                 var path = $"{DateTime.Now:dd.MM.yyyy_HH-mm-ss}.xlsx";
