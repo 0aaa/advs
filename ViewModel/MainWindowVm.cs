@@ -576,7 +576,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             });
         }
 
-        public void StartTestDvs01(GateTime gateTime)
+        private void StartTestDvs01(GateTime gateTime)
         {
             StatusCurrentAction = "Запуск тестирования";
 
@@ -588,15 +588,15 @@ namespace VerificationAirVelocitySensor.ViewModel
             //Снятие 1-ого значения
             for (var i = 1; i < SpeedPointsList.Count - 1; i++)
             {
+                //Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList . Выходит -2
+                var id = SpeedPointsList[i].Id - 2;
+                CollectionDvsValue01[id].DeviceSpeedValue1.IsСheckedNow = true;
+
                 //Метод разгона трубы
                 Preparation(i);
 
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                //Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList . Выходит -2
-                var id = SpeedPointsList[i].Id - 2;
-
-                CollectionDvsValue01[id].DeviceSpeedValue1.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
                 var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter , _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
@@ -612,15 +612,15 @@ namespace VerificationAirVelocitySensor.ViewModel
             //Снятие 2-ого значения
             for (var i = 1; i < SpeedPointsList.Count - 1; i++)
             {
+                //Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList . Выходит -2
+                var id = SpeedPointsList[i].Id - 2;
+                CollectionDvsValue01[id].DeviceSpeedValue2.IsСheckedNow = true;
+
                 //Метод разгона трубы
                 Preparation(i);
 
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                //Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList . Выходит -2
-                var id = SpeedPointsList[i].Id - 2;
-
-                CollectionDvsValue01[id].DeviceSpeedValue2.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
                 var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
@@ -629,22 +629,24 @@ namespace VerificationAirVelocitySensor.ViewModel
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue01[id].ReferenceSpeedValue1 = _averageSpeedReferenceValue;
+                CollectionDvsValue01[id].ReferenceSpeedValue2 = _averageSpeedReferenceValue;
             }
 
             //Первую точку (0.7) скипаю и последнюю (30) 
             //Снятие 3-его значения
             for (var i = 1; i < SpeedPointsList.Count - 1; i++)
             {
+
+                //Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList . Выходит -2
+                var id = SpeedPointsList[i].Id - 2;
+                CollectionDvsValue01[id].DeviceSpeedValue3.IsСheckedNow = true;
+
                 //Метод разгона трубы
                 Preparation(i);
 
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                //Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList . Выходит -2
-                var id = SpeedPointsList[i].Id - 2;
 
-                CollectionDvsValue01[id].DeviceSpeedValue3.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
                 var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
@@ -653,7 +655,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 Thread.Sleep(50);
                 if (IsCancellationRequested(_ctsTask)) return;
 
-                CollectionDvsValue01[id].ReferenceSpeedValue1 = _averageSpeedReferenceValue;
+                CollectionDvsValue01[id].ReferenceSpeedValue3 = _averageSpeedReferenceValue;
             }
 
             foreach (var dvsValue01 in CollectionDvsValue01)
@@ -701,6 +703,11 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             foreach (var point in SpeedPointsList)
             {
+                //Так как номеровка идет с 1 , а коллекция с 0
+                var id = point.Id - 1;
+                CollectionDvsValue02[id].DeviceSpeedValue1.IsСheckedNow = true;
+
+
                 StatusCurrentAction = $"Точка {point.Speed}";
 
                 _acceptCorrectionReference = false;
@@ -734,11 +741,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (point.Speed == 0.7m)
                     timeOutCounter = 5000;
 
-                //Так как номеровка идет с 1 , а коллекция с 0
-                var id = point.Id - 1;
-
-
-                CollectionDvsValue02[id].DeviceSpeedValue1.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 1";
                 var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
