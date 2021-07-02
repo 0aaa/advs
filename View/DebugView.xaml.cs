@@ -10,10 +10,9 @@ namespace VerificationAirVelocitySensor.View
     {
         private readonly DebugVm _debugVm = new DebugVm();
 
-        public DebugView(ref decimal speedReferenceValue)
+        public DebugView()
         {
             InitializeComponent();
-            _debugVm.SpeedReferenceValue = speedReferenceValue;
             DataContext = _debugVm;
         }
 

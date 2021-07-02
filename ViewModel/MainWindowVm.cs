@@ -272,7 +272,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 Application.Current.Dispatcher?.Invoke(() =>
                 {
-                    FrameContent = new DebugView(ref _speedReferenceValue);
+                    FrameContent = new DebugView();
                 });
 
                 SelectedPage = SelectedPage.Debug;
@@ -377,67 +377,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             new TypeTestDescription(TypeTest.Dvs01, "ДСВ - 01"),
             new TypeTestDescription(TypeTest.Dvs02, "ДВС - 02")
         };
-
-
-        #region Работа с коэффициентом для обработки получаемого с анемометра значения
-
-        /// <summary>
-        /// Скоростные точки для расчета коефа . Данные от сотрудников Аэро Трубы
-        /// </summary>
-        private readonly decimal[] _vPoint = {0m, 0.72m, 5m, 10m, 15m, 30m};
-
-        /// <summary>
-        /// Коефы расчитанные для v_point (для каждого диапазона) . Данные от сотрудников Аэро Трубы
-        /// </summary>
-        private readonly decimal[] _kPoint = {0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m};
-
-        private readonly decimal[] _aKoef = new decimal[5];
-        private readonly decimal[] _bKoef = new decimal[5];
-
-        private void Get_a_b_koef()
-        {
-            for (var i = 0; i < 6; i++)
-            {
-                if (i == 0) continue;
-                _aKoef[i - 1] = (_kPoint[i] - _kPoint[i - 1]) / (_vPoint[i] - _vPoint[i - 1]);
-                _bKoef[i - 1] = _kPoint[i] - _aKoef[i - 1] * _vPoint[i];
-            }
-        }
-
-        private decimal SpeedCalculation(decimal rawSpeed)
-        {
-            var rangeValue = GetRange(rawSpeed);
-
-
-            var a = _aKoef[rangeValue - 1];
-            var b = _bKoef[rangeValue - 1];
-
-            var speedCoefficient = a * rawSpeed + b;
-
-            var newSpeed = Math.Round(rawSpeed * speedCoefficient, 2);
-
-            return newSpeed;
-        }
-
-        private int GetRange(decimal rawSpeed)
-        {
-            if (rawSpeed < _vPoint[1])
-                return 1;
-            if (rawSpeed >= _vPoint[4])
-                return 5;
-            if (rawSpeed >= _vPoint[3])
-                return 4;
-            if (rawSpeed >= _vPoint[2])
-                return 3;
-            if (rawSpeed >= _vPoint[1])
-                return 2;
-
-            var errorMessage = "Значение эталона вне диапазона от 0 до 30";
-            throw new ArgumentOutOfRangeException(errorMessage);
-        }
-
-        #endregion
-
 
         /// <summary>
         /// Проверка запроса на отмену
@@ -1043,8 +982,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                     SpeedPointsList.Add(speedPoint);
             }
 
-            Get_a_b_koef();
-
             #region Код для теста
 
             //var dvsValue1 = new DvsValue02(5)
@@ -1115,8 +1052,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
-            var newSpeed = SpeedCalculation((decimal) e.ReferenceValue);
-            SpeedReferenceValue = newSpeed;
+            SpeedReferenceValue = (decimal)e.ReferenceValue;
             UpdateAverageSpeedReferenceValue(SpeedReferenceValue);
         }
 
