@@ -113,13 +113,18 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             WriteCommand(command, sleepTime);
         }
 
+        private bool IsCancellationRequested(CancellationTokenSource ctSource) =>
+            ctSource.Token.IsCancellationRequested;
+
+
         /// <summary>
         /// Запрос на значение частоты
         /// </summary>
         /// <param name="speedPoint"></param>
         /// <param name="whileWait"></param>
+        /// <param name="ctsTask"></param>
         /// <returns></returns>
-        public decimal GetCurrentHzValue(SpeedPoint speedPoint, int whileWait)
+        public decimal GetCurrentHzValue(SpeedPoint speedPoint, int whileWait, CancellationTokenSource ctsTask)
         {
             var attemptRead = 0;
 
@@ -129,6 +134,8 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
             while (true)
             {
+                if (IsCancellationRequested(ctsTask)) return 0;
+
                 try
                 {
                     attemptRead++;

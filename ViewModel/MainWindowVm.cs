@@ -598,7 +598,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 CollectionDvsValue01[id].DeviceSpeedValue1.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
-                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter);
+                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter , _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue01[id].DeviceSpeedValue1.ResultValue = value1;
                 CollectionDvsValue01[id].DeviceSpeedValue1.IsVerified = true;
@@ -622,7 +622,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 CollectionDvsValue01[id].DeviceSpeedValue2.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
-                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter);
+                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue01[id].DeviceSpeedValue2.ResultValue = value1;
                 CollectionDvsValue01[id].DeviceSpeedValue2.IsVerified = true;
@@ -646,7 +646,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 CollectionDvsValue01[id].DeviceSpeedValue3.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
-                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter);
+                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue01[id].DeviceSpeedValue3.ResultValue = value1;
                 CollectionDvsValue01[id].DeviceSpeedValue3.IsVerified = true;
@@ -740,7 +740,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 CollectionDvsValue02[id].DeviceSpeedValue1.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 1";
-                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
+                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue02[id].DeviceSpeedValue1.ResultValue = value1;
                 CollectionDvsValue02[id].DeviceSpeedValue1.IsVerified = true;
@@ -749,7 +749,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 CollectionDvsValue02[id].DeviceSpeedValue2.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 2";
-                var value2 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
+                var value2 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue02[id].DeviceSpeedValue2.ResultValue = value2;
                 CollectionDvsValue02[id].DeviceSpeedValue2.IsVerified = true;
@@ -758,7 +758,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 CollectionDvsValue02[id].DeviceSpeedValue3.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 3";
-                var value3 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
+                var value3 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue02[id].DeviceSpeedValue3.ResultValue = value3;
                 CollectionDvsValue02[id].DeviceSpeedValue3.IsVerified = true;
@@ -767,7 +767,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 CollectionDvsValue02[id].DeviceSpeedValue4.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 4";
-                var value4 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
+                var value4 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue02[id].DeviceSpeedValue4.ResultValue = value4;
                 CollectionDvsValue02[id].DeviceSpeedValue4.IsVerified = true;
@@ -776,7 +776,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 CollectionDvsValue02[id].DeviceSpeedValue5.IsСheckedNow = true;
                 StatusCurrentAction = $"Точка {point.Speed} : Снятие значения 5";
-                var value5 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter);
+                var value5 = FrequencyCounterDevice.Instance.GetCurrentHzValue(point, timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue02[id].DeviceSpeedValue5.ResultValue = value5;
                 CollectionDvsValue02[id].DeviceSpeedValue5.IsVerified = true;
