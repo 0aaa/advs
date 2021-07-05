@@ -142,10 +142,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 MessageBox.Show($"{e.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
-            finally
-            {
-
-            }
         }
 
         public bool ValidationComPort()
