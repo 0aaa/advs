@@ -280,7 +280,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\DvsValue01.cs" />
+    <Compile Include="Model\DsvValue01.cs" />
     <Compile Include="Model\SettingsModel.cs" />
     <Compile Include="Model\SpeedValue.cs" />
     <Compile Include="Style\Converter\BooleanConverter.cs" />
@@ -377,7 +377,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Resources\Dvs1.xlsx">
+    <None Include="Resources\Dsv1.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Resources\Dvs2.xlsx">

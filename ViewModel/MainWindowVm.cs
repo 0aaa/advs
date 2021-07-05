@@ -304,7 +304,7 @@ namespace VerificationAirVelocitySensor.ViewModel
             if (validation == false)
             {
                 FrequencyCounterDevice.Instance.ClosePort();
-                MessageBox.Show("Выбранный Com Port не является частотомером",
+                MessageBox.Show($"{SettingsModel.ComPortFrequencyCounter} не является частотомером",
                     "Ошибка",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
@@ -388,8 +388,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region Test Method
 
-        public ObservableCollection<DvsValue01> CollectionDvsValue01 { get; set; }
-            = new ObservableCollection<DvsValue01>();
+        public ObservableCollection<DsvValue01> CollectionDvsValue01 { get; set; }
+            = new ObservableCollection<DsvValue01>();
 
         public ObservableCollection<DvsValue02> CollectionDvsValue02 { get; set; }
             = new ObservableCollection<DvsValue02>();
@@ -566,12 +566,12 @@ namespace VerificationAirVelocitySensor.ViewModel
             {
                 CollectionDvsValue01?.Clear();
 
-                CollectionDvsValue01 = new ObservableCollection<DvsValue01>();
+                CollectionDvsValue01 = new ObservableCollection<DsvValue01>();
 
                 //Первую точку (0.7) скипаю и последнюю (30) 
                 for (var i = 1; i < SpeedPointsList.Count - 1; i++)
                 {
-                    CollectionDvsValue01.Add(new DvsValue01(SpeedPointsList[i].Speed));
+                    CollectionDvsValue01.Add(new DsvValue01(SpeedPointsList[i].Speed));
                 }
             });
         }
@@ -871,7 +871,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void ResultToXlsxDvs1()
         {
-            var pathExampleXlsxFile = @"Resources\Dvs1.xlsx";
+            var pathExampleXlsxFile = @"Resources\Dsv1.xlsx";
             while (true)
             {
                 if (File.Exists(pathExampleXlsxFile))
