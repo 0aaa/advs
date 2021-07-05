@@ -9,7 +9,7 @@ using System.Windows;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Минимакс-94")]
-[assembly: AssemblyProduct("VerificationAirVelocitySensor")]
+[assembly: AssemblyProduct("ПО для поверки ДСВ-01 и ДВС-02")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
