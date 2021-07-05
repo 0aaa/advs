@@ -1187,7 +1187,7 @@ namespace VerificationAirVelocitySensor.ViewModel
     {
         MainWindow = 0,
         Settings = 1,
-        Checkpoint = 3,
-        Debug = 4
+        Checkpoint = 2,
+        Debug = 3
     }
 }
