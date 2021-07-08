@@ -2,9 +2,9 @@
 
 namespace VerificationAirVelocitySensor.Model
 {
-    public class DvsValue01 : BaseVm
+    public class DsvValue01 : BaseVm
     {
-        public DvsValue01(decimal speedValue)
+        public DsvValue01(decimal speedValue)
         {
             SpeedValue = speedValue;
         }

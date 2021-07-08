@@ -136,28 +136,20 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             {
                 if (IsCancellationRequested(ctsTask)) return 0;
 
+                Thread.Sleep(whileWait);
+
                 try
                 {
-                    attemptRead++;
 
-                    if (attemptRead == 10)
-                    {
-                        _serialPort.Close();
-                        Thread.Sleep(200);
-                        _serialPort.Open();
-
-                        attemptRead = 0;
-                    }
+                    if (attemptRead++ == 10)
+                        throw new Exception("Превышен лимит попыток считывания значения частоты");
 
                     WriteCommand("FETC?", 1000);
 
                     var data = _serialPort.ReadExisting();
 
                     if (string.IsNullOrEmpty(data))
-                    {
-                        Thread.Sleep(whileWait);
                         continue;
-                    }
 
                     data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
 

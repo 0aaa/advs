@@ -122,14 +122,15 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             try
             {
                 _comPort = comPort;
-                _serialPort = new SerialPort(_comPort, BaudRate) { ReadTimeout = 2000, WriteTimeout = 2000 };
+                _serialPort = new SerialPort(_comPort, BaudRate) {ReadTimeout = 2000, WriteTimeout = 2000};
                 _serialPort.Open();
 
                 var validation = ValidationComPort();
                 if (validation == false)
                 {
                     _serialPort.Close();
-                    throw new Exception("Выбранный Com Port не является ПЛК 73");
+                    _serialPort.Dispose();
+                    throw new Exception($"{comPort} не является ПЛК 73");
                 }
 
                 IsOpenUpdateMethod(_serialPort.IsOpen);
