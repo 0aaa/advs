@@ -411,6 +411,19 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public bool ChangeTypeTestOnValidation => !IsTestActive;
 
+        private void StopTestClosePort()
+        {
+            IsTestActive = false;
+            IsBusy = false;
+            BusyContent = string.Empty;
+
+            if (FrequencyCounterIsOpen)
+                FrequencyCounterDevice.Instance.ClosePort();
+
+            if (FrequencyMotorIsOpen)
+                FrequencyMotorDevice.Instance.ClosePort();
+        }
+
         private void StartTest()
         {
             IsTestActive = true;
@@ -427,17 +440,26 @@ namespace VerificationAirVelocitySensor.ViewModel
                 IsBusy = true;
                 BusyContent = "Проверка подключенных устройств и их настройка";
 
-
-                var validComMotor = FrequencyMotorDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyMotor);
                 var validComCounter = OpenPortFrequencyCounterDevice();
 
-                if (validComCounter == false || validComMotor == false)
+                if (!validComCounter)
                 {
-                    IsTestActive = false;
-                    IsBusy = false;
-                    BusyContent = string.Empty;
+                    StopTestClosePort();
                     return;
                 }
+
+                var validComMotor = FrequencyMotorDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyMotor);
+                if (!validComMotor)
+                {
+                    StopTestClosePort();
+                    return;
+                }
+
+
+                //
+                StopTestClosePort();
+                return;
+                //
 
                 IsBusy = false;
                 BusyContent = string.Empty;
