@@ -122,7 +122,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             try
             {
                 _comPort = comPort;
-                _serialPort = new SerialPort(_comPort, BaudRate) {ReadTimeout = 2000, WriteTimeout = 2000};
+                _serialPort = new SerialPort(_comPort, BaudRate) { ReadTimeout = 2000, WriteTimeout = 2000 };
                 _serialPort.Open();
 
                 var validation = ValidationComPort();
@@ -163,7 +163,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                     }
                 }
             }
-            
+
         }
 
         public void ClosePort()
@@ -390,7 +390,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                                 try
                                 {
                                     var rawValue = GetReferenceValue();
-                                    _referenceSpeedValue = (double) SpeedCalculation((decimal) rawValue);
+                                    _referenceSpeedValue = (double)SpeedCalculation((decimal)rawValue);
 
                                     UpdateReferenceValueMethod(_referenceSpeedValue);
                                 }
@@ -453,7 +453,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="averageReferenceSpeedValue"></param>
         /// <param name="speedPoint"></param>
         /// <param name="ctsTask"></param>
-        public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue, SpeedPoint speedPoint ,ref CancellationTokenSource ctsTask)
+        public void CorrectionSpeedMotor(ref decimal averageReferenceSpeedValue, SpeedPoint speedPoint, ref CancellationTokenSource ctsTask)
         {
             var countAcceptValueErrorValidation = 0;
             var stepValue = speedPoint.MaxStep;

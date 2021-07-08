@@ -1,6 +1,4 @@
-﻿using System;
-using System.Globalization;
-
+﻿
 namespace VerificationAirVelocitySensor.View
 {
     /// <summary>

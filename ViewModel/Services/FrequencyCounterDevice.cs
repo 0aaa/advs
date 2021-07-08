@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Windows;
 
@@ -46,12 +44,12 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #region Open , Close
 
-        public void OpenPort(string comPort , int timeOut)
+        public void OpenPort(string comPort, int timeOut)
         {
             try
             {
                 _comPort = comPort;
-                _serialPort = new SerialPort(_comPort, BaudRate) {ReadTimeout = timeOut, WriteTimeout = timeOut};
+                _serialPort = new SerialPort(_comPort, BaudRate) { ReadTimeout = timeOut, WriteTimeout = timeOut };
                 _serialPort.Open();
 
                 IsOpenUpdateMethod(_serialPort.IsOpen);
@@ -132,8 +130,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             var attemptRead = 0;
             //Кол-во байт ожидаемого ответа
             const int sizeArray = 18;
-            var buffer = new byte[sizeArray];
-            
+
 
             //Чистка от возможных старых значений
             // ReSharper disable once AssignmentIsFullyDiscarded
@@ -153,7 +150,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                     var countAttempt = 0;
                     var maxCount = whileWait / 100;
 
-                    while (_serialPort.BytesToRead != 18)
+                    while (_serialPort.BytesToRead != sizeArray)
                     {
                         Thread.Sleep(100);
                         countAttempt++;
@@ -172,7 +169,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         data = data.Substring(0, 18);
 
                     data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
-                    
+
 
 
                     var value = decimal.Parse(data, NumberStyles.Float, CultureInfo.InvariantCulture);
@@ -226,7 +223,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public void SetGateTime(GateTime gateTime, int sleepTime = 2000)
         {
-            WriteCommand($":ARM:TIMer {(int) gateTime} S", sleepTime);
+            WriteCommand($":ARM:TIMer {(int)gateTime} S", sleepTime);
         }
 
         /// <summary>
@@ -235,7 +232,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void SetChannelFrequency(FrequencyChannel frequencyChannel, int sleepTime = 2000)
         {
-            WriteCommand($":FUNCtion FREQuency {(int) frequencyChannel}", sleepTime);
+            WriteCommand($":FUNCtion FREQuency {(int)frequencyChannel}", sleepTime);
         }
 
 
@@ -272,7 +269,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
     public class FrequencyChannelDescription
     {
-        public FrequencyChannelDescription(FrequencyChannel frequencyChannel , string description)
+        public FrequencyChannelDescription(FrequencyChannel frequencyChannel, string description)
         {
             FrequencyChannel = frequencyChannel;
             Description = description;

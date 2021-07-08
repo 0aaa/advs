@@ -33,7 +33,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public ObservableCollection<SpeedPoint> SpeedPointsList { get; set; }
 
-        public SpeedPointsVm(ObservableCollection<SpeedPoint> speedPointsList , RelayCommand saveSpeedsPointCommand)
+        public SpeedPointsVm(ObservableCollection<SpeedPoint> speedPointsList, RelayCommand saveSpeedsPointCommand)
         {
             SpeedPointsList = speedPointsList;
             SaveSpeedsPointCommand = saveSpeedsPointCommand;

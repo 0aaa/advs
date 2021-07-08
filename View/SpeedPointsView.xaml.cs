@@ -8,11 +8,11 @@ namespace VerificationAirVelocitySensor.View
     /// <summary>
     /// Логика взаимодействия для SpeedPointsView.xaml
     /// </summary>
-    public partial class SpeedPointsView 
+    public partial class SpeedPointsView
     {
         public SpeedPointsView(ObservableCollection<SpeedPoint> speedPointsList, RelayCommand saveSpeedsPointCommand)
         {
-            DataContext = new SpeedPointsVm(speedPointsList , saveSpeedsPointCommand);
+            DataContext = new SpeedPointsVm(speedPointsList, saveSpeedsPointCommand);
             InitializeComponent();
         }
     }

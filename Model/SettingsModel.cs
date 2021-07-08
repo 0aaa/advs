@@ -20,4 +20,3 @@ namespace VerificationAirVelocitySensor.Model
         public int SetFrequencyMotor { get; set; } = 0;
     }
 }
-    

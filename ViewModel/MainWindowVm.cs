@@ -291,7 +291,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private bool OpenPortFrequencyCounterDevice()
         {
-            FrequencyCounterDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyCounter , FrequencyCounterDevice.Instance.GateTimeToMSec(SettingsModel.GateTime));
+            FrequencyCounterDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyCounter, FrequencyCounterDevice.Instance.GateTimeToMSec(SettingsModel.GateTime));
 
             if (!FrequencyCounterIsOpen) return false;
 
@@ -599,7 +599,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
                 //Время запроса для точки 0.7 больше из-за маленькой скорости прокрутки датчика. 
-                var timeOutCounterValue1 = 7000; 
+                var timeOutCounterValue1 = 7000;
                 var value1 =
                     FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounterValue1, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
@@ -668,7 +668,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                                dvsValue01.ReferenceSpeedValue2 +
                                dvsValue01.ReferenceSpeedValue3) / 3;
 
-                if (average != null) dvsValue01.ReferenceSpeedValueMain = Math.Round((decimal) average, 2);
+                if (average != null) dvsValue01.ReferenceSpeedValueMain = Math.Round((decimal)average, 2);
             }
 
 
@@ -1061,7 +1061,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
-            SpeedReferenceValue = (decimal) e.ReferenceValue;
+            SpeedReferenceValue = (decimal)e.ReferenceValue;
             UpdateAverageSpeedReferenceValue(SpeedReferenceValue);
         }
 
