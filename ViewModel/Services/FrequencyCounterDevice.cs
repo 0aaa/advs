@@ -44,12 +44,12 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #region Open , Close
 
-        public void OpenPort(string comPort)
+        public void OpenPort(string comPort , int timeOut)
         {
             try
             {
                 _comPort = comPort;
-                _serialPort = new SerialPort(_comPort, BaudRate);
+                _serialPort = new SerialPort(_comPort, BaudRate) {ReadTimeout = timeOut, WriteTimeout = timeOut};
                 _serialPort.Open();
 
                 IsOpenUpdateMethod(_serialPort.IsOpen);
@@ -127,6 +127,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public decimal GetCurrentHzValue(SpeedPoint speedPoint, int whileWait, CancellationTokenSource ctsTask)
         {
             var attemptRead = 0;
+            
 
             //Чистка от возможных старых значений
             // ReSharper disable once AssignmentIsFullyDiscarded
@@ -144,14 +145,20 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                     if (attemptRead++ == 10)
                         throw new Exception("Превышен лимит попыток считывания значения частоты");
 
-                    WriteCommand("FETC?", 1000);
+                    WriteCommand("FETC?", whileWait);
 
                     var data = _serialPort.ReadExisting();
+                    var x = data.Length;
 
                     if (string.IsNullOrEmpty(data))
                         continue;
 
+                    if (data.Length > 18)
+                        data = data.Substring(0, 18);
+
                     data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
+                    
+
 
                     var value = decimal.Parse(data, NumberStyles.Float, CultureInfo.InvariantCulture);
 

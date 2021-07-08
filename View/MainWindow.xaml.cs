@@ -1,4 +1,7 @@
-﻿namespace VerificationAirVelocitySensor.View
+﻿using System;
+using System.Globalization;
+
+namespace VerificationAirVelocitySensor.View
 {
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml

@@ -291,7 +291,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private bool OpenPortFrequencyCounterDevice()
         {
-            FrequencyCounterDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyCounter);
+            FrequencyCounterDevice.Instance.OpenPort(SettingsModel.ComPortFrequencyCounter , FrequencyCounterDevice.Instance.GateTimeToMSec(SettingsModel.GateTime));
 
             if (!FrequencyCounterIsOpen) return false;
 
@@ -580,7 +580,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             StatusCurrentAction = "Запуск тестирования";
 
-            var timeOutCounter = FrequencyCounterDevice.Instance.GateTimeToMSec(gateTime) + 1000;
+            var timeOutCounter = FrequencyCounterDevice.Instance.GateTimeToMSec(gateTime);
 
             if (IsCancellationRequested(_ctsTask)) return;
 
@@ -699,7 +699,7 @@ namespace VerificationAirVelocitySensor.ViewModel
         {
             StatusCurrentAction = "Запуск тестирования";
 
-            var timeOutCounter = FrequencyCounterDevice.Instance.GateTimeToMSec(gateTime) + 1000;
+            var timeOutCounter = FrequencyCounterDevice.Instance.GateTimeToMSec(gateTime);
 
             if (IsCancellationRequested(_ctsTask)) return;
 
