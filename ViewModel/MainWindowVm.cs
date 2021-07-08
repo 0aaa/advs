@@ -270,10 +270,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 IsBusy = false;
                 BusyContent = string.Empty;
 
-                Application.Current.Dispatcher?.Invoke(() =>
-                {
-                    FrameContent = new DebugView();
-                });
+                Application.Current.Dispatcher?.Invoke(() => { FrameContent = new DebugView(); });
 
                 SelectedPage = SelectedPage.Debug;
             }));
@@ -456,11 +453,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 }
 
 
-                //
-                StopTestClosePort();
-                return;
-                //
-
                 IsBusy = false;
                 BusyContent = string.Empty;
 
@@ -484,14 +476,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                             ResultToXlsxDvs1();
 
-                            IsTestActive = false;
-                            IsBusy = false;
-
-                            if (FrequencyCounterIsOpen)
-                                FrequencyCounterDevice.Instance.ClosePort();
-
-                            if (FrequencyMotorIsOpen)
-                                FrequencyMotorDevice.Instance.ClosePort();
+                            StopTestClosePort();
 
                             MessageBox.Show("Поверка завершена", "Внимание", MessageBoxButton.OK,
                                 MessageBoxImage.Asterisk, MessageBoxResult.OK);
@@ -515,14 +500,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                             ResultToXlsxDvs2();
 
-                            IsTestActive = false;
-                            IsBusy = false;
-
-                            if (FrequencyCounterIsOpen)
-                                FrequencyCounterDevice.Instance.ClosePort();
-
-                            if (FrequencyMotorIsOpen)
-                                FrequencyMotorDevice.Instance.ClosePort();
+                            StopTestClosePort();
 
                             MessageBox.Show("Поверка завершена", "Внимание", MessageBoxButton.OK,
                                 MessageBoxImage.Asterisk, MessageBoxResult.OK);
@@ -620,7 +598,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
-                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter , _ctsTask);
+                var value1 =
+                    FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue01[id].DeviceSpeedValue1.ResultValue = value1;
                 CollectionDvsValue01[id].DeviceSpeedValue1.IsVerified = true;
@@ -644,7 +623,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
-                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter, _ctsTask);
+                var value1 =
+                    FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue01[id].DeviceSpeedValue2.ResultValue = value1;
                 CollectionDvsValue01[id].DeviceSpeedValue2.IsVerified = true;
@@ -658,7 +638,6 @@ namespace VerificationAirVelocitySensor.ViewModel
             //Снятие 3-его значения
             for (var i = 1; i < SpeedPointsList.Count - 1; i++)
             {
-
                 //Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList . Выходит -2
                 var id = SpeedPointsList[i].Id - 2;
                 CollectionDvsValue01[id].DeviceSpeedValue3.IsСheckedNow = true;
@@ -670,7 +649,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
 
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
-                var value1 = FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter, _ctsTask);
+                var value1 =
+                    FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue01[id].DeviceSpeedValue3.ResultValue = value1;
                 CollectionDvsValue01[id].DeviceSpeedValue3.IsVerified = true;
@@ -878,7 +858,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                 {
                     if (File.Exists(fullPath))
                     {
-                        path = $"Протокол ДВС-02 № {MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
+                        path =
+                            $"Протокол ДВС-02 № {MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
                         fullPath = Path.Combine(PathSave, path);
                         attemptSave++;
                         continue;
@@ -937,6 +918,7 @@ namespace VerificationAirVelocitySensor.ViewModel
                 ws.Cells[24, 5].Value = MeasurementsData.Humidity;
                 ws.Cells[25, 5].Value = MeasurementsData.Pressure;
                 ws.Cells[14, 6].Value = MeasurementsData.DeviceId;
+
                 #endregion
 
                 var path = $"Протокол ДСВ-01 № {MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}.xlsx";
@@ -948,7 +930,8 @@ namespace VerificationAirVelocitySensor.ViewModel
                 {
                     if (File.Exists(fullPath))
                     {
-                        path = $"Протокол ДСВ-01 № {MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
+                        path =
+                            $"Протокол ДСВ-01 № {MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
                         fullPath = Path.Combine(PathSave, path);
                         attemptSave++;
                         continue;
@@ -1076,7 +1059,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
-            SpeedReferenceValue = (decimal)e.ReferenceValue;
+            SpeedReferenceValue = (decimal) e.ReferenceValue;
             UpdateAverageSpeedReferenceValue(SpeedReferenceValue);
         }
 
