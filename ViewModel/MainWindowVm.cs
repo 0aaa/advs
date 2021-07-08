@@ -598,8 +598,10 @@ namespace VerificationAirVelocitySensor.ViewModel
                 if (IsCancellationRequested(_ctsTask)) return;
 
                 StatusCurrentAction = $"Точка {SpeedPointsList[i].Speed} : Снятие значения 1";
+                //Время запроса для точки 0.7 больше из-за маленькой скорости прокрутки датчика. 
+                var timeOutCounterValue1 = 7000; 
                 var value1 =
-                    FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounter, _ctsTask);
+                    FrequencyCounterDevice.Instance.GetCurrentHzValue(SpeedPointsList[i], timeOutCounterValue1, _ctsTask);
                 if (IsCancellationRequested(_ctsTask)) return;
                 CollectionDvsValue01[id].DeviceSpeedValue1.ResultValue = value1;
                 CollectionDvsValue01[id].DeviceSpeedValue1.IsVerified = true;

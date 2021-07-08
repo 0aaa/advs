@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Globalization;
 using System.IO.Ports;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Windows;
 
@@ -85,6 +87,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             Thread.Sleep(sleepTime);
         }
 
+
         /// <summary>
         /// Reset device
         /// </summary>
@@ -127,6 +130,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         public decimal GetCurrentHzValue(SpeedPoint speedPoint, int whileWait, CancellationTokenSource ctsTask)
         {
             var attemptRead = 0;
+            //Кол-во байт ожидаемого ответа
+            const int sizeArray = 18;
+            var buffer = new byte[sizeArray];
             
 
             //Чистка от возможных старых значений
@@ -137,18 +143,27 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             {
                 if (IsCancellationRequested(ctsTask)) return 0;
 
-                Thread.Sleep(whileWait);
-
                 try
                 {
 
                     if (attemptRead++ == 10)
                         throw new Exception("Превышен лимит попыток считывания значения частоты");
 
-                    WriteCommand("FETC?", whileWait);
+                    WriteCommand("FETC?", 500);
+                    var countAttempt = 0;
+                    var maxCount = whileWait / 100;
+
+                    while (_serialPort.BytesToRead != 18)
+                    {
+                        Thread.Sleep(100);
+                        countAttempt++;
+                        if (countAttempt == maxCount)
+                        {
+                            throw new Exception("Превышен лимит ожидания ответа");
+                        }
+                    }
 
                     var data = _serialPort.ReadExisting();
-                    var x = data.Length;
 
                     if (string.IsNullOrEmpty(data))
                         continue;

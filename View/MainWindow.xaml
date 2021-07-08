@@ -9,6 +9,7 @@
         Title="Поверка датчиков скорости воздушного потока"
         d:DataContext="{d:DesignInstance Type=viewModel:MainWindowVm}"
         MinHeight="490"
+        ResizeMode="NoResize"
         MinWidth="780"
         Height="490"
         Width="780">

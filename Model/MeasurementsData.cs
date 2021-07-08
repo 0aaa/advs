@@ -11,15 +11,15 @@ namespace VerificationAirVelocitySensor.Model
         /// <summary>
         /// Температура
         /// </summary>
-        public decimal Temperature { get; set; }
+        public string Temperature { get; set; }
         /// <summary>
         /// Влажность
         /// </summary>
-        public decimal Humidity { get; set; }
+        public string Humidity { get; set; }
         /// <summary>
         /// Давление
         /// </summary>
-        public decimal Pressure { get; set; }
+        public string Pressure { get; set; }
         /// <summary>
         /// Настройка на будущее, тип поверки
         /// </summary>
