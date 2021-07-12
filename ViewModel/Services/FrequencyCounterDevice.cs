@@ -49,7 +49,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             try
             {
                 _comPort = comPort;
-                _serialPort = new SerialPort(_comPort, BaudRate) { ReadTimeout = timeOut, WriteTimeout = timeOut };
+                _serialPort = new SerialPort(_comPort, BaudRate) {ReadTimeout = 200, WriteTimeout = 200};
                 _serialPort.Open();
 
                 IsOpenUpdateMethod(_serialPort.IsOpen);
@@ -142,25 +142,41 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                 try
                 {
-
                     if (attemptRead++ == 10)
                         throw new Exception("Превышен лимит попыток считывания значения частоты");
 
                     WriteCommand("FETC?", 500);
+                    //var countAttempt = 0;
+                    //var maxCount = whileWait / 100;
+
+                    //while (_serialPort.BytesToRead != sizeArray)
+                    //{
+                    //    Thread.Sleep(100);
+                    //    countAttempt++;
+                    //    if (countAttempt == maxCount)
+                    //    {
+                    //        throw new Exception("Превышен лимит ожидания ответа");
+                    //    }
+                    //}
+
+                    var data = string.Empty;
                     var countAttempt = 0;
                     var maxCount = whileWait / 100;
 
-                    while (_serialPort.BytesToRead != sizeArray)
+                    while (true)
                     {
+                        if (IsCancellationRequested(ctsTask)) return 0;
+                        data = _serialPort.ReadExisting();
+
                         Thread.Sleep(100);
                         countAttempt++;
                         if (countAttempt == maxCount)
-                        {
                             throw new Exception("Превышен лимит ожидания ответа");
-                        }
+
+                        if (!string.IsNullOrEmpty(data)) break;
                     }
 
-                    var data = _serialPort.ReadExisting();
+                    //var data = _serialPort.ReadExisting();
 
                     if (string.IsNullOrEmpty(data))
                         continue;
@@ -169,7 +185,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         data = data.Substring(0, 18);
 
                     data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
-
 
 
                     var value = decimal.Parse(data, NumberStyles.Float, CultureInfo.InvariantCulture);
@@ -185,7 +200,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 }
                 catch
                 {
-                    Thread.Sleep(whileWait);
+                    Thread.Sleep(1000);
                 }
             }
         }
@@ -223,7 +238,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// <param name="sleepTime"></param>
         public void SetGateTime(GateTime gateTime, int sleepTime = 2000)
         {
-            WriteCommand($":ARM:TIMer {(int)gateTime} S", sleepTime);
+            WriteCommand($":ARM:TIMer {(int) gateTime} S", sleepTime);
         }
 
         /// <summary>
@@ -232,7 +247,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         /// </summary>
         public void SetChannelFrequency(FrequencyChannel frequencyChannel, int sleepTime = 2000)
         {
-            WriteCommand($":FUNCtion FREQuency {(int)frequencyChannel}", sleepTime);
+            WriteCommand($":FUNCtion FREQuency {(int) frequencyChannel}", sleepTime);
         }
 
 
