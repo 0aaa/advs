@@ -6,7 +6,7 @@
         xmlns:viewModel="clr-namespace:VerificationAirVelocitySensor.ViewModel"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Поверка датчиков скорости воздушного потока"
+        Title="{Binding MainWindowHeader}"
         d:DataContext="{d:DesignInstance Type=viewModel:MainWindowVm}"
         MinHeight="490"
         ResizeMode="NoResize"

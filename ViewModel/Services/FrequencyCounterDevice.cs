@@ -159,7 +159,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                     //    }
                     //}
 
-                    var data = string.Empty;
+                    string data;
                     var countAttempt = 0;
                     var maxCount = whileWait / 100;
 
@@ -167,6 +167,16 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                     {
                         if (IsCancellationRequested(ctsTask)) return 0;
                         data = _serialPort.ReadExisting();
+
+                        while (data.Length != 18)
+                        {
+                            if (IsCancellationRequested(ctsTask)) return 0;
+                            data += _serialPort.ReadExisting();
+                            if (data.Length == 18) break;
+                            countAttempt++;
+                            if (countAttempt == maxCount)
+                                throw new Exception("Превышен лимит ожидания ответа");
+                        }
 
                         Thread.Sleep(100);
                         countAttempt++;

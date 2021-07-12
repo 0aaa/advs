@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -73,6 +74,9 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         #region Property
 
+        public string MainWindowHeader =>
+            $"{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title}" + "  " +
+            "v" + $"{Assembly.GetExecutingAssembly().GetName().Version.ToString()}";
         public UserControl FrameContent { get; set; }
         public SelectedPage SelectedPage { get; set; }
 
