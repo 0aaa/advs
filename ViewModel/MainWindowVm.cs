@@ -76,7 +76,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
         public string MainWindowHeader =>
             $"{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title}" + "  " +
-            "v" + $"{Assembly.GetExecutingAssembly().GetName().Version.ToString()}";
+            "v" + $"{Assembly.GetExecutingAssembly().GetName().Version}";
         public UserControl FrameContent { get; set; }
         public SelectedPage SelectedPage { get; set; }
 

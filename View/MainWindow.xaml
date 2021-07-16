@@ -605,7 +605,7 @@
 
 
         <!--#region IsBusy-->
-        <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}" />
+        <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="{Binding BusyContent}"/>
         <!--#endregion-->
 
     </Grid>

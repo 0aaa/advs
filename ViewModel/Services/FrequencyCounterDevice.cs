@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO.Ports;
+using System.Text;
 using System.Threading;
 using System.Windows;
 
@@ -49,7 +50,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             try
             {
                 _comPort = comPort;
-                _serialPort = new SerialPort(_comPort, BaudRate) {ReadTimeout = 200, WriteTimeout = 200};
+                _serialPort = new SerialPort(_comPort, BaudRate) {ReadTimeout = 7000, WriteTimeout = 7000};
                 _serialPort.Open();
 
                 IsOpenUpdateMethod(_serialPort.IsOpen);
@@ -79,6 +80,11 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
         #endregion
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="sleepTime">Устройство очень долго думает. 2сек, это гарантие того, что при старте программы все настройки будут отправлены</param>
         private void WriteCommand(string command, int sleepTime = 2000)
         {
             _serialPort.WriteLine(command);
@@ -129,7 +135,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         {
             var attemptRead = 0;
             //Кол-во байт ожидаемого ответа
-            const int sizeArray = 18;
 
 
             //Чистка от возможных старых значений
@@ -146,18 +151,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         throw new Exception("Превышен лимит попыток считывания значения частоты");
 
                     WriteCommand("FETC?", 500);
-                    //var countAttempt = 0;
-                    //var maxCount = whileWait / 100;
-
-                    //while (_serialPort.BytesToRead != sizeArray)
-                    //{
-                    //    Thread.Sleep(100);
-                    //    countAttempt++;
-                    //    if (countAttempt == maxCount)
-                    //    {
-                    //        throw new Exception("Превышен лимит ожидания ответа");
-                    //    }
-                    //}
 
                     string data;
                     var countAttempt = 0;
@@ -186,7 +179,6 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         if (!string.IsNullOrEmpty(data)) break;
                     }
 
-                    //var data = _serialPort.ReadExisting();
 
                     if (string.IsNullOrEmpty(data))
                         continue;
@@ -211,6 +203,60 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                 catch
                 {
                     Thread.Sleep(1000);
+                }
+            }
+        }
+
+
+        public decimal GetCurrentHzValueTest(SpeedPoint speedPoint, int whileWait, CancellationTokenSource ctsTask)
+        {
+            var attemptCountSendRequest = 0;
+            const int maxCountAttempt = 3;
+            const string command = "FETC?";
+            const int countReadByte = 18;
+
+            while (true)
+            {
+                if (IsCancellationRequested(ctsTask)) return 0;
+
+                try
+                {
+                    //1.Clear buffer
+                    // ReSharper disable once AssignmentIsFullyDiscarded
+                    _ = _serialPort.ReadExisting();
+
+                    attemptCountSendRequest++;
+                    if (attemptCountSendRequest >= maxCountAttempt)
+                        throw new Exception("Превышено кол-во попыток чтения значения частоты с частотомера");
+
+                    //2-3.Request command and wait
+                    WriteCommand(command, 500);
+
+                    //3 Read
+                    var byteArray = new byte[countReadByte];
+                    _serialPort.Read(byteArray, 0, countReadByte);
+                    var data = Encoding.UTF8.GetString(byteArray);
+
+                    //5.Calibration
+                    data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
+
+                    var value = decimal.Parse(data, NumberStyles.Float, CultureInfo.InvariantCulture);
+
+                    var mathValue = Math.Round(value, 3);
+                    //6.Validation
+                    var isValidation = ValidationHzValue(mathValue, speedPoint);
+
+                    if (isValidation)
+                        return mathValue;
+
+                    //"Невалидное значение частоты полученное с частотометра"
+                }
+                catch(Exception exception)
+                {
+                    if (attemptCountSendRequest >= maxCountAttempt)
+                        throw new Exception("Превышено кол-во попыток запроса частоты с частотомера" , exception);
+
+                    Thread.Sleep(whileWait);
                 }
             }
         }
