@@ -10,7 +10,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
     public class UserSettings
     {
         public SettingsModel SettingsModel { get; set; } = new SettingsModel();
-        public TypeTest TypeTest { get; set; }
+        public TypeTest TypeTest { get; set; } = TypeTest.Dvs01;
         public ObservableCollection<SpeedPoint> SpeedPointsList { get; set; } = new ObservableCollection<SpeedPoint>();
         /// <summary>
         /// Путь сохранения результата
