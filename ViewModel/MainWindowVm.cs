@@ -462,57 +462,46 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 _ctsTask = new CancellationTokenSource();
 
-                switch (TypeTest)
+                try
                 {
-                    case TypeTest.Dvs01:
-                        LoadDefaultValueCollectionDvs1Value();
-                        try
-                        {
+                    switch (TypeTest)
+                    {
+                        case TypeTest.Dvs01:
+                            LoadDefaultValueCollectionDvs1Value();
                             StartTestDvs01(SettingsModel.GateTime);
-                        }
-                        catch (Exception e)
-                        {
-                            GlobalLog.Log.Debug(e, e.Message);
-                        }
-                        finally
-                        {
-                            FrequencyMotorDevice.Instance.SetFrequency(0, 0);
-
-                            ResultToXlsxDvs1();
-
-                            StopTestClosePort();
-
-                            MessageBox.Show("Поверка завершена", "Внимание", MessageBoxButton.OK,
-                                MessageBoxImage.Asterisk, MessageBoxResult.OK);
-                        }
-
-
-                        break;
-                    case TypeTest.Dvs02:
-                        LoadDefaultValueCollectionDvs2Value();
-                        try
-                        {
+                            break;
+                        case TypeTest.Dvs02:
+                            LoadDefaultValueCollectionDvs2Value();
                             StartTestDvs02(SettingsModel.GateTime);
-                        }
-                        catch (Exception e)
-                        {
-                            GlobalLog.Log.Debug(e, e.Message);
-                        }
-                        finally
-                        {
-                            FrequencyMotorDevice.Instance.SetFrequency(0, 0);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+                catch (Exception e)
+                {
+                    GlobalLog.Log.Debug(e, e.Message);
+                }
+                finally
+                {
+                    FrequencyMotorDevice.Instance.SetFrequency(0, 0);
 
+                    switch (TypeTest)
+                    {
+                        case TypeTest.Dvs01:
+                            ResultToXlsxDvs1();
+                            break;
+                        case TypeTest.Dvs02:
                             ResultToXlsxDvs2();
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
 
-                            StopTestClosePort();
+                    StopTestClosePort();
 
-                            MessageBox.Show("Поверка завершена", "Внимание", MessageBoxButton.OK,
-                                MessageBoxImage.Asterisk, MessageBoxResult.OK);
-                        }
-
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    MessageBox.Show("Поверка завершена", "Внимание", MessageBoxButton.OK,
+                        MessageBoxImage.Asterisk, MessageBoxResult.OK);
                 }
             }));
         }
@@ -527,7 +516,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             if (isContinue == false)
             {
-                MessageBox.Show("Отменено пользователем", "Внимание", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Отменено пользователем", "Внимание", MessageBoxButton.OK, MessageBoxImage.Error , MessageBoxResult.OK);
                 return false;
             }
 
@@ -535,7 +524,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             if (string.IsNullOrEmpty(PathSave))
             {
-                MessageBox.Show("Не указан путь сохранения", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Не указан путь сохранения", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
                 return false;
             }
 
