@@ -124,91 +124,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             ctSource.Token.IsCancellationRequested;
 
 
-        /// <summary>
-        /// Запрос на значение частоты
-        /// </summary>
-        /// <param name="speedPoint"></param>
-        /// <param name="whileWait"></param>
-        /// <param name="ctsTask"></param>
-        /// <returns></returns>
         public decimal GetCurrentHzValue(SpeedPoint speedPoint, int whileWait, CancellationTokenSource ctsTask)
-        {
-            var attemptRead = 0;
-            //Кол-во байт ожидаемого ответа
-
-
-            //Чистка от возможных старых значений
-            // ReSharper disable once AssignmentIsFullyDiscarded
-            _ = _serialPort.ReadExisting();
-
-            while (true)
-            {
-                if (IsCancellationRequested(ctsTask)) return 0;
-
-                try
-                {
-                    if (attemptRead++ == 10)
-                        throw new Exception("Превышен лимит попыток считывания значения частоты");
-
-                    WriteCommand("FETC?", 500);
-
-                    string data;
-                    var countAttempt = 0;
-                    var maxCount = whileWait / 100;
-
-                    while (true)
-                    {
-                        if (IsCancellationRequested(ctsTask)) return 0;
-                        data = _serialPort.ReadExisting();
-
-                        while (data.Length != 18)
-                        {
-                            if (IsCancellationRequested(ctsTask)) return 0;
-                            data += _serialPort.ReadExisting();
-                            if (data.Length == 18) break;
-                            countAttempt++;
-                            if (countAttempt == maxCount)
-                                throw new Exception("Превышен лимит ожидания ответа");
-                        }
-
-                        Thread.Sleep(100);
-                        countAttempt++;
-                        if (countAttempt == maxCount)
-                            throw new Exception("Превышен лимит ожидания ответа");
-
-                        if (!string.IsNullOrEmpty(data)) break;
-                    }
-
-
-                    if (string.IsNullOrEmpty(data))
-                        continue;
-
-                    if (data.Length > 18)
-                        data = data.Substring(0, 18);
-
-                    data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
-
-
-                    var value = decimal.Parse(data, NumberStyles.Float, CultureInfo.InvariantCulture);
-
-                    var mathValue = Math.Round(value, 3);
-
-                    var isValidation = ValidationHzValue(mathValue, speedPoint);
-
-                    if (isValidation)
-                        return mathValue;
-
-                    throw new Exception("Невалидное значение частоты полученное с частотометра");
-                }
-                catch
-                {
-                    Thread.Sleep(1000);
-                }
-            }
-        }
-
-
-        public decimal GetCurrentHzValueTest(SpeedPoint speedPoint, int whileWait, CancellationTokenSource ctsTask)
         {
             var attemptCountSendRequest = 0;
             const int maxCountAttempt = 3;
@@ -234,7 +150,14 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                     //3 Read
                     var byteArray = new byte[countReadByte];
-                    _serialPort.Read(byteArray, 0, countReadByte);
+
+                    for (var i = 0; i < countReadByte; i++)
+                    {
+                        _serialPort.Read(byteArray, i, 1);
+                    }
+
+                    //_serialPort.Read(byteArray, 0, countReadByte);
+
                     var data = Encoding.UTF8.GetString(byteArray);
 
                     //5.Calibration
