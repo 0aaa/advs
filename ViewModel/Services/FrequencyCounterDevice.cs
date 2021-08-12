@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO.Ports;
 using System.Text;
@@ -41,6 +42,9 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
             _instance ?? (_instance = new FrequencyCounterDevice());
 
         public bool IsOpen() => _serialPort != null && _serialPort.IsOpen;
+
+
+        public Action StopTest;
 
 
         #region Open , Close
@@ -145,18 +149,65 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                     if (attemptCountSendRequest >= maxCountAttempt)
                         throw new Exception("Превышено кол-во попыток чтения значения частоты с частотомера");
 
-                    //2-3.Request command and wait
                     WriteCommand(command, 500);
 
                     //3 Read
-                    var byteArray = new byte[countReadByte];
+                    var bytesList = new List<byte>();
+                    var attemptRead = 0;
+                    //Для скорости 0.7
+                    var maxAttemptRead07 = 5;
+                    //Для остальных скоростей
+                    var maxAttemptReadAll = 2;
 
-                    for (var i = 0; i < countReadByte; i++)
+                    while (true)
                     {
-                        _serialPort.Read(byteArray, i, 1);
+                        try
+                        {
+                            var readByte = (byte) _serialPort.ReadByte();
+                            if (IsCancellationRequested(ctsTask)) return 0;
+
+                            bytesList.Add(readByte);
+
+                            if (bytesList.Count == countReadByte)
+                            {
+                                break;
+                            }
+                        }
+                        catch 
+                        {
+                            attemptRead++;
+
+                            if (speedPoint.Speed == 0.7m)
+                            {
+                                if (attemptRead >= maxAttemptRead07)
+                                {
+                                    attemptRead = 0;
+                                    var messageBoxResult = MessageBox.Show(
+                                        "Проверьте вращается ли датчик на текущей скорости и нажмите Ок, что бы повторить попытку. Или Отмена, что бы завершить поверку.",
+                                        "Ошибка чтения данных с частотомера", MessageBoxButton.OKCancel,
+                                        MessageBoxImage.Error,
+                                        MessageBoxResult.Cancel);
+
+                                    if (messageBoxResult != MessageBoxResult.Cancel) continue;
+
+                                    StopTest();
+                                    if (IsCancellationRequested(ctsTask)) return 0;
+                                }
+
+                                continue;
+                            }
+
+
+                            if (attemptRead >= maxAttemptReadAll)
+                            {
+                                StopTest();
+                            }
+
+                            WriteCommand(command, 500);
+                        }
                     }
 
-                    //_serialPort.Read(byteArray, 0, countReadByte);
+                    var byteArray = bytesList.ToArray();
 
                     var data = Encoding.UTF8.GetString(byteArray);
 
@@ -174,10 +225,10 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
 
                     //"Невалидное значение частоты полученное с частотометра"
                 }
-                catch(Exception exception)
+                catch (Exception exception)
                 {
                     if (attemptCountSendRequest >= maxCountAttempt)
-                        throw new Exception("Превышено кол-во попыток запроса частоты с частотомера" , exception);
+                        throw new Exception("Превышено кол-во попыток запроса частоты с частотомера", exception);
 
                     Thread.Sleep(whileWait);
                 }

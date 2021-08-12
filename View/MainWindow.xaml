@@ -561,7 +561,7 @@
                                 </Grid>
                                 <Grid Grid.Column="1">
                                     <Button Command="{Binding ChangeVisibilitySetFrequencyCommand}"
-                                            ToolTip="Вывести отображение частоты вращения частотного двигателя в условных еденицах"
+                                            ToolTip="Вывести отображение частоты вращения частотного двигателя в условных единицах"
                                             Style="{StaticResource OnlyBackgroundButtonStyle}">
                                         <Image Source="{StaticResource QuestionMark}" />
                                     </Button>
