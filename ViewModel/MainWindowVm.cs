@@ -143,6 +143,11 @@ namespace VerificationAirVelocitySensor.ViewModel
         /// </summary>
         public bool IsTestActive { get; set; }
 
+        /// <summary>
+        /// Флаг показывающий было ли экстренное завершение поверки
+        /// </summary>
+        private bool IsEmergencyStop { get; set; }
+
 
         public ObservableCollection<string> PortsList { get; set; } =
             new ObservableCollection<string>(SerialPort.GetPortNames());
@@ -404,6 +409,16 @@ namespace VerificationAirVelocitySensor.ViewModel
             _ctsTask.Cancel();
         }
 
+        private void EmergencyStop()
+        {
+            BusyContent = "Аварийная остановка";
+            IsBusy = true;
+            IsTestActive = false;
+            IsEmergencyStop = true;
+
+            _ctsTask.Cancel();
+        }
+
         private bool StopTestValidation() =>
             IsTestActive;
 
@@ -462,6 +477,8 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                 _ctsTask = new CancellationTokenSource();
 
+                FrequencyCounterDevice.Instance.StopTest = EmergencyStop;
+
                 try
                 {
                     switch (TypeTest)
@@ -500,8 +517,17 @@ namespace VerificationAirVelocitySensor.ViewModel
 
                     StopTestClosePort();
 
-                    MessageBox.Show("Поверка завершена", "Внимание", MessageBoxButton.OK,
-                        MessageBoxImage.Asterisk, MessageBoxResult.OK);
+
+                    if (IsEmergencyStop)
+                    {
+                        MessageBox.Show("Произошло аварийное завершение поверки", "Внимание", MessageBoxButton.OK,
+                            MessageBoxImage.Error, MessageBoxResult.OK);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Поверка завершена", "Внимание", MessageBoxButton.OK,
+                            MessageBoxImage.Asterisk, MessageBoxResult.OK);
+                    }
                 }
             }));
         }

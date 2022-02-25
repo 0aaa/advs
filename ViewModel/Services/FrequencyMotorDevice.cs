@@ -385,7 +385,7 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         lock (_locker)
                         {
                             _isSendCommand = true;
-                            while (true)
+                            while (_isInterview)
                             {
                                 try
                                 {
