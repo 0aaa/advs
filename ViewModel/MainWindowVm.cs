@@ -516,7 +516,7 @@ namespace VerificationAirVelocitySensor.ViewModel
 
             if (isContinue == false)
             {
-                MessageBox.Show("Отменено пользователем", "Внимание", MessageBoxButton.OK, MessageBoxImage.Error , MessageBoxResult.OK);
+                MessageBox.Show("Отменено пользователем", "Внимание", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
                 return false;
             }
 

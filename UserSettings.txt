@@ -1,10 +1,12 @@
-FilterChannel1: false
-FilterChannel2: false
-FrequencyChannel: Channel1
-GateTime: S4
-ComPortFrequencyMotor: ''
-ComPortFrequencyCounter: ''
-TypeTest: 0
+SettingsModel:
+  ComPortFrequencyMotor: 
+  ComPortFrequencyCounter: 
+  FrequencyChannel: Channel1
+  GateTime: S4
+  FilterChannel1: false
+  FilterChannel2: false
+  SetFrequencyMotor: 0
+TypeTest: Dvs01
 SpeedPointsList: []
 PathSave: 
 MeasurementsData: 
