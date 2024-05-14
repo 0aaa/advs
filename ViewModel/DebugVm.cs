@@ -3,23 +3,22 @@ using VerificationAirVelocitySensor.ViewModel.Services;
 
 namespace VerificationAirVelocitySensor.ViewModel
 {
-    public class DebugVm : BaseVm.BaseVm
+    internal class DebugVm : BaseVm.BaseVm
     {
-
-        public RelayCommand StopFrequencyMotorCommand =>
-            new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0, 0),
-                FrequencyMotorDevice.Instance.IsOpen);
-
-        public RelayCommand SetSpeedFrequencyMotorCommand => new RelayCommand(SetSpeedFrequencyMotorMethod, FrequencyMotorDevice.Instance.IsOpen);
-
+        public RelayCommand[] FrequencyMotorCommands { get; }// StopFrequencyMotorCommand, SetSpeedFrequencyMotorCommand.
+		public decimal SpeedReferenceValue { get; set; }
         public int SetFrequencyMotor { get; set; }
-        public decimal SpeedReferenceValue { get; set; }
 
-        private void SetSpeedFrequencyMotorMethod()
+        public DebugVm()
         {
-            FrequencyMotorDevice.Instance.UpdateReferenceValue += FrequencyMotor_UpdateReferenceValue;
-            FrequencyMotorDevice.Instance.SetFrequency(SetFrequencyMotor, 0);
-        }
+			FrequencyMotorCommands = new RelayCommand[] {
+				new RelayCommand(() => FrequencyMotorDevice.Instance.SetFrequency(0, 0), FrequencyMotorDevice.Instance.IsOpen)
+				, new RelayCommand(() => {
+					FrequencyMotorDevice.Instance.UpdateReferenceValue += FrequencyMotor_UpdateReferenceValue;
+					FrequencyMotorDevice.Instance.SetFrequency(SetFrequencyMotor, 0);
+				}, FrequencyMotorDevice.Instance.IsOpen)
+			};
+		}
 
         private void FrequencyMotor_UpdateReferenceValue(object sender, UpdateReferenceValueEventArgs e)
         {
@@ -32,7 +31,5 @@ namespace VerificationAirVelocitySensor.ViewModel
             FrequencyMotorDevice.Instance.SetFrequency(0, 0);
             FrequencyMotorDevice.Instance.ClosePort();
         }
-
-
     }
 }

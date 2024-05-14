@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.Ports;
 using VerificationAirVelocitySensor.Model;
@@ -8,71 +7,25 @@ using VerificationAirVelocitySensor.ViewModel.Services;
 
 namespace VerificationAirVelocitySensor.ViewModel
 {
-    public class SettingsVm : BaseVm.BaseVm
+    internal class SettingsVm : BaseVm.BaseVm
     {
-        #region RelayCommand
-
-        public RelayCommand UpdateComPortsSourceCommand => new RelayCommand(UpdateComPortsSource);
-
-        #endregion
-
-
-        public SettingsModel SettingsModel { get; set; }
-
-        #region Collection
-
-        public ObservableCollection<string> PortsList { get; set; } =
-            new ObservableCollection<string>(SerialPort.GetPortNames());
-
-        public List<GateTimeDescription> GateTimeList { get; } = new List<GateTimeDescription>
-        {
-            //new GateTimeDescription(GateTime.S1, "1 сек"),
-            new GateTimeDescription(GateTime.S4, "4 сек"),
-            new GateTimeDescription(GateTime.S7, "7 сек"),
-            new GateTimeDescription(GateTime.S10, "10 сек"),
-            new GateTimeDescription(GateTime.S100, "100 сек"),
-        };
-
-        public List<FrequencyChannelDescription> FrequencyChannelList { get; } = new List<FrequencyChannelDescription>
-        {
-            new FrequencyChannelDescription(FrequencyChannel.Channel1, "1-ый канал"),
-            new FrequencyChannelDescription(FrequencyChannel.Channel2, "2-ой канал"),
-        };
-
-        #endregion
-
-        private Action _serialization;
-
-        private bool _filterChannel1;
-
-        public bool FilterChannel1
-        {
-            get => _filterChannel1;
-            set
-            {
-                _filterChannel1 = value;
-                OnPropertyChanged(nameof(FilterChannel1));
-                SettingsModel.FilterChannel1 = value;
-                _serialization();
-            }
-        }
-
-        private bool _filterChannel2;
-
-        public bool FilterChannel2
-        {
-            get => _filterChannel2;
-            set
-            {
-                _filterChannel2 = value;
-                OnPropertyChanged(nameof(FilterChannel2));
-                SettingsModel.FilterChannel2 = value;
-                _serialization();
-            }
-        }
-
+        private readonly Action _serialization;
         private FrequencyChannel _frequencyChannel;
-
+        private GateTime _gateTime;
+        private string _comPortFrequencyMotor;
+        private string _comPortFrequencyCounter;
+        private int _setFrequencyMotor;
+        private bool _filterChannel1;
+        private bool _filterChannel2;
+        #region Collections
+        public FrequencyChannelDescription[] FrequencyChannelArr { get; }
+        public GateTimeDescription[] GateTimeArr { get; }
+        public ObservableCollection<string> PortsList { get; }
+        #endregion
+        public SettingsModel SettingsModel { get; }
+        #region RelayCommand
+        public RelayCommand UpdateComPortsSourceCommand { get; }
+        #endregion
         public FrequencyChannel FrequencyChannel
         {
             get => _frequencyChannel;
@@ -84,9 +37,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 _serialization();
             }
         }
-
-        private GateTime _gateTime;
-
         public GateTime GateTime
         {
             get => _gateTime;
@@ -98,9 +48,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 _serialization();
             }
         }
-
-        private string _comPortFrequencyMotor;
-
         public string ComPortFrequencyMotor
         {
             get => _comPortFrequencyMotor;
@@ -112,9 +59,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 _serialization();
             }
         }
-
-        private string _comPortFrequencyCounter;
-
         public string ComPortFrequencyCounter
         {
             get => _comPortFrequencyCounter;
@@ -126,9 +70,6 @@ namespace VerificationAirVelocitySensor.ViewModel
                 _serialization();
             }
         }
-
-        private int _setFrequencyMotor;
-
         public int SetFrequencyMotor
         {
             get => _setFrequencyMotor;
@@ -140,56 +81,74 @@ namespace VerificationAirVelocitySensor.ViewModel
                 _serialization();
             }
         }
+        public bool FilterChannel1
+        {
+            get => _filterChannel1;
+            set
+            {
+                _filterChannel1 = value;
+                OnPropertyChanged(nameof(FilterChannel1));
+				SettingsModel.FilterChannels[0] = value;
+                _serialization();
+            }
+        }
+        public bool FilterChannel2
+        {
+            get => _filterChannel2;
+            set
+            {
+                _filterChannel2 = value;
+                OnPropertyChanged(nameof(FilterChannel2));
+				SettingsModel.FilterChannels[1] = value;
+                _serialization();
+            }
+        }
 
         public SettingsVm(SettingsModel settingsModel, Action serialization)
         {
             SettingsModel = settingsModel;
             _serialization = serialization;
-
             ComPortFrequencyCounter = SettingsModel.ComPortFrequencyCounter;
             ComPortFrequencyMotor = SettingsModel.ComPortFrequencyMotor;
             GateTime = SettingsModel.GateTime;
-            FilterChannel1 = SettingsModel.FilterChannel1;
-            FilterChannel2 = SettingsModel.FilterChannel2;
+            FilterChannel1 = SettingsModel.FilterChannels[0];
+            FilterChannel2 = SettingsModel.FilterChannels[1];
             FrequencyChannel = SettingsModel.FrequencyChannel;
-
             SetFrequencyMotor = SettingsModel.SetFrequencyMotor;
-
-
-
-        }
-
-
-        private void UpdateComPortsSource()
-        {
-            var newPortList = new ObservableCollection<string>(SerialPort.GetPortNames());
-
-            //Добавляю новые итемы из полученной коллекции.
-            foreach (var port in newPortList)
-            {
-                if (!PortsList.Contains(port))
-                {
-                    PortsList.Add(port);
-                }
-            }
-
-
-            var deletePorts = new ObservableCollection<string>();
-
-            //Записываю старые итемы в коллекцию на удаление
-            foreach (var port in PortsList)
-            {
-                if (!newPortList.Contains(port))
-                {
-                    deletePorts.Add(port);
-                }
-            }
-
-            //Удаляю лишние элементы
-            foreach (var port in deletePorts)
-            {
-                PortsList.Remove(port);
-            }
+			GateTimeArr = new GateTimeDescription[] {
+				//new GateTimeDescription(GateTime.S1, "1 сек"),
+				new GateTimeDescription(GateTime.S4, "4 сек")
+				, new GateTimeDescription(GateTime.S7, "7 сек")
+				, new GateTimeDescription(GateTime.S10, "10 сек")
+				, new GateTimeDescription(GateTime.S100, "100 сек")
+			};
+			FrequencyChannelArr = new FrequencyChannelDescription[] {
+				new FrequencyChannelDescription(FrequencyChannel.Channel1, "1-ый канал")
+				, new FrequencyChannelDescription(FrequencyChannel.Channel2, "2-ой канал")
+			};
+			PortsList = new ObservableCollection<string>(SerialPort.GetPortNames());
+			UpdateComPortsSourceCommand = new RelayCommand(() => {
+				var newPortList = new ObservableCollection<string>(SerialPort.GetPortNames());
+				foreach (var port in newPortList)// Добавляю новые итемы из полученной коллекции.
+				{
+					if (!PortsList.Contains(port))
+					{
+						PortsList.Add(port);
+					}
+				}
+				var deletePorts = new ObservableCollection<string>();
+				foreach (var port in PortsList)// Записываю старые итемы в коллекцию на удаление.
+				{
+					if (!newPortList.Contains(port))
+					{
+						deletePorts.Add(port);
+					}
+				}
+				foreach (var port in deletePorts)// Удаляю лишние элементы.
+				{
+					PortsList.Remove(port);
+				}
+			});
         }
     }
 }

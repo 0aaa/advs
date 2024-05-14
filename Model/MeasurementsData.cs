@@ -2,52 +2,34 @@
 
 namespace VerificationAirVelocitySensor.Model
 {
-    public class MeasurementsData : BaseVm
+    internal class MeasurementsData : BaseVm
     {
-        /// <summary>
-        /// Серийный номер
-        /// </summary>
-        public string DeviceId { get; set; }
-        /// <summary>
-        /// Температура
-        /// </summary>
-        public string Temperature { get; set; }
-        /// <summary>
-        /// Влажность
-        /// </summary>
-        public string Humidity { get; set; }
-        /// <summary>
-        /// Давление
-        /// </summary>
-        public string Pressure { get; set; }
-        /// <summary>
-        /// Настройка на будущее, тип поверки
-        /// </summary>
+        /// <summary>Настройка на будущее, тип поверки</summary>
         public TypeVerification TypeVerification { get; set; }
-        /// <summary>
-        /// Поверитель , в месте использования будет сделана коллекция имен или типо того
-        /// </summary>
+        /// <summary>Серийный номер</summary>
+        public string DeviceId { get; set; }
+        /// <summary>Температура</summary>
+        public string Temperature { get; set; }
+        /// <summary>Влажность</summary>
+        public string Humidity { get; set; }
+        /// <summary>Давление</summary>
+        public string Pressure { get; set; }
+        /// <summary>Поверитель, в месте использования будет сделана коллекция имен или типо того</summary>
         public string Verifier { get; set; }
     }
 
-    public enum TypeVerification
+    /// <summary>Класс для биндинга коллекции на чекбокс</summary>
+    internal class ListTypeVerification
     {
-        Periodic, // Переодическая поверка
-        Primary   // Первичная поверка
+        /// <summary>Значение</summary>
+        public TypeVerification TypeVerification { get; set; }
+        /// <summary>Описание</summary>
+        public string Description { get; set; }
     }
 
-    /// <summary>
-    /// Класс для биндинга коллекции на чекбокс
-    /// </summary>
-    public class ListTypeVerification
+    internal enum TypeVerification
     {
-        /// <summary>
-        /// Значение
-        /// </summary>
-        public TypeVerification TypeVerification { get; set; }
-        /// <summary>
-        /// Описание
-        /// </summary>
-        public string Description { get; set; }
+        Periodic, // Переодическая поверка.
+        Primary   // Первичная поверка.
     }
 }

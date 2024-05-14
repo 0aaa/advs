@@ -2,7 +2,7 @@
 
 namespace VerificationAirVelocitySensor.ViewModel.Services
 {
-    public static class GlobalLog
+    internal static class GlobalLog
     {
         public static readonly Serilog.Core.Logger Log = new LoggerConfiguration()
             .MinimumLevel.Information()

@@ -2,26 +2,17 @@
 
 namespace VerificationAirVelocitySensor.View
 {
-    /// <summary>
-    /// Логика взаимодействия для SetMeasurementsData.xaml
-    /// </summary>
+    /// <summary>Логика взаимодействия для SetMeasurementsData.xaml</summary>
     public partial class SetMeasurementsData
     {
-        public SetMeasurementsDataVm ViewModel => (SetMeasurementsDataVm)DataContext;
+        internal SetMeasurementsDataVm ViewModel { get; }
 
-        public SetMeasurementsData(SetMeasurementsDataVm setMeasurementsDataVm)
+        internal SetMeasurementsData(SetMeasurementsDataVm setMeasurementsDataVm)
         {
             InitializeComponent();
-
             DataContext = setMeasurementsDataVm;
-
-            ViewModel.CloseWindow = CloseWindow;
-        }
-
-
-        private void CloseWindow()
-        {
-            Close();
+			ViewModel = (SetMeasurementsDataVm)DataContext;
+			ViewModel.CloseWindow = () => Close();
         }
     }
 }

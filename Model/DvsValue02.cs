@@ -2,27 +2,23 @@
 
 namespace VerificationAirVelocitySensor.Model
 {
-    public class DvsValue02 : BaseVm
+    internal class DvsValue02 : BaseVm
     {
+		private const int VALUES_CNT = 5;
+        /// <summary>Скорость потока воздуха на которой снимается значение</summary>
+        public decimal SpeedValue { get; }
+        /// <summary>Снимаемое значение скорости с эталона</summary>
+        public decimal? ReferenceSpeedValue { get; set; }
+        public SpeedValue[] DeviceSpeedValues { get; set; }
+
         public DvsValue02(decimal speedValue)
         {
+			DeviceSpeedValues = new SpeedValue[VALUES_CNT];
+            for (int i = 0; i < DeviceSpeedValues.Length; i++)
+			{
+				DeviceSpeedValues[i] = new SpeedValue();
+            }
             SpeedValue = speedValue;
         }
-
-        /// <summary>
-        /// Скорость потока воздуха на которой снимается значение
-        /// </summary>
-        public decimal SpeedValue { get; }
-
-        /// <summary>
-        /// Снимаемое значение скорости с эталона
-        /// </summary>
-        public decimal? ReferenceSpeedValue { get; set; }
-
-        public SpeedValue DeviceSpeedValue1 { get; set; } = new SpeedValue();
-        public SpeedValue DeviceSpeedValue2 { get; set; } = new SpeedValue();
-        public SpeedValue DeviceSpeedValue3 { get; set; } = new SpeedValue();
-        public SpeedValue DeviceSpeedValue4 { get; set; } = new SpeedValue();
-        public SpeedValue DeviceSpeedValue5 { get; set; } = new SpeedValue();
     }
 }

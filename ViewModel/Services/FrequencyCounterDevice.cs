@@ -8,62 +8,42 @@ using System.Windows;
 
 namespace VerificationAirVelocitySensor.ViewModel.Services
 {
-    /// <summary>
-    /// Управление частотомером
-    /// </summary>
-    public class FrequencyCounterDevice
+    /// <summary>Управление частотомером</summary>
+    internal class FrequencyCounterDevice
     {
+        private const int BAUD_RATE = 9600;
+        private static FrequencyCounterDevice _instance;
         private SerialPort _serialPort;
         private string _comPort;
-        private const int BaudRate = 9600;
-
         #region EventHandler Open/Close Port
-
-        public event EventHandler<IsOpenFrequencyCounterEventArgs> IsOpenUpdate;
-
-        private void IsOpenUpdateMethod(bool isOpen)
-        {
-            IsOpenUpdate?.Invoke(this, new IsOpenFrequencyCounterEventArgs
-            {
-                IsOpen = isOpen
-            });
-        }
-
+        internal event EventHandler<IsOpenFrequencyCounterEventArgs> IsOpenUpdate;
         #endregion
+        public static FrequencyCounterDevice Instance => _instance ?? (_instance = new FrequencyCounterDevice());
+        public Action StopTest { get; set; }
 
-
-        private FrequencyCounterDevice()
+        /// <summary></summary><param name="command"></param><param name="sleepTime">Устройство очень долго думает. 2 сек, это гарантия того, что при старте программы все настройки будут отправлены</param>
+        private void WriteCommand(string command, int sleepTime = 2000)
         {
+            _serialPort.WriteLine(command);
+            Thread.Sleep(sleepTime);
         }
-
-        private static FrequencyCounterDevice _instance;
-
-        public static FrequencyCounterDevice Instance =>
-            _instance ?? (_instance = new FrequencyCounterDevice());
 
         public bool IsOpen() => _serialPort != null && _serialPort.IsOpen;
 
-
-        public Action StopTest;
-
-
         #region Open , Close
-
         public void OpenPort(string comPort, int timeOut)
         {
             try
             {
                 _comPort = comPort;
-                _serialPort = new SerialPort(_comPort, BaudRate) {ReadTimeout = 7000, WriteTimeout = 7000};
+                _serialPort = new SerialPort(_comPort, BAUD_RATE) { ReadTimeout = 7000, WriteTimeout = 7000 };
                 _serialPort.Open();
-
-                IsOpenUpdateMethod(_serialPort.IsOpen);
+				IsOpenUpdate?.Invoke(this, new IsOpenFrequencyCounterEventArgs { IsOpen = _serialPort.IsOpen });
             }
             catch (Exception e)
             {
                 _serialPort?.Close();
-                MessageBox.Show($"{e.Message}", "Ошибка открытия порта Частотомера", MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBox.Show(e.Message, "Ошибка открытия порта Частотомера", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -71,104 +51,64 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         {
             _serialPort.Close();
             _serialPort.Dispose();
-
             if (_serialPort == null)
             {
-                IsOpenUpdateMethod(false);
+                IsOpenUpdate?.Invoke(this, new IsOpenFrequencyCounterEventArgs { IsOpen = false });
                 return;
             }
-
-
-            IsOpenUpdateMethod(_serialPort.IsOpen);
+			IsOpenUpdate?.Invoke(this, new IsOpenFrequencyCounterEventArgs { IsOpen = _serialPort.IsOpen });
         }
-
         #endregion
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="command"></param>
-        /// <param name="sleepTime">Устройство очень долго думает. 2сек, это гарантие того, что при старте программы все настройки будут отправлены</param>
-        private void WriteCommand(string command, int sleepTime = 2000)
-        {
-            _serialPort.WriteLine(command);
-            Thread.Sleep(sleepTime);
-        }
-
-
-        /// <summary>
-        /// Reset device
-        /// </summary>
+        /// <summary>Reset device</summary>
         public void RstCommand()
         {
             WriteCommand("*RST");
         }
 
-        /// <summary>
-        /// Вкыл, выкл фильтра
-        /// </summary>
-        /// <param name="channel">1 , 2 , 3 only</param>
-        /// <param name="isOn"></param>
-        /// <param name="sleepTime"></param>
+        /// <summary>Вкыл, выкл фильтра</summary><param name="channel">1 , 2 , 3 only</param><param name="isOn"></param><param name="sleepTime"></param>
         public void SwitchFilter(int channel, bool isOn, int sleepTime = 2000)
         {
             if (channel != 1 && channel != 2 && channel != 3)
+			{
                 throw new ArgumentOutOfRangeException();
-
-            var stringIsOn = isOn
-                ? "ON"
-                : "OFF";
-
-            var command = $":INPut{channel}:FILTer {stringIsOn}";
-
-            WriteCommand(command, sleepTime);
+			}
+            WriteCommand($":INPut{channel}:FILTer {(isOn ? "ON" : "OFF")}", sleepTime);
         }
-
-        private bool IsCancellationRequested(CancellationTokenSource ctSource) =>
-            ctSource.Token.IsCancellationRequested;
-
 
         public decimal GetCurrentHzValue(SpeedPoint speedPoint, int whileWait, CancellationTokenSource ctsTask)
         {
             var attemptCountSendRequest = 0;
-            const int maxCountAttempt = 3;
-            const string command = "FETC?";
-            const int countReadByte = 18;
-
+            const string COMMAND = "FETC?";
+            const int MAX_ATTEMPTS = 3;
+            const int CNT_READ_BYTE = 18;
             while (true)
             {
-                if (IsCancellationRequested(ctsTask)) return 0;
-
+				if (ctsTask.Token.IsCancellationRequested)
+				{
+					return 0;
+				}
                 try
                 {
-                    //1.Clear buffer
-                    // ReSharper disable once AssignmentIsFullyDiscarded
-                    _ = _serialPort.ReadExisting();
-
-                    attemptCountSendRequest++;
-                    if (attemptCountSendRequest >= maxCountAttempt)
+                    _serialPort.ReadExisting();// 1. Clear buffer.
+					attemptCountSendRequest++;
+                    if (attemptCountSendRequest >= MAX_ATTEMPTS)
+					{
                         throw new Exception("Превышено кол-во попыток чтения значения частоты с частотомера");
-
-                    WriteCommand(command, 500);
-
-                    //3 Read
+					}
+                    WriteCommand(COMMAND, 500);
                     var bytesList = new List<byte>();
                     var attemptRead = 0;
-                    //Для скорости 0.7
-                    var maxAttemptRead07 = 5;
-                    //Для остальных скоростей
-                    var maxAttemptReadAll = 2;
-
-                    while (true)
-                    {
+					while (true)// 3. Read.
+					{
                         try
                         {
-                            var readByte = (byte) _serialPort.ReadByte();
-                            if (IsCancellationRequested(ctsTask)) return 0;
-
-                            bytesList.Add(readByte);
-
-                            if (bytesList.Count == countReadByte)
+							if (ctsTask.Token.IsCancellationRequested)
+							{
+								return 0;
+							}
+                            bytesList.Add((byte)_serialPort.ReadByte());
+                            if (bytesList.Count == CNT_READ_BYTE)
                             {
                                 break;
                             }
@@ -176,110 +116,72 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
                         catch 
                         {
                             attemptRead++;
-
                             if (speedPoint.Speed == 0.7m)
                             {
-                                if (attemptRead >= maxAttemptRead07)
-                                {
+                                if (attemptRead >= 5)// Для скорости 0.7.
+								{
                                     attemptRead = 0;
-                                    var messageBoxResult = MessageBox.Show(
-                                        "Проверьте вращается ли датчик на текущей скорости и нажмите Ок, что бы повторить попытку. Или Отмена, что бы завершить поверку.",
-                                        "Ошибка чтения данных с частотомера", MessageBoxButton.OKCancel,
-                                        MessageBoxImage.Error,
-                                        MessageBoxResult.Cancel);
-
-                                    if (messageBoxResult != MessageBoxResult.Cancel) continue;
-
+									if (MessageBoxResult.Cancel != MessageBox.Show("Проверьте, вращается ли датчик на текущей скорости и нажмите \"OK\", чтобы повторить попытку. Или \"Отмена\", чтобы завершить поверку.",
+										"Ошибка чтения данных с частотомера", MessageBoxButton.OKCancel, MessageBoxImage.Error, MessageBoxResult.Cancel))
+									{
+										continue;
+									}
                                     StopTest();
-                                    if (IsCancellationRequested(ctsTask)) return 0;
+									if (ctsTask.Token.IsCancellationRequested)
+									{
+										return 0;
+									}
                                 }
-
                                 continue;
                             }
-
-
-                            if (attemptRead >= maxAttemptReadAll)
-                            {
+                            if (attemptRead >= 2)// Для остальных скоростей.
+							{
                                 StopTest();
                             }
-
-                            WriteCommand(command, 500);
+                            WriteCommand(COMMAND, 500);
                         }
                     }
-
-                    var byteArray = bytesList.ToArray();
-
-                    var data = Encoding.UTF8.GetString(byteArray);
-
-                    //5.Calibration
-                    data = data.Replace("\r", "").Replace("\n", "").Replace(" ", "");
-
-                    var value = decimal.Parse(data, NumberStyles.Float, CultureInfo.InvariantCulture);
-
-                    var mathValue = Math.Round(value, 3);
-                    //6.Validation
-                    var isValidation = ValidationHzValue(mathValue, speedPoint);
-
-                    if (isValidation)
+                    // 5.Calibration.
+                    var mathValue = Math.Round(decimal.Parse(Encoding.UTF8.GetString(bytesList.ToArray()).Replace("\r", "").Replace("\n", "").Replace(" ", ""), NumberStyles.Float, CultureInfo.InvariantCulture), 3);
+        /// <summary>Метод для проверки полученного значения на вброс (баги со стороны частотометра)</summary><param name="value"></param><param name="speedPoint"></param>
+                    if (mathValue >= speedPoint.MinEdge && mathValue <= speedPoint.MaxEdge)// 6. Validation.
+					{
                         return mathValue;
-
-                    //"Невалидное значение частоты полученное с частотометра"
+					}
+                    // "Невалидное значение частоты полученное с частотометра".
                 }
                 catch (Exception exception)
                 {
-                    if (attemptCountSendRequest >= maxCountAttempt)
+                    if (attemptCountSendRequest >= MAX_ATTEMPTS)
+					{
                         throw new Exception("Превышено кол-во попыток запроса частоты с частотомера", exception);
-
+					}
                     Thread.Sleep(whileWait);
                 }
             }
         }
 
-        /// <summary>
-        /// Метод для проверки полученного значения на вброс ( баги со стороны частотометра)
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="speedPoint"></param>
-        /// <returns></returns>
-        private bool ValidationHzValue(decimal value, SpeedPoint speedPoint)
-            => value >= speedPoint.MinEdge && value <= speedPoint.MaxEdge;
-
-        /// <summary>
-        /// Запрос версии
-        /// </summary>
-        /// <param name="sleepTime"></param>
+        /// <summary>Запрос версии</summary><param name="sleepTime"></param>
         public string GetModelVersion(int sleepTime = 1000)
         {
-            //TODO сделать возвращаемый тип bool. Поместить в метод проверку на валидность устройства.
+            // TODO сделать возвращаемый тип bool. Поместить в метод проверку на валидность устройства.
             WriteCommand("*IDN?", sleepTime);
-
             Thread.Sleep(100);
             var data = _serialPort.ReadExisting();
-
-            return string.IsNullOrEmpty(data)
-                ? "Error"
-                : data;
+            return string.IsNullOrEmpty(data) ? "Error" : data;
         }
 
-        /// <summary>
-        /// Установка времени опроса частотомером
-        /// </summary>
-        /// <param name="gateTime"></param>
-        /// <param name="sleepTime"></param>
+        /// <summary>Установка времени опроса частотомером</summary><param name="gateTime"></param><param name="sleepTime"></param>
         public void SetGateTime(GateTime gateTime, int sleepTime = 2000)
         {
             WriteCommand($":ARM:TIMer {(int) gateTime} S", sleepTime);
         }
 
-        /// <summary>
-        /// Устанавливает выбранный канал для считывания значения частоты.
-        /// Доступных каналы : 1, 2, 3
-        /// </summary>
+        /// <summary>Устанавливает выбранный канал для считывания значения частоты. Доступные каналы : 1, 2, 3</summary>
         public void SetChannelFrequency(FrequencyChannel frequencyChannel, int sleepTime = 2000)
         {
             WriteCommand($":FUNCtion FREQuency {(int) frequencyChannel}", sleepTime);
         }
-
 
         public int GateTimeToMSec(GateTime gateTime)
         {
@@ -301,61 +203,52 @@ namespace VerificationAirVelocitySensor.ViewModel.Services
         }
     }
 
-    /// <summary>
-    /// Каналы частотометра 1 и 2.
-    /// 3-ий использоваться не планируется.
-    /// </summary>
-    public enum FrequencyChannel
+    internal class FrequencyChannelDescription
+    {
+        public FrequencyChannel FrequencyChannel { get; }
+        public string Description { get; }
+
+        public FrequencyChannelDescription(FrequencyChannel frequencyChannel, string description)
+        {
+            FrequencyChannel = frequencyChannel;
+            Description = description;
+        }
+    }
+
+    /// <summary>Класс для создания коллекции доступных enum GateTime для биндинга на интерфейс.</summary>
+    internal class GateTimeDescription
+    {
+        public GateTime GateTime { get; }
+        public string Description { get; }
+
+        public GateTimeDescription(GateTime gateTime, string description)
+        {
+            GateTime = gateTime;
+            Description = description;
+        }
+    }
+
+    /// <summary>Событие открытия или закрытие порта частотомера</summary>
+    internal class IsOpenFrequencyCounterEventArgs : EventArgs
+    {
+        public bool IsOpen { get; set; }
+    }
+
+    /// <summary>Каналы частотометра 1 и 2. 3-ий использоваться не планируется.</summary>
+    internal enum FrequencyChannel
     {
         Channel1 = 1,
         Channel2 = 2,
         Channel3 = 3
     }
 
-    public class FrequencyChannelDescription
-    {
-        public FrequencyChannelDescription(FrequencyChannel frequencyChannel, string description)
-        {
-            FrequencyChannel = frequencyChannel;
-            Description = description;
-        }
-
-        public FrequencyChannel FrequencyChannel { get; }
-        public string Description { get; }
-    }
-
-    /// <summary>
-    /// Период опроса частотомера в секундах
-    /// </summary>
-    public enum GateTime
+    /// <summary>Период опроса частотомера в секундах</summary>
+    internal enum GateTime
     {
         //S1 = 1,
         S4 = 4,
         S7 = 7,
         S10 = 10,
         S100 = 100
-    }
-
-    /// <summary>
-    /// Класс для создания коллекции доступных enum GateTime  для биндинга на интерфейс.
-    /// </summary>
-    public class GateTimeDescription
-    {
-        public GateTimeDescription(GateTime gateTime, string description)
-        {
-            GateTime = gateTime;
-            Description = description;
-        }
-
-        public GateTime GateTime { get; }
-        public string Description { get; }
-    }
-
-    /// <summary>
-    /// Событие открытия или закрытие порта частотомера
-    /// </summary>
-    public class IsOpenFrequencyCounterEventArgs : EventArgs
-    {
-        public bool IsOpen { get; set; }
     }
 }

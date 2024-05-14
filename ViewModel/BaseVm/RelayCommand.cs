@@ -3,41 +3,34 @@ using System.Windows.Input;
 
 namespace VerificationAirVelocitySensor.ViewModel.BaseVm
 {
-    /// <summary>
-    /// Управление командами для биндинга на интерфейс
-    /// </summary>
-    public class RelayCommand : ICommand
+    /// <summary>Управление командами для биндинга на интерфейс</summary>
+    internal class RelayCommand : ICommand
     {
         private readonly Action<object> _execute;
         private readonly Func<object, bool> _canExecute;
-
         public event EventHandler CanExecuteChanged
         {
             add => CommandManager.RequerySuggested += value;
             remove => CommandManager.RequerySuggested -= value;
         }
 
+        public RelayCommand(Action execute, Func<bool> canExecute)
+        {
+            _execute = _ => execute();
+            _canExecute = _ => canExecute();
+        }
+
+        /// <summary>Конструктор команды</summary><param name="execute"></param><param name="canExecute"></param>
+        public RelayCommand(Action execute, Func<object, bool> canExecute = null)
+        {
+            _execute = _ => execute();
+            _canExecute = canExecute;
+        }
+
         public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
         {
             _execute = execute;
             _canExecute = canExecute;
-        }
-
-        /// <summary>
-        /// Конструктор команды
-        /// </summary>
-        /// <param name="execute"></param>
-        /// <param name="canExecute"></param>
-        public RelayCommand(Action execute, Func<object, bool> canExecute = null)
-        {
-            _execute = o => execute();
-            _canExecute = canExecute;
-        }
-
-        public RelayCommand(Action execute, Func<bool> canExecute)
-        {
-            _execute = o => execute();
-            _canExecute = o => canExecute();
         }
 
         public bool CanExecute(object parameter)

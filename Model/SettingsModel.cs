@@ -3,20 +3,16 @@ using VerificationAirVelocitySensor.ViewModel.Services;
 
 namespace VerificationAirVelocitySensor.Model
 {
-    public class SettingsModel : BaseVm
+    internal class SettingsModel : BaseVm
     {
-        //Com порты
-        public string ComPortFrequencyMotor { get; set; }
-        public string ComPortFrequencyCounter { get; set; }
-
-        //Настройки частотомера
+        // Настройки частотомера.
         public FrequencyChannel FrequencyChannel { get; set; } = FrequencyChannel.Channel1;
         public GateTime GateTime { get; set; } = GateTime.S4;
-        public bool FilterChannel1 { get; set; }
-        public bool FilterChannel2 { get; set; }
-
-
-        //Режим ручной настройки ПКЛ73
+        // COM-ports.
+        public string ComPortFrequencyMotor { get; set; }
+        public string ComPortFrequencyCounter { get; set; }
+		public bool[] FilterChannels { get; set; } = new bool[2];// FilterChannel1, FilterChannel2.
+        // Режим ручной настройки ПКЛ73.
         public int SetFrequencyMotor { get; set; } = 0;
     }
 }
