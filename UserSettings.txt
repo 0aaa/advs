@@ -1,12 +1,11 @@
 SettingsModel:
-  ComPortFrequencyMotor: 
-  ComPortFrequencyCounter: 
+  TubePort: 
+  CounterPort: 
   FrequencyChannel: Channel1
   GateTime: S4
-  FilterChannel1: false
-  FilterChannel2: false
-  SetFrequencyMotor: 0
-TypeTest: Dvs01
-SpeedPointsList: []
-PathSave: 
+  FilterChannels: []
+  SetFrequencyTube: 0
+SensorModel: Dvs03
+Checkpoints: []
+SavePath: 
 MeasurementsData: 
