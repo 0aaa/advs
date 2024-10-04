@@ -1,36 +1,36 @@
-﻿using VerificationAirVelocitySensor.Model.Lib;
-using VerificationAirVelocitySensor.ViewModels.BaseVm;
+﻿using VerificationAirVelocitySensor.Models.Classes;
+using VerificationAirVelocitySensor.ViewModels.Base;
 using VerificationAirVelocitySensor.ViewModels.Services;
 
 namespace VerificationAirVelocitySensor.ViewModels
 {
-    internal class DebugVm : BaseVm.BaseVm
+    internal class DebugVm : BaseVm
     {
-        public RelayCommand[] TubeCommands { get; }// StopFrequencyMotorCommand, SetSpeedFrequencyMotorCommand.
-		public decimal SpeedReference { get; private set; }
-        public int SetTube { get; set; }
+        public RelayCommand[] Rcs { get; }// StopFrequencyMotorCommand, SetSpeedFrequencyMotorCommand.
+		public decimal Sref { get; private set; }
+        public int F { get; set; }
 
         public DebugVm()
         {
-			TubeCommands = [
-				new RelayCommand(() => Tube.Instance.SetFreq(0, 0), Tube.Instance.IsOpen)
+			Rcs = [
+				new RelayCommand(() => Tube.Inst.SetF(0, 0), Tube.Inst.IsOpen)
 				, new RelayCommand(() => {
-					Tube.Instance.ReferenceUpdate += FrequencyMotor_UpdateReferenceValue;
-					Tube.Instance.SetFreq(SetTube, 0);
-				}, Tube.Instance.IsOpen)
+					Tube.Inst.RefUpd += Tube_UpdRef;
+					Tube.Inst.SetF(F, 0);
+				}, Tube.Inst.IsOpen)
 			];
 		}
 
-        private void FrequencyMotor_UpdateReferenceValue(object sender, ReferenceUpdateEventArgs e)
+        private void Tube_UpdRef(object _, RefUpd e)
         {
-            SpeedReference = (decimal)e.ReferenceValue;
+            Sref = (decimal)e.Ref;
         }
 
-        public void Unloaded()
+        public void Unload()
         {
-            Tube.Instance.ReferenceUpdate -= FrequencyMotor_UpdateReferenceValue;
-            Tube.Instance.SetFreq(0, 0);
-            Tube.Instance.Close();
+            Tube.Inst.RefUpd -= Tube_UpdRef;
+            Tube.Inst.SetF(0, 0);
+            Tube.Inst.Close();
         }
     }
 }

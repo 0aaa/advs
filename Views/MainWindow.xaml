@@ -48,10 +48,10 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Button Content="Главная страница" Command="{Binding PaginationCmds[0]}" />
-            <Button Grid.Column="1" Content="Настройки" Command="{Binding PaginationCmds[1]}" />
-            <Button Grid.Column="2" Content="Чекпоинты" Command="{Binding PaginationCmds[2]}" />
-            <Button Grid.Column="3" Content="Отладка" Command="{Binding PaginationCmds[3]}" />
+            <Button Content="Главная страница" Command="{Binding PaginationRcs[0]}" />
+            <Button Grid.Column="1" Content="Настройки" Command="{Binding PaginationRcs[1]}" />
+            <Button Grid.Column="2" Content="Чекпоинты" Command="{Binding PaginationRcs[2]}" />
+            <Button Grid.Column="3" Content="Отладка" Command="{Binding PaginationRcs[3]}" />
         </Grid>
         <!--#region WSS revision-->
         <Grid Grid.Row="1" Background="#E2E1E1">
@@ -93,7 +93,7 @@
                     <TextBlock Grid.Column="2" Text="№ 2"/>
                     <TextBlock Grid.Column="3" Text="№ 3"/>
                 </Grid>
-                <ItemsControl Grid.Row="1" ItemsSource="{Binding WssValues01}" BorderThickness="0" Padding="0" Margin="0">
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding Wss01Measurements}" BorderThickness="0" Padding="0" Margin="0">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Grid>
@@ -101,7 +101,7 @@
                                     <ColumnDefinition Width="100" />
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding ReferenceSpeedValueMain}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" Margin="2" HorizontalContentAlignment="Center"
+                                <TextBox Text="{Binding RefS}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" Margin="2" HorizontalContentAlignment="Center"
                                     VerticalContentAlignment="Center" />
                                 <Grid Grid.Column="1">
                                     <Grid.ColumnDefinitions>
@@ -111,45 +111,45 @@
                                         <ColumnDefinition/>
                                         <ColumnDefinition/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Text="{Binding DeviceSpeedValues[0].ResultValue}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
+                                    <TextBox Text="{Binding Ss[0].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
                                              VerticalContentAlignment="Center">
                                         <TextBox.Style>
                                             <Style TargetType="TextBox">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding DeviceSpeedValues[0].IsСheckedNow}" Value="True">
+                                                    <DataTrigger Binding="{Binding Ss[0].IsСheckedNow}" Value="True">
                                                         <Setter Property="Background" Value="Yellow" />
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding DeviceSpeedValues[0].IsVerified}" Value="True">
+                                                    <DataTrigger Binding="{Binding Ss[0].IsVerified}" Value="True">
                                                         <Setter Property="Background" Value="#7BD87B" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBox.Style>
                                     </TextBox>
-                                    <TextBox Grid.Column="1" Text="{Binding DeviceSpeedValues[1].ResultValue}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
+                                    <TextBox Grid.Column="1" Text="{Binding Ss[1].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
                                              VerticalContentAlignment="Center">
                                         <TextBox.Style>
                                             <Style TargetType="TextBox">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding DeviceSpeedValues[1].IsСheckedNow}" Value="True">
+                                                    <DataTrigger Binding="{Binding Ss[1].IsСheckedNow}" Value="True">
                                                         <Setter Property="Background" Value="Yellow" />
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding DeviceSpeedValues[1].IsVerified}" Value="True">
+                                                    <DataTrigger Binding="{Binding Ss[1].IsVerified}" Value="True">
                                                         <Setter Property="Background" Value="#7BD87B" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBox.Style>
                                     </TextBox>
-                                    <TextBox Grid.Column="2" Text="{Binding DeviceSpeedValues[2].ResultValue}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
+                                    <TextBox Grid.Column="2" Text="{Binding Ss[2].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
                                              VerticalContentAlignment="Center">
                                         <TextBox.Style>
                                             <Style TargetType="TextBox">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding DeviceSpeedValues[2].IsСheckedNow}" Value="True">
+                                                    <DataTrigger Binding="{Binding Ss[2].IsСheckedNow}" Value="True">
                                                         <Setter Property="Background" Value="Yellow" />
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding DeviceSpeedValues[2].IsVerified}" Value="True">
+                                                    <DataTrigger Binding="{Binding Ss[2].IsVerified}" Value="True">
                                                         <Setter Property="Background" Value="#7BD87B" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -199,7 +199,7 @@
                     <TextBlock Grid.Column="4" Text="№ 4"/>
                     <TextBlock Grid.Column="5" Text="№ 5"/>
                 </Grid>
-                <ItemsControl Grid.Row="1" ItemsSource="{Binding WssValues02}" BorderThickness="0" Padding="0" Margin="0">
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding Wss02Measurements}" BorderThickness="0" Padding="0" Margin="0">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Grid>
@@ -211,72 +211,72 @@
                                     <ColumnDefinition/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding ReferenceSpeedValue}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" Margin="2" HorizontalContentAlignment="Center"
+                                <TextBox Text="{Binding RefS}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" Margin="2" HorizontalContentAlignment="Center"
                                     VerticalContentAlignment="Center" />
-                                <TextBox Grid.Column="1" Text="{Binding DeviceSpeedValues[0].ResultValue}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                <TextBox Grid.Column="1" Text="{Binding Ss[0].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                     <TextBox.Style>
                                         <Style TargetType="TextBox">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding DeviceSpeedValues[0].IsСheckedNow}" Value="True">
+                                                <DataTrigger Binding="{Binding Ss[0].IsСheckedNow}" Value="True">
                                                     <Setter Property="Background" Value="Yellow" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding DeviceSpeedValues[0].IsVerified}" Value="True">
+                                                <DataTrigger Binding="{Binding Ss[0].IsVerified}" Value="True">
                                                     <Setter Property="Background" Value="#7BD87B" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </TextBox.Style>
                                 </TextBox>
-                                <TextBox Grid.Column="2" Text="{Binding DeviceSpeedValues[1].ResultValue}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                <TextBox Grid.Column="2" Text="{Binding Ss[1].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                     <TextBox.Style>
                                         <Style TargetType="TextBox">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding DeviceSpeedValues[1].IsСheckedNow}" Value="True">
+                                                <DataTrigger Binding="{Binding Ss[1].IsСheckedNow}" Value="True">
                                                     <Setter Property="Background" Value="Yellow" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding DeviceSpeedValues[1].IsVerified}" Value="True">
+                                                <DataTrigger Binding="{Binding Ss[1].IsVerified}" Value="True">
                                                     <Setter Property="Background" Value="#7BD87B" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </TextBox.Style>
                                 </TextBox>
-                                <TextBox Grid.Column="3" Text="{Binding DeviceSpeedValues[2].ResultValue}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                <TextBox Grid.Column="3" Text="{Binding Ss[2].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                     <TextBox.Style>
                                         <Style TargetType="TextBox">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding DeviceSpeedValues[2].IsСheckedNow}" Value="True">
+                                                <DataTrigger Binding="{Binding Ss[2].IsСheckedNow}" Value="True">
                                                     <Setter Property="Background" Value="Yellow" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding DeviceSpeedValues[2].IsVerified}" Value="True">
+                                                <DataTrigger Binding="{Binding Ss[2].IsVerified}" Value="True">
                                                     <Setter Property="Background" Value="#7BD87B" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </TextBox.Style>
                                 </TextBox>
-                                <TextBox Grid.Column="4" Text="{Binding DeviceSpeedValues[3].ResultValue}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                <TextBox Grid.Column="4" Text="{Binding Ss[3].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                     <TextBox.Style>
                                         <Style TargetType="TextBox">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding DeviceSpeedValues[3].IsСheckedNow}" Value="True">
+                                                <DataTrigger Binding="{Binding Ss[3].IsСheckedNow}" Value="True">
                                                     <Setter Property="Background" Value="Yellow" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding DeviceSpeedValues[3].IsVerified}" Value="True">
+                                                <DataTrigger Binding="{Binding Ss[3].IsVerified}" Value="True">
                                                     <Setter Property="Background" Value="#7BD87B" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </TextBox.Style>
                                 </TextBox>
-                                <TextBox Grid.Column="5" Text="{Binding DeviceSpeedValues[4].ResultValue}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                <TextBox Grid.Column="5" Text="{Binding Ss[4].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                     <TextBox.Style>
                                         <Style TargetType="TextBox">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding DeviceSpeedValues[4].IsСheckedNow}" Value="True">
+                                                <DataTrigger Binding="{Binding Ss[4].IsСheckedNow}" Value="True">
                                                     <Setter Property="Background" Value="Yellow" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding DeviceSpeedValues[4].IsVerified}" Value="True">
+                                                <DataTrigger Binding="{Binding Ss[4].IsVerified}" Value="True">
                                                     <Setter Property="Background" Value="#7BD87B" />
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -304,10 +304,10 @@
                                 <Setter Property="Height" Value="25"/>
                             </Style>
                         </StackPanel.Resources>
-                        <Button Content="Старт" Command="{Binding RevisionCmds[0]}" />
-                        <Button Content="Стоп" Command="{Binding RevisionCmds[1]}" />
-                        <ComboBox ItemsSource="{Binding Sensors}" IsEnabled="{Binding ChangeModelOnValidation}" DisplayMemberPath="Description" SelectedValue="{Binding UserSettings.SensorModel}"
-                            SelectedValuePath="TypeTest" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="25" Width="100" Margin="20,10,0,10" />
+                        <Button Content="Старт" Command="{Binding RevisionRcs[0]}" />
+                        <Button Content="Стоп" Command="{Binding RevisionRcs[1]}" />
+                        <ComboBox ItemsSource="{Binding Sensors}" IsEnabled="{Binding ChangeModelOnValidation}" DisplayMemberPath="Descr" SelectedValue="{Binding Settings.M}"
+                            SelectedValuePath="Model" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="25" Width="100" Margin="20,10,0,10" />
                     </StackPanel>
                     <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
                         <Grid Margin="50,0">
@@ -315,17 +315,17 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition Width="15" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Width="80" Visibility="{Binding VisibilitySetFrequency, Converter={StaticResource BoolToVis}}" Margin="0,5,10,5" Text="{Binding UserSettings.SettingsModel.SetFrequencyTube, StringFormat={}{0:0 n}}" FontSize="16" />
-                            <Button Grid.Column="1" Command="{Binding RevisionCmds[3]}" ToolTip="Вывести отображение частоты вращения частотного двигателя в условных единицах" Style="{StaticResource OnlyBackgroundButtonStyle}">
+                            <TextBlock Width="80" Visibility="{Binding Fvisibility, Converter={StaticResource BoolToVis}}" Margin="0,5,10,5" Text="{Binding Settings.Devices.F, StringFormat={}{0:0 n}}" FontSize="16" />
+                            <Button Grid.Column="1" Command="{Binding RevisionRcs[3]}" ToolTip="Вывести отображение частоты вращения частотного двигателя в условных единицах" Style="{StaticResource OnlyBackgroundButtonStyle}">
                                 <Image Source="{StaticResource QuestionMark}" />
                             </Button>
                         </Grid>
-                        <TextBlock Text="{Binding SpeedReference, StringFormat={}{0:0.00 м/с}}" Width="80" Margin="0,5,10,5" FontSize="16" />
+                        <TextBlock Text="{Binding Sref, StringFormat={}{0:0.00 м/с}}" Width="80" Margin="0,5,10,5" FontSize="16" />
                     </StackPanel>
                 </Grid>
                 <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" Background="#D8D3D3">
                     <TextBlock Text="Статус:" Style="{StaticResource GridRowHeaderTextBlock}" Margin="30,0" />
-                    <TextBlock Text="{Binding Status}" Style="{StaticResource GridRowHeaderTextBlock}" />
+                    <TextBlock Text="{Binding Stat}" Style="{StaticResource GridRowHeaderTextBlock}" />
                 </StackPanel>
             </Grid>
         </Grid>

@@ -5,19 +5,19 @@ using System.Windows.Data;
 
 namespace VerificationAirVelocitySensor.Styles.Converters
 {
-    internal class BooleanConverter<T>(T trueValue, T falseValue) : IValueConverter
+    internal class BooleanConverter<T>(T trueV, T falseV) : IValueConverter
     {
-		public T True { get; set; } = trueValue;
-		public T False { get; set; } = falseValue;
+		public T True { get; set; } = trueV;
+		public T False { get; set; } = falseV;
 
-		public virtual object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		public virtual object Convert(object v, Type t, object p, CultureInfo c)
         {
-            return value is bool b && b ? True : False;
+            return v is bool b && b ? True : False;
         }
 
-        public virtual object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public virtual object ConvertBack(object v, Type t, object p, CultureInfo c)
         {
-            return value is T && (bool)value;
+            return v is T && (bool)v;
         }
     }
 
@@ -30,16 +30,16 @@ namespace VerificationAirVelocitySensor.Styles.Converters
     internal class InverseBooleanConverter : IValueConverter
     {
         #region IValueConverter Members
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object v, Type t, object p, CultureInfo c)
         {
-            if (targetType != typeof(bool))
+            if (t != typeof(bool))
 			{
                 throw new InvalidOperationException("The target must be a boolean");
 			}
-            return value != null && !(bool)value;
+            return v != null && !(bool)v;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object v, Type t, object p, CultureInfo c)
         {
             throw new NotSupportedException();
         }

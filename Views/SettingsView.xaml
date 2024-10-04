@@ -6,7 +6,7 @@
              xmlns:viewModel="clr-namespace:VerificationAirVelocitySensor.ViewModels"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=viewModel:SettingsVm}"
+             d:DataContext="{d:DesignInstance Type=viewModel:DeviceSettingsVm}"
              d:DesignHeight="300" d:DesignWidth="600">
     <Grid Margin="5" Background="#E2E1E1">
         <Grid.Resources>
@@ -45,28 +45,28 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.ColumnSpan="2" Text="Настройки частотомера" FontSize="19"/>
         <TextBlock Grid.Row="1" Text="Канал"/>
-        <ComboBox Grid.Column="1" Grid.Row="1" ItemsSource="{Binding LpfArr}" DisplayMemberPath="Description" SelectedValue="{Binding SettingsModel.FrequencyChannel}" SelectedValuePath="FrequencyChannel"/>
+        <ComboBox Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Lpfs}" SelectedValue="{Binding Devices.Ch}" SelectedValuePath="LpfCh" DisplayMemberPath="Descr"/>
         <TextBlock Grid.Row="2" Text="Время"/>
-        <ComboBox Grid.Column="1" Grid.Row="2" ItemsSource="{Binding GateTimeArr}" SelectedValue="{Binding SettingsModel.GateTime}" SelectedValuePath="GateTimeSec" DisplayMemberPath="Description"/>
+        <ComboBox Grid.Column="1" Grid.Row="2" ItemsSource="{Binding Gts}" SelectedValue="{Binding Devices.Sec}" SelectedValuePath="Sec" DisplayMemberPath="Descr"/>
         <TextBlock Grid.Row="3" Text="ФНЧ1"/>
-        <CheckBox Grid.Column="1" Grid.Row="3" IsChecked="{Binding SettingsModel.FilterChannels[0]}"/>
+        <CheckBox Grid.Column="1" Grid.Row="3" IsChecked="{Binding Devices.FilterChs[0]}"/>
         <TextBlock Grid.Row="4" Text="ФНЧ2"/>
-        <CheckBox Grid.Column="1" Grid.Row="4" Height="20" IsChecked="{Binding SettingsModel.FilterChannels[1]}"/>
+        <CheckBox Grid.Column="1" Grid.Row="4" Height="20" IsChecked="{Binding Devices.FilterChs[1]}"/>
         <!--Коннект меню-->
         <TextBlock Grid.Column="2" Grid.ColumnSpan="2" Text="COM-ports" FontSize="19"/>
         <TextBlock Grid.Column="2" Grid.Row="1" Text="Частотомер ЧЗ-85/6" TextWrapping="Wrap" />
-        <ComboBox Grid.Column="3" Grid.Row="1" ItemsSource="{Binding Ports}" SelectedItem="{Binding SettingsModel.CymometerPort}">
+        <ComboBox Grid.Column="3" Grid.Row="1" ItemsSource="{Binding Ps}" SelectedItem="{Binding Devices.Cymometer}">
             <b:Interaction.Triggers>
                 <b:EventTrigger EventName="DropDownOpened">
-                    <b:InvokeCommandAction Command="{Binding UpdatePorts}" />
+                    <b:InvokeCommandAction Command="{Binding UpdatePs}" />
                 </b:EventTrigger>
             </b:Interaction.Triggers>
         </ComboBox>
         <TextBlock Grid.Column="2" Grid.Row="2" Text="ПЛК73"/>
-        <ComboBox Grid.Column="3" Grid.Row="2" ItemsSource="{Binding Ports}" SelectedItem="{Binding SettingsModel.TubePort}">
+        <ComboBox Grid.Column="3" Grid.Row="2" ItemsSource="{Binding Ps}" SelectedItem="{Binding Devices.Tube}">
             <b:Interaction.Triggers>
                 <b:EventTrigger EventName="DropDownOpened">
-                    <b:InvokeCommandAction Command="{Binding UpdatePorts}" />
+                    <b:InvokeCommandAction Command="{Binding UpdatePs}" />
                 </b:EventTrigger>
             </b:Interaction.Triggers>
         </ComboBox>

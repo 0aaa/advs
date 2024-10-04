@@ -1,12 +1,10 @@
-﻿using VerificationAirVelocitySensor.ViewModels;
-
-namespace VerificationAirVelocitySensor.Views
+﻿namespace VerificationAirVelocitySensor.Views
 {
     public partial class SettingsView// Логика взаимодействия для SettingsView.xaml.
     {
-        internal SettingsView(SettingsVm settingsVm)
+        internal SettingsView(ViewModels.DeviceSettingsVm s)
         {
-            DataContext = settingsVm;
+            DataContext = s;
             InitializeComponent();
         }
     }

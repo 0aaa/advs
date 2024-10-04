@@ -10,34 +10,34 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using VerificationAirVelocitySensor.Models;
-using VerificationAirVelocitySensor.Models.ClassLib;
+using VerificationAirVelocitySensor.Models.Classes;
 using VerificationAirVelocitySensor.Views;
-using VerificationAirVelocitySensor.ViewModels.BaseVm;
+using VerificationAirVelocitySensor.ViewModels.Base;
 using VerificationAirVelocitySensor.ViewModels.Sensors;
 using VerificationAirVelocitySensor.ViewModels.Services;
-using VerificationAirVelocitySensor.Model.EnumLib;
+using VerificationAirVelocitySensor.Models.Enums;
 
 namespace VerificationAirVelocitySensor.ViewModels
 {
-	internal class MainWindowVm : BaseVm.BaseVm
+	internal class MainWindowVm : BaseVm
 	{
-		private const int T_OUT_SET_FREQ = 5000;// Время ожидания после установки значения частоты, чтобы дать аэротрубе стабилизировать значение.
-		private List<decimal> _avgSpRefs;
-		private CancellationTokenSource _ctsTask;
+		private const int LAT = 5000;// Время ожидания после установки значения частоты, чтобы дать аэротрубе стабилизировать значение.
+		private readonly List<decimal> _avgSrefs;
+		private CancellationTokenSource _t;
 		// Все свойства что ниже, должны сохранятся при перезапуске.
 		private UserControl _frame;
-		private decimal _spRef;// Эталонное значение скорости с частотной трубы.
-		private decimal _avgSpRef;
+		private decimal _sRef;// Эталонное значение скорости с частотной трубы.
+		private decimal _avgSref;
 		private bool _canAdjust;// Флаг для включения в коллекцию среднего значения эталона, всех его значений за время теста скоростной точки после прохождения корректировки.
 		private bool _isActiveRevision;// Флаг, показывающий активно ли тестирование.
 		private bool _isBusy;
 		#region Properties.
-		public ObservableCollection<Dsv01Sp> WssValues01 { get; }
-		public ObservableCollection<Dvs02Sp> WssValues02 { get; }
-		public Sensor[] Sensors { get; }
-		public RelayCommand[] RevisionCmds { get; }// Start, Stop, SaveSpeeds, VisibilitySetFrequency, Reset, ClosePortFrequencyCounter, ClosePortFrequencyMotor.
-		public RelayCommand[] PaginationCmds { get; }// MainWindow, Settings, Checkpoints, Debug tab.
-		public UserSettings UserSettings { get; }// Свойство для хранения условий поверки.
+		public ObservableCollection<Wss01Measur> Wss01Measurements { get; }
+		public ObservableCollection<Wss02Measur> Wss02Measurements { get; }
+		public Wss[] Sensors { get; }
+		public RelayCommand[] RevisionRcs { get; }// Start, Stop, SaveSpeeds, VisibilitySetFrequency, Reset, ClosePortFrequencyCounter, ClosePortFrequencyMotor.
+		public RelayCommand[] PaginationRcs { get; }// MainWindow, Settings, Checkpoints, Debug tab.
+		public Settings Settings { get; }// Свойство для хранения условий поверки.
 		public string Title { get; }
 		public bool ChangeModelOnValidation => !_isActiveRevision;
 		public UserControl Frame
@@ -48,25 +48,25 @@ namespace VerificationAirVelocitySensor.ViewModels
 				_frame = value;
 				if (value != null)
 				{
-					SelectedPage = Enum.GetValues<SelectedPage>().FirstOrDefault(p => p.ToString().StartsWith(value.GetType().Name.Split("View")[0]));
+					CurrPage = Enum.GetValues<CurrPage>().FirstOrDefault(p => p.ToString().StartsWith(value.GetType().Name.Split("View")[0]));
 				}
 				else
 				{
-					SelectedPage = SelectedPage.Main;
+                    CurrPage = CurrPage.Main;
 				}
-				UserSettings.Serialize();
+				Settings.Serialize();
 			}
 		}
-		public SelectedPage SelectedPage { get; private set; }
-		public string Status { get; private set; }// Свойство для биндинга на UI текущего действия внутри app.
+		public CurrPage CurrPage { get; private set; }
+		public string Stat { get; private set; }// Свойство для биндинга на UI текущего действия внутри app.
 		public string BusyContent { get; private set; }// Текст BusyIndicator.
-		public decimal SpeedReference
+		public decimal Sref
 		{
-			get => _spRef;
+			get => _sRef;
 			private set
 			{
-				_spRef = value;
-				OnPropertyChanged(nameof(SpeedReference));
+				_sRef = value;
+				OnPropertyChanged(nameof(Sref));
 			}
 		}
 		public bool IsBusy// Активность BusyIndicator.
@@ -81,7 +81,7 @@ namespace VerificationAirVelocitySensor.ViewModels
 				}
 			}
 		}
-		public bool VisibilitySetFrequency { get; private set; }
+		public bool Fvisibility { get; private set; }
 		public bool[] WssVisibility { get; private set; }// Флаг для биндинга отображения таблицы разультатов для WSS-0(n).
 		#endregion
 		private readonly Wss03Vm _wss03Vm;
@@ -89,69 +89,69 @@ namespace VerificationAirVelocitySensor.ViewModels
 
 		public MainWindowVm()
 		{
-			_avgSpRefs = [];
-			Tube.Instance.ReferenceUpdate += (_, e) => {
-				SpeedReference = (decimal)e.ReferenceValue;
-				if (_avgSpRefs.Count > 5 && !_canAdjust)
+			_avgSrefs = [];
+			Tube.Inst.RefUpd += (_, e) => {
+				Sref = (decimal)e.Ref;
+				if (_avgSrefs.Count > 5 && !_canAdjust)
 				{
-					_avgSpRefs.RemoveAt(0);
+					_avgSrefs.RemoveAt(0);
 				}
-				_avgSpRefs.Add(SpeedReference);
-				_avgSpRef = Math.Round(_avgSpRefs.Average(), 2);
+				_avgSrefs.Add(Sref);
+				_avgSref = Math.Round(_avgSrefs.Average(), 2);
 			};
-			WssVisibility = new bool[Enum.GetNames<SensorModel>().Length];
-			UserSettings = UserSettings.Deserialize() ?? new UserSettings() { SensorModel = SensorModel.Dvs02 };
-			UserSettings.PropertyChanged += (_, _) => {
-				UserSettings.Serialize();
+			WssVisibility = new bool[Enum.GetNames<Model>().Length];
+			Settings = Settings.Deserialize() ?? new Settings() { M = Model.Dvs02 };
+			Settings.PropertyChanged += (_, _) => {
+				Settings.Serialize();
 				for (int i = 0; i < WssVisibility.Length; i++)
 				{
 					WssVisibility[i] = false;
 				}
-				WssVisibility[(int)UserSettings.SensorModel - 1] = true;
+				WssVisibility[(int)Settings.M - 1] = true;
 				OnPropertyChanged(nameof(WssVisibility));
 			};
-			_wss03Vm = new Wss03Vm(UserSettings);
+			_wss03Vm = new Wss03Vm(Settings);
 			_wss03Vm.PropertyChanged += (_, e) => {
 				switch (e.PropertyName)
 				{
 					case "Status":
-						Status = _wss03Vm.Status;
+						Stat = _wss03Vm.Stat;
 						break;
 					case "IsBusy":
 						IsBusy = false;// "IsBusy" take only false.
 						break;
 				}
 			};
-			WssVisibility[(int)UserSettings.SensorModel - 1] = true;
-			Tube.Instance.SetFrequencyUpdate += (_, e) => UserSettings.SettingsModel.SetFrequencyTube = e.SetFrequency;
+			WssVisibility[(int)Settings.M - 1] = true;
+			Tube.Inst.CurrFupd += (_, e) => Settings.Devices.F = e.F;
 			Title = $"{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title}  v{Assembly.GetExecutingAssembly().GetName().Version}";
-			Sensors = [new Sensor(SensorModel.Dvs01, "ДСВ-01"), new Sensor(SensorModel.Dvs02, "ДВС-02"), new Sensor(SensorModel.Wss03, "ДВС-03")];
-			WssValues01 = [];
-			WssValues02 = [];
+			Sensors = [new Wss(Model.Dvs01, "ДСВ-01"), new Wss(Model.Dvs02, "ДВС-02"), new Wss(Model.Wss03, "ДВС-03")];
+			Wss01Measurements = [];
+			Wss02Measurements = [];
 			Wss03 = new Wss03(_wss03Vm);
-			RevisionCmds = [
+			RevisionRcs = [
 				 new(Start, () => !_isActiveRevision)// Start.
 				, new(() => {
 					BusyContent = "Тестирование прервано пользователем\nОжидание завершения процесса";
 					IsBusy = true;
 					_isActiveRevision = false;
-					_ctsTask.Cancel();
+					_t.Cancel();
 				}, () => _isActiveRevision)// Stop.
-				, new(() => UserSettings.Serialize())// SaveSpeeds.
-				, new(() => VisibilitySetFrequency = !VisibilitySetFrequency)// VisibilitySetFrequency.
+				, new(() => Settings.Serialize())// SaveSpeeds.
+				, new(() => Fvisibility = !Fvisibility)// VisibilitySetFrequency.
 				#region Частотомер ЧЗ-85/6.
-				, new RelayCommand(Cymometer.Instance.Reset, Cymometer.Instance.IsOpen)// Reset.
-				, new RelayCommand(Cymometer.Instance.Close, Cymometer.Instance.IsOpen)// ClosePortFrequencyCounter.
+				, new RelayCommand(Cymometer.Inst.Reset, Cymometer.Inst.IsOpen)// Reset.
+				, new RelayCommand(Cymometer.Inst.Close, Cymometer.Inst.IsOpen)// ClosePortFrequencyCounter.
 				#endregion
 				#region Анемометр / Частотный двигатель.
-				, new RelayCommand(Tube.Instance.Close, Tube.Instance.IsOpen)// ClosePortFrequencyMotor.
+				, new RelayCommand(Tube.Inst.Close, Tube.Inst.IsOpen)// ClosePortFrequencyMotor.
 				#endregion
 			];
-			PaginationCmds = [
-				new(() => { Frame = null; SelectedPage = SelectedPage.Main; }, () => SelectedPage != SelectedPage.Main && !_isActiveRevision)// MainWindow.
-				, new(() => Frame = new SettingsView(new SettingsVm(UserSettings.SettingsModel)), () => SelectedPage != SelectedPage.Settings && !_isActiveRevision)// Settings.
-				, new(() => Frame = new CheckpointsView(UserSettings.Checkpoints, RevisionCmds[2]), () => SelectedPage != SelectedPage.Checkpoints && !_isActiveRevision)// Checkpoints.
-				, new(ChangePageOnDebug, () => SelectedPage != SelectedPage.Debug && !_isActiveRevision)// Debug tab.
+            PaginationRcs = [
+				new(() => { Frame = null; CurrPage = CurrPage.Main; }, () => CurrPage != CurrPage.Main && !_isActiveRevision)// MainWindow.
+				, new(() => Frame = new SettingsView(new DeviceSettingsVm(Settings.Devices)), () => CurrPage != CurrPage.Settings && !_isActiveRevision)// Settings.
+				, new(() => Frame = new CheckpointsView(Settings.Checkpoints, RevisionRcs[2]), () => CurrPage != CurrPage.Checkpoints && !_isActiveRevision)// Checkpoints.
+				, new(ChangePageOnDebug, () => CurrPage != CurrPage.Debug && !_isActiveRevision)// Debug tab.
 			];
 			#region Debug.
 			//CollectionDvsValue02.Add(new DvsValue02(5) {
@@ -178,7 +178,7 @@ namespace VerificationAirVelocitySensor.ViewModels
 			{
 				IsBusy = true;
 				BusyContent = "Проверка подключения аэродинамической трубы";
-				if (!Tube.Instance.Open(UserSettings.SettingsModel.TubePort))
+				if (!Tube.Inst.Open(Settings.Devices.Tube))
 				{
 					IsBusy = false;
 					return;
@@ -191,35 +191,35 @@ namespace VerificationAirVelocitySensor.ViewModels
 
 		private bool OpenCymometer()
 		{
-			if (!Cymometer.Instance.Open(UserSettings.SettingsModel.CymometerPort, (int)UserSettings.SettingsModel.GateTime * 1000))
+			if (!Cymometer.Inst.Open(Settings.Devices.Cymometer, (int)Settings.Devices.Sec * 1000))
 			{
 				return false;
 			}
-			switch (Cymometer.Instance.GetModel())
+			switch (Cymometer.Inst.GetModel())
 			{
 				case "counter":
 					OnOffFilter(0);
 					OnOffFilter(1);
-					Cymometer.Instance.SetGateTime(UserSettings.SettingsModel.GateTime);
+					Cymometer.Inst.SetGt(Settings.Devices.Sec);
 					break;
 				case "WSS":
 					break;
 				default:
-					Cymometer.Instance.Close();
-					MessageBox.Show($"{UserSettings.SettingsModel.CymometerPort} не является ни частотомером, ни ДВС-03.", "Нераспознанное устройство", MessageBoxButton.OK, MessageBoxImage.Error);
+					Cymometer.Inst.Close();
+					MessageBox.Show($"{Settings.Devices.Cymometer} не является ни частотомером, ни ДВС-03.", "Нераспознанное устройство", MessageBoxButton.OK, MessageBoxImage.Error);
 					return false;
 			}
 			return true;
 		}
 
 		#region Частотомер ЧЗ-85/6.
-		private void OnOffFilter(int chIndex)
+		private void OnOffFilter(int chI)
 		{
-			if (chIndex < 0 || 1 < chIndex)
+			if (chI < 0 || 1 < chI)
 			{
-				throw new ArgumentOutOfRangeException(nameof(chIndex));
+				throw new ArgumentOutOfRangeException(nameof(chI));
 			}
-			Cymometer.Instance.SwitchFilter(chIndex + 1, UserSettings.SettingsModel.FilterChannels[chIndex]);
+			Cymometer.Inst.SwitchFilter(chI + 1, Settings.Devices.FilterChs[chI]);
 		}
 		#endregion
 		#endregion
@@ -230,7 +230,7 @@ namespace VerificationAirVelocitySensor.ViewModels
 			BusyContent = "Аварийная остановка";
 			IsBusy = true;
 			_isActiveRevision = false;
-			_ctsTask.Cancel();
+			_t.Cancel();
 			MessageBox.Show("Произошло аварийное завершение поверки", "Внимание", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 
@@ -238,8 +238,8 @@ namespace VerificationAirVelocitySensor.ViewModels
 		{
 			_isActiveRevision = false;
 			IsBusy = false;
-			Cymometer.Instance.Close();
-			Tube.Instance.Close();
+			Cymometer.Inst.Close();
+			Tube.Inst.Close();
 		}
 
 		private async void Start()
@@ -254,34 +254,34 @@ namespace VerificationAirVelocitySensor.ViewModels
 			{
 				IsBusy = true;
 				BusyContent = "Проверка подключенных устройств и их настройка";
-				if (!OpenCymometer() || !Tube.Instance.Open(UserSettings.SettingsModel.TubePort))
+				if (!OpenCymometer() || !Tube.Inst.Open(Settings.Devices.Tube))
 				{
 					Stop();
 					return;
 				}
 				IsBusy = false;
-				_ctsTask = new CancellationTokenSource();
-				Cymometer.Instance.Stop = EmergencyStop;
+				_t = new CancellationTokenSource();
+				Cymometer.Inst.Stop = EmergencyStop;
 				try
 				{
-					Status = "Запуск тестирования";
-					switch (UserSettings.SensorModel)
+					Stat = "Запуск тестирования";
+					switch (Settings.M)
 					{
-						case SensorModel.Dvs01:
+						case Model.Dvs01:
 							Init01Sps();
 							StartWss01();
 							break;
-						case SensorModel.Dvs02:
+						case Model.Dvs02:
 							Init02Sps();
 							StartWss02();
 							break;
-						case SensorModel.Wss03:
-							_wss03Vm.Revise(ref _canAdjust, ref _avgSpRefs, ref _avgSpRef, ref _ctsTask);
+						case Model.Wss03:
+							_wss03Vm.Revise(ref _canAdjust, _avgSrefs, ref _avgSref, _t);
 							break;
 						default:
 							throw new ArgumentOutOfRangeException();
 					}
-					Status = "Поверка завершена";
+					Stat = "Поверка завершена";
 				}
 				catch (Exception e)
 				{
@@ -290,13 +290,13 @@ namespace VerificationAirVelocitySensor.ViewModels
 				}
 				finally
 				{
-					Tube.Instance.SetFreq(0, 0);
-					switch (UserSettings.SensorModel)
+					Tube.Inst.SetF(0, 0);
+					switch (Settings.M)
 					{
-						case SensorModel.Dvs01:
+						case Model.Dvs01:
 							WriteXlsxWss01();
 							break;
-						case SensorModel.Dvs02:
+						case Model.Dvs02:
 							WriteXlsxWss02();
 							break;
 					}
@@ -308,7 +308,7 @@ namespace VerificationAirVelocitySensor.ViewModels
 
 		private bool OpenConditions()
 		{
-			var c = new SetMeasurementsData(new SetMeasurementsDataVm(UserSettings));
+			var c = new Views.Conditions(new ConditionsVm(Settings));
 			c.ShowDialog();
 			bool isContinue = c.ViewModel.IsContinue;
 			c.Close();
@@ -317,8 +317,8 @@ namespace VerificationAirVelocitySensor.ViewModels
 				MessageBox.Show("Отменено пользователем", "Внимание", MessageBoxButton.OK, MessageBoxImage.Error);
 				return false;
 			}
-			UserSettings.Serialize();
-			if (string.IsNullOrEmpty(UserSettings.SavePath))
+			Settings.Serialize();
+			if (string.IsNullOrEmpty(Settings.SavePath))
 			{
 				MessageBox.Show("Не указан путь сохранения", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
 				return false;
@@ -330,10 +330,10 @@ namespace VerificationAirVelocitySensor.ViewModels
 		{
 			Application.Current.Dispatcher?.Invoke(() =>
 			{
-				WssValues01?.Clear();
-				for (int i = 1; i < UserSettings.Checkpoints.Count - 1; i++)// Первую точку (0.7) скипаю и последнюю (30).
+				Wss01Measurements?.Clear();
+				for (int i = 1; i < Settings.Checkpoints.Count - 1; i++)// Первую точку (0.7) скипаю и последнюю (30).
 				{
-					WssValues01.Add(new Dsv01Sp(UserSettings.Checkpoints[i].Speed));
+					Wss01Measurements.Add(new Wss01Measur(Settings.Checkpoints[i].S));
 				}
 			});
 		}
@@ -342,91 +342,91 @@ namespace VerificationAirVelocitySensor.ViewModels
 		{
 			Application.Current.Dispatcher?.Invoke(() =>
 			{
-				WssValues02?.Clear();
-				for (int i = 0; i < UserSettings.Checkpoints.Count; i++)
+				Wss02Measurements?.Clear();
+				for (int i = 0; i < Settings.Checkpoints.Count; i++)
 				{
-					WssValues02.Add(new Dvs02Sp(UserSettings.Checkpoints[i].Speed));
+					Wss02Measurements.Add(new Wss02Measur(Settings.Checkpoints[i].S));
 				}
 			});
 		}
 
 		private void StartWss01()
 		{
-			int tOutCounter = (int)UserSettings.SettingsModel.GateTime * 1000;
+			int latency = (int)Settings.Devices.Sec * 1000;
 			decimal? avg;
 			int id = 0;
-			for (int i = 0; i < WssValues01[id].DeviceSpeedValues.Length; i++)
+			for (int i = 0; i < Wss01Measurements[id].Ss.Length; i++)
 			{
-				for (int j = 1; j < UserSettings.Checkpoints.Count - 1; j++)// Первую точку (0.7) скипаю и последнюю (30). Снятие 1-ого значения.
+				for (int j = 1; j < Settings.Checkpoints.Count - 1; j++)// Первую точку (0.7) скипаю и последнюю (30). Снятие 1-ого значения.
 				{
-					id = UserSettings.Checkpoints[j].Id - 2;// Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList. Выходит -2.
-					WssValues01[id].DeviceSpeedValues[i].IsСheckedNow = true;
+					id = Settings.Checkpoints[j].Id - 2;// Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList. Выходит -2.
+					Wss01Measurements[id].Ss[i].IsСheckedNow = true;
 					Prepare(j);// Метод разгона трубы.
-					Status = $"Точка {UserSettings.Checkpoints[j].Speed}: Снятие значения 1";
-					WssValues01[id].DeviceSpeedValues[i].ResultValue = Cymometer.Instance.GetCurrentHz(UserSettings.Checkpoints[j], i > 0 ? tOutCounter : 7000, _ctsTask);// Время запроса для точки 0.7 больше из-за маленькой скорости прокрутки датчика.
-					WssValues01[id].DeviceSpeedValues[i].IsVerified = true;
+					Stat = $"Точка {Settings.Checkpoints[j].S}: Снятие значения 1";
+					Wss01Measurements[id].Ss[i].V = Cymometer.Inst.GetCurrHz(Settings.Checkpoints[j], i > 0 ? latency : 7000, _t);// Время запроса для точки 0.7 больше из-за маленькой скорости прокрутки датчика.
+					Wss01Measurements[id].Ss[i].IsVerified = true;
 					Thread.Sleep(50);
-					if (_ctsTask.Token.IsCancellationRequested)
+					if (_t.Token.IsCancellationRequested)
 					{
 						return;
 					}
-					WssValues01[id].ReferenceSpeedValues[i] = _avgSpRef;
+					Wss01Measurements[id].RefSs[i] = _avgSref;
 				}
 			}
-			for (int i = 0; i < WssValues01.Count; i++)
+			for (int i = 0; i < Wss01Measurements.Count; i++)
 			{
-				avg = WssValues01[i].ReferenceSpeedValues.Average();
+				avg = Wss01Measurements[i].RefSs.Average();
 				if (avg != null)
 				{
-					WssValues01[i].ReferenceSpeedValueMain = Math.Round((decimal)avg, 2);
+					Wss01Measurements[i].RefS = Math.Round((decimal)avg, 2);
 				}
 			}
 		}
 
 		private void StartWss02()
 		{
-			int tOutCounter = (int)UserSettings.SettingsModel.GateTime * 1000;
-			for (int i = 0; i < UserSettings.Checkpoints.Count; i++)
+			int latency = (int)Settings.Devices.Sec * 1000;
+			for (int i = 0; i < Settings.Checkpoints.Count; i++)
 			{
 				Prepare(i);
-				if (UserSettings.Checkpoints[i].Speed == 0.7m)// На данной скорости, датчик вращается очень медленно. А значение поступает на частотомер в момент полного оборота датчика.
+				if (Settings.Checkpoints[i].S == 0.7m)// На данной скорости, датчик вращается очень медленно. А значение поступает на частотомер в момент полного оборота датчика.
 				{
-					tOutCounter = 5000;
+					latency = 5000;
 				}
-				for (int j = 0; j < WssValues02[i].DeviceSpeeds.Length; j++)
+				for (int j = 0; j < Wss02Measurements[i].Ss.Length; j++)
 				{
-					WssValues02[i].DeviceSpeeds[j].IsСheckedNow = true;
-					Status = $"Точка {UserSettings.Checkpoints[i].Speed}: Снятие значения {j + 1}";
-					WssValues02[i].DeviceSpeeds[j].ResultValue = Cymometer.Instance.GetCurrentHz(UserSettings.Checkpoints[i], tOutCounter, _ctsTask);
-					WssValues02[i].DeviceSpeeds[j].IsVerified = true;
+					Wss02Measurements[i].Ss[j].IsСheckedNow = true;
+					Stat = $"Точка {Settings.Checkpoints[i].S}: Снятие значения {j + 1}";
+					Wss02Measurements[i].Ss[j].V = Cymometer.Inst.GetCurrHz(Settings.Checkpoints[i], latency, _t);
+					Wss02Measurements[i].Ss[j].IsVerified = true;
 					Thread.Sleep(50);
-					if (_ctsTask.Token.IsCancellationRequested)
+					if (_t.Token.IsCancellationRequested)
 					{
 						return;
 					}
 				}
 				IsBusy = false;
-				WssValues02[i].ReferenceSpeed = _avgSpRef;
+				Wss02Measurements[i].RefS = _avgSref;
 			}
 		}
 
-		private void Prepare(int pntInd)
+		private void Prepare(int cpI)
 		{
-			Status = $"Точка {UserSettings.Checkpoints[pntInd].Speed}";
+			Stat = $"Точка {Settings.Checkpoints[cpI].S}";
 			_canAdjust = false;
-			Tube.Instance.SetFreq(UserSettings.Checkpoints[pntInd].Frequency, UserSettings.Checkpoints[pntInd].Speed);
-			Thread.Sleep(T_OUT_SET_FREQ);// Время ожидания для стабилизации трубы.
-			Application.Current.Dispatcher?.Invoke(_avgSpRefs.Clear);
-			Status = $"Точка {UserSettings.Checkpoints[pntInd].Speed}: Корректировка скорости";
-			if (UserSettings.Checkpoints[pntInd].Speed == 30)
+			Tube.Inst.SetF(Settings.Checkpoints[cpI].F, Settings.Checkpoints[cpI].S);
+			Thread.Sleep(LAT);// Время ожидания для стабилизации трубы.
+			Application.Current.Dispatcher?.Invoke(_avgSrefs.Clear);
+			Stat = $"Точка {Settings.Checkpoints[cpI].S}: Корректировка скорости";
+			if (Settings.Checkpoints[cpI].S == 30)
 			{
 				Thread.Sleep(15000);
 			}
 			else// Для скоростной точки 30 отключаю коррекцию скорости, тк. труба не может разогнаться до 30 м/с. А где-то до 27-29 м/с.
 			{
-				Tube.Instance.AdjustSp(ref _avgSpRef, UserSettings.Checkpoints[pntInd], ref _ctsTask);
+				Tube.Inst.AdjustS(ref _avgSref, Settings.Checkpoints[cpI], _t);
 			}
-			if (_ctsTask.Token.IsCancellationRequested)
+			if (_t.Token.IsCancellationRequested)
 			{
 				return;
 			}
@@ -436,10 +436,10 @@ namespace VerificationAirVelocitySensor.ViewModels
 
 		private void WriteXlsxWss01()
 		{
-			const string SAMPLE_PATH = @"Resources\Dsv1.xlsx";
+			const string SAMPLE_PATH = @"Resources\Wss1.xlsx";
 			while (!File.Exists(SAMPLE_PATH))
 			{
-				if (1 != (int)MessageBox.Show("Отсутствует файл образец Dvs1.xlsx. Пожалуйста, поместите файл и повторите попытку (ОК). Или нажмите \"Отмена\" для пропуска создания .xlsx", "Ошибка", MessageBoxButton.OKCancel))
+				if (1 != (int)MessageBox.Show("Отсутствует файл образец Wss1.xlsx. Пожалуйста, поместите файл и повторите попытку (ОК). Или нажмите \"Отмена\" для пропуска создания .xlsx", "Ошибка", MessageBoxButton.OKCancel))
 				{
 					return;
 				}
@@ -447,28 +447,28 @@ namespace VerificationAirVelocitySensor.ViewModels
 			var p = new ExcelPackage(new FileInfo(SAMPLE_PATH));
 			var ws = p.Workbook.Worksheets[0];
 			const int XLSX_SEED = 14;
-			for (int i = 0; i < WssValues01.Count; i++)
+			for (int i = 0; i < Wss01Measurements.Count; i++)
 			{
-				AddToCell(ws.Cells[i + XLSX_SEED, 16], WssValues01[i].ReferenceSpeedValueMain);
-				for (int j = 0; j < WssValues01[i].DeviceSpeedValues.Length; j++)
+				AddToCell(ws.Cells[i + XLSX_SEED, 16], Wss01Measurements[i].RefS);
+				for (int j = 0; j < Wss01Measurements[i].Ss.Length; j++)
 				{
-					AddToCell(ws.Cells[i + XLSX_SEED, j + 17], WssValues01[i].DeviceSpeedValues[j].ResultValue);
+					AddToCell(ws.Cells[i + XLSX_SEED, j + 17], Wss01Measurements[i].Ss[j].V);
 				}
 			}
 			// Условия поверки.
-			ws.Cells[44, 16].Value = UserSettings.MeasurementsData.Verifier;
+			ws.Cells[44, 16].Value = Settings.Conditions.Verifier;
 			ws.Cells[44, 20].Value = DateTime.Now.ToString("dd.MM.yyyy");
-			ws.Cells[25, 5].Value = UserSettings.MeasurementsData.Temperature;
-			ws.Cells[26, 5].Value = UserSettings.MeasurementsData.Humidity;
-			ws.Cells[27, 5].Value = UserSettings.MeasurementsData.Pressure;
-			ws.Cells[16, 6].Value = UserSettings.MeasurementsData.DeviceId;
-			string path = $"Протокол ДСВ-01 № {UserSettings.MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}.xlsx";
-			string fullPath = Path.Combine(UserSettings.SavePath, path);
+			ws.Cells[25, 5].Value = Settings.Conditions.T;
+			ws.Cells[26, 5].Value = Settings.Conditions.H;
+			ws.Cells[27, 5].Value = Settings.Conditions.P;
+			ws.Cells[16, 6].Value = Settings.Conditions.Snum;
+			string path = $"Протокол ДСВ-01 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}.xlsx";
+			string fullPath = Path.Combine(Settings.SavePath, path);
 			int attemptSave = 1;
 			while (File.Exists(fullPath))
 			{
-				path = $"Протокол ДСВ-01 № {UserSettings.MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
-				fullPath = Path.Combine(UserSettings.SavePath, path);
+				path = $"Протокол ДСВ-01 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
+				fullPath = Path.Combine(Settings.SavePath, path);
 				attemptSave++;
 			}
 			p.SaveAs(new FileInfo(fullPath));
@@ -476,10 +476,10 @@ namespace VerificationAirVelocitySensor.ViewModels
 
 		private void WriteXlsxWss02()
 		{
-			const string SAMPLE_PATH = @"Resources\Dvs2.xlsx";
+			const string SAMPLE_PATH = @"Resources\Wss2.xlsx";
 			while (!File.Exists(SAMPLE_PATH))
 			{
-				if (1 != (int)MessageBox.Show("Отсутствует файл образец Dvs2.xlsx. Пожалуйста, поместите файл и повторите попытку (ОК). Или нажмите отмена для пропуска создания .xlsx", "Ошибка", MessageBoxButton.OKCancel))
+				if (1 != (int)MessageBox.Show("Отсутствует файл образец Wss2.xlsx. Пожалуйста, поместите файл и повторите попытку (ОК). Или нажмите отмена для пропуска создания .xlsx", "Ошибка", MessageBoxButton.OKCancel))
 				{
 					return;
 				}
@@ -488,30 +488,30 @@ namespace VerificationAirVelocitySensor.ViewModels
 			var ws = p.Workbook.Worksheets[0];
 			#region Заполнение значений.
 			const int XLSX_SEED = 14;
-			for (int i = 0; i < WssValues02.Count; i++)
+			for (int i = 0; i < Wss02Measurements.Count; i++)
 			{
-				AddToCell(ws.Cells[i + XLSX_SEED, 12], WssValues02[i].ReferenceSpeed);
-				for (int j = 0; j < WssValues02[i].DeviceSpeeds.Length; j++)
+				AddToCell(ws.Cells[i + XLSX_SEED, 12], Wss02Measurements[i].RefS);
+				for (int j = 0; j < Wss02Measurements[i].Ss.Length; j++)
 				{
-					AddToCell(ws.Cells[i + XLSX_SEED, j + 13], WssValues02[i].DeviceSpeeds[j].ResultValue);
+					AddToCell(ws.Cells[i + XLSX_SEED, j + 13], Wss02Measurements[i].Ss[j].V);
 				}
 			}
 			// Условия поверки.
-			ws.Cells[42, 16].Value = UserSettings.MeasurementsData.Verifier;
+			ws.Cells[42, 16].Value = Settings.Conditions.Verifier;
 			ws.Cells[42, 20].Value = DateTime.Now.ToString("dd.MM.yyyy");
-			ws.Cells[25, 5].Value = UserSettings.MeasurementsData.Temperature;
-			ws.Cells[26, 5].Value = UserSettings.MeasurementsData.Humidity;
-			ws.Cells[27, 5].Value = UserSettings.MeasurementsData.Pressure;
-			ws.Cells[16, 6].Value = UserSettings.MeasurementsData.DeviceId;
+			ws.Cells[25, 5].Value = Settings.Conditions.T;
+			ws.Cells[26, 5].Value = Settings.Conditions.H;
+			ws.Cells[27, 5].Value = Settings.Conditions.P;
+			ws.Cells[16, 6].Value = Settings.Conditions.Snum;
 			//ws.Cells[5, 4].Value = "Протокол ДВС-02 №00212522 от 10.01.2021";
 			#endregion
-			string path = $"Протокол ДВС-02 № {UserSettings.MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}.xlsx";
-			string fullPath = Path.Combine(UserSettings.SavePath, path);
+			string path = $"Протокол ДВС-02 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}.xlsx";
+			string fullPath = Path.Combine(Settings.SavePath, path);
 			int attemptSave = 1;
 			while (File.Exists(fullPath))
 			{
-				path = $"Протокол ДВС-02 № {UserSettings.MeasurementsData.DeviceId} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
-				fullPath = Path.Combine(UserSettings.SavePath, path);
+				path = $"Протокол ДВС-02 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
+				fullPath = Path.Combine(Settings.SavePath, path);
 				attemptSave++;
 			}
 			p.SaveAs(new FileInfo(fullPath));
