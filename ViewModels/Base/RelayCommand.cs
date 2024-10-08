@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.ViewModels.Base
+﻿namespace ADVS.ViewModels.Base
 {
     internal class RelayCommand : System.Windows.Input.ICommand// Управление командами для биндинга на UI.
     {

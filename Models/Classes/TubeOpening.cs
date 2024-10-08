@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Models.Classes
+﻿namespace ADVS.Models.Classes
 {
     public class TubeOpening : System.EventArgs// Событие открытия или закрытия порта частотного двигателя.
     {

@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Models.Classes
+﻿namespace ADVS.Models.Classes
 {
     internal class Revis// Класс для биндинга коллекции на чекбокс.
     {

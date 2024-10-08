@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Views
+﻿namespace ADVS.Views
 {
 	public partial class Wss03 : System.Windows.Controls.UserControl// Interaction logic for Wss03.xaml.
 	{

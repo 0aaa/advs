@@ -1,8 +1,8 @@
 ﻿using System;
-using VerificationAirVelocitySensor.ViewModels.Base;
-using VerificationAirVelocitySensor.ViewModels.Services;
+using ADVS.ViewModels.Base;
+using ADVS.ViewModels.Services;
 
-namespace VerificationAirVelocitySensor.ViewModels
+namespace ADVS.ViewModels
 {
     internal class ConditionsVm : BaseVm// Vm страницы с условиями поверки.
     {

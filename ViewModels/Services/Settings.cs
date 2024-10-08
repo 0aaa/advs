@@ -2,12 +2,12 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
-using VerificationAirVelocitySensor.Models.Enums;
-using VerificationAirVelocitySensor.Models;
-using VerificationAirVelocitySensor.Models.Classes;
+using ADVS.Models.Enums;
+using ADVS.Models;
+using ADVS.Models.Classes;
 using YamlDotNet.Serialization;
 
-namespace VerificationAirVelocitySensor.ViewModels.Services
+namespace ADVS.ViewModels.Services
 {
 	internal class Settings : Base.BaseVm// Пользовательские настройки.
 	{
@@ -35,12 +35,14 @@ namespace VerificationAirVelocitySensor.ViewModels.Services
 			{
 				Checkpoints = [
 					new Checkpoint { Id = 1, S = 0.7m, F = 500, MaxStep = 10, Min = 0m, Max = 3.007m }
-					, new Checkpoint { Id = 2, S = 5m, F = 2765, MaxStep = 50, Min = 3.320m, Max = 8.837m }
-					, new Checkpoint { Id = 3, S = 10m, F = 5390, MaxStep = 50, Min = 9.634m, Max = 15.595m }
-					, new Checkpoint { Id = 4, S = 15m, F = 8130, MaxStep = 50, Min = 15.935m, Max = 22.366m }
-					, new Checkpoint { Id = 5, S = 20m, F = 10810, MaxStep = 80, Min = 22.248m, Max = 29.124m }
-					, new Checkpoint { Id = 6, S = 25m, F = 13570, MaxStep = 90, Min = 28.549m, Max = 35.895m }
-					, new Checkpoint { Id = 7, S = 30m, F = 16384, MaxStep = 100, Min = 32.340m, Max = 39.948m }
+					, new Checkpoint { Id = 2, S = 2.5m, F = 1383, MaxStep = 10, Min = 1.66m, Max = 4.4185m }// To verify.
+					, new Checkpoint { Id = 3, S = 4.8m, F = 2654, MaxStep = 20, Min = 2.988m, Max = 7.9533m }// To verify.
+					, new Checkpoint { Id = 4, S = 5m, F = 2765, MaxStep = 50, Min = 3.320m, Max = 8.837m }
+					, new Checkpoint { Id = 5, S = 10m, F = 5390, MaxStep = 50, Min = 9.634m, Max = 15.595m }
+					, new Checkpoint { Id = 6, S = 15m, F = 8130, MaxStep = 50, Min = 15.935m, Max = 22.366m }
+					, new Checkpoint { Id = 7, S = 20m, F = 10810, MaxStep = 80, Min = 22.248m, Max = 29.124m }
+					, new Checkpoint { Id = 8, S = 25m, F = 13570, MaxStep = 90, Min = 28.549m, Max = 35.895m }
+					, new Checkpoint { Id = 9, S = 30m, F = 16384, MaxStep = 100, Min = 32.340m, Max = 39.948m }
 				];
 			}
 			Checkpoints.CollectionChanged += (_, _) =>

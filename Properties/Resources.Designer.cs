@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace VerificationAirVelocitySensor.Properties {
+namespace ADVS.Properties {
     using System;
     
     

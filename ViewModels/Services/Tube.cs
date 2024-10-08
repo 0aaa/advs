@@ -5,10 +5,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using VerificationAirVelocitySensor.Models.Enums;
-using VerificationAirVelocitySensor.Models.Classes;
+using ADVS.Models.Enums;
+using ADVS.Models.Classes;
 
-namespace VerificationAirVelocitySensor.ViewModels.Services
+namespace ADVS.ViewModels.Services
 {
     internal class Tube// Управление частотным преобразователем ОВЕН ПЧВ3 и эталонным анемометром. Оба устройства находятся на одном порте. Это халтурный вариант работы с протоколом ModBus Rtu. Так как для работы программы нужны всего 4 запроса.
     {
@@ -298,7 +298,6 @@ namespace VerificationAirVelocitySensor.ViewModels.Services
                 prevSign = currSign;
                 if (IsErrValidation(ref avgRefS) && eCnt++ == 2)// Делаю проверку на 2 корректировки, чтобы в случае первой корректировки значение не уплыло из-за быстрой смены частоты вращения двигателя аэротрубы.
 				{
-					MessageBox.Show("Достигнуто максимальное количество коррекций скорости мотора на заданной точке. Коррекция прервана.", "Прерывание коррекции", MessageBoxButton.OK, MessageBoxImage.Warning);
 					return;
                 }
                 currSign = _currS - avgRefS > 0 ? Sing.Plus : Sing.Minus;

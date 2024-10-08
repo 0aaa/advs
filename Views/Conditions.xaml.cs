@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Views
+﻿namespace ADVS.Views
 {
     public partial class Conditions// Логика взаимодействия для SetMeasurementsData.xaml.
     {

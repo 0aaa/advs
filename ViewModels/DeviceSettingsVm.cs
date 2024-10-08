@@ -1,11 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO.Ports;
-using VerificationAirVelocitySensor.Models.Enums;
-using VerificationAirVelocitySensor.Models;
-using VerificationAirVelocitySensor.Models.Classes;
-using VerificationAirVelocitySensor.ViewModels.Base;
+using ADVS.Models.Enums;
+using ADVS.Models;
+using ADVS.Models.Classes;
+using ADVS.ViewModels.Base;
 
-namespace VerificationAirVelocitySensor.ViewModels
+namespace ADVS.ViewModels
 {
     internal class DeviceSettingsVm : BaseVm
     {

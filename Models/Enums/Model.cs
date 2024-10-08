@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Models.Enums
+﻿namespace ADVS.Models.Enums
 {
     internal enum Model
     {

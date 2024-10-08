@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.ViewModels.Base
+﻿namespace ADVS.ViewModels.Base
 {
     internal class BaseVm : System.ComponentModel.INotifyPropertyChanged
     {

@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Models.Enums
+﻿namespace ADVS.Models.Enums
 {
     internal enum Secs// Период опроса частотомера в секундах.
     {

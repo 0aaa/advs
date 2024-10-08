@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Models.Classes
+﻿namespace ADVS.Models.Classes
 {
     public class Fupd : System.EventArgs
     {

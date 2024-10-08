@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Views
+﻿namespace ADVS.Views
 {
     public partial class MainWindow// Логика взаимодействия для MainWindow.xaml.
     {

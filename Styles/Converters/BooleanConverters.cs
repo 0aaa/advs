@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace VerificationAirVelocitySensor.Styles.Converters
+namespace ADVS.Styles.Converters
 {
     internal class BooleanConverter<T>(T trueV, T falseV) : IValueConverter
     {

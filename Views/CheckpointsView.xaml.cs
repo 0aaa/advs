@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Views
+﻿namespace ADVS.Views
 {
     public partial class CheckpointsView// Логика взаимодействия для SpeedPointsView.xaml.
     {

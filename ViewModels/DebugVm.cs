@@ -1,8 +1,8 @@
-﻿using VerificationAirVelocitySensor.Models.Classes;
-using VerificationAirVelocitySensor.ViewModels.Base;
-using VerificationAirVelocitySensor.ViewModels.Services;
+﻿using ADVS.Models.Classes;
+using ADVS.ViewModels.Base;
+using ADVS.ViewModels.Services;
 
-namespace VerificationAirVelocitySensor.ViewModels
+namespace ADVS.ViewModels
 {
     internal class DebugVm : BaseVm
     {

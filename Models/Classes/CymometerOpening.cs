@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Models.Classes
+﻿namespace ADVS.Models.Classes
 {
     internal class CymometerOpening : System.EventArgs// Событие открытия или закрытия порта частотомера.
     {

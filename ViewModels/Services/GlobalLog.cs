@@ -1,6 +1,6 @@
 ﻿using Serilog;
 
-namespace VerificationAirVelocitySensor.ViewModels.Services
+namespace ADVS.ViewModels.Services
 {
     internal static class GlobalLog
     {

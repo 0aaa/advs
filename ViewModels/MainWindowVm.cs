@@ -9,15 +9,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using VerificationAirVelocitySensor.Models;
-using VerificationAirVelocitySensor.Models.Classes;
-using VerificationAirVelocitySensor.Views;
-using VerificationAirVelocitySensor.ViewModels.Base;
-using VerificationAirVelocitySensor.ViewModels.Sensors;
-using VerificationAirVelocitySensor.ViewModels.Services;
-using VerificationAirVelocitySensor.Models.Enums;
+using ADVS.Models;
+using ADVS.Models.Classes;
+using ADVS.Views;
+using ADVS.ViewModels.Base;
+using ADVS.ViewModels.Sensors;
+using ADVS.ViewModels.Services;
+using ADVS.Models.Enums;
+using System.Diagnostics.Metrics;
 
-namespace VerificationAirVelocitySensor.ViewModels
+namespace ADVS.ViewModels
 {
 	internal class MainWindowVm : BaseVm
 	{
@@ -114,7 +115,7 @@ namespace VerificationAirVelocitySensor.ViewModels
 			_wss03Vm.PropertyChanged += (_, e) => {
 				switch (e.PropertyName)
 				{
-					case "Status":
+					case "Stat":
 						Stat = _wss03Vm.Stat;
 						break;
 					case "IsBusy":
@@ -330,47 +331,66 @@ namespace VerificationAirVelocitySensor.ViewModels
 		{
 			Application.Current.Dispatcher?.Invoke(() =>
 			{
+				var ss = new decimal[] { 5, 10, 15, 20, 25 };
+				decimal currS;
 				Wss01Measurements?.Clear();
-				for (int i = 1; i < Settings.Checkpoints.Count - 1; i++)// Первую точку (0.7) скипаю и последнюю (30).
-				{
-					Wss01Measurements.Add(new Wss01Measur(Settings.Checkpoints[i].S));
-				}
-			});
+                for (int i = 0; i < Settings.Checkpoints.Count; i++)// Первые 3 точки (0.7, 2.5, 4.8) скипаю и последнюю (30).
+                {
+                    currS = Settings.Checkpoints.ElementAtOrDefault(i).S;
+                    if (ss.Contains(currS))
+                    {
+                        Wss01Measurements.Add(new Wss01Measur(currS));
+                    }
+                }
+            });
 		}
 
 		private void Init02Sps()// Метод для очистки от старых значений WssValues02 с заполнением пустыми значениями. Для WSS-02.
 		{
 			Application.Current.Dispatcher?.Invoke(() =>
 			{
+				var ss = new decimal[] { 0.7m, 5, 10, 15, 20, 25, 30 };
+				decimal currS;
 				Wss02Measurements?.Clear();
-				for (int i = 0; i < Settings.Checkpoints.Count; i++)
-				{
-					Wss02Measurements.Add(new Wss02Measur(Settings.Checkpoints[i].S));
-				}
-			});
+                for (int i = 0; i < Settings.Checkpoints.Count; i++)
+                {
+                    currS = Settings.Checkpoints.ElementAtOrDefault(i).S;
+                    if (ss.Contains(currS))
+                    {
+                        Wss02Measurements.Add(new Wss02Measur(currS));
+                    }
+                }
+            });
 		}
 
 		private void StartWss01()
 		{
 			int latency = (int)Settings.Devices.Sec * 1000;
 			decimal? avg;
-			int id = 0;
-			for (int i = 0; i < Wss01Measurements[id].Ss.Length; i++)
+			//int id = 0;
+			//for (int i = 0; i < Wss01Measurements[id].Ss.Length; i++)
+			var j = 0;
+			for (int i = 0; i < Wss01Measurements[j].Ss.Length; i++)
 			{
-				for (int j = 1; j < Settings.Checkpoints.Count - 1; j++)// Первую точку (0.7) скипаю и последнюю (30). Снятие 1-ого значения.
+				//for (int j = 1; j < Settings.Checkpoints.Count - 1; j++)// Первую точку (0.7) скипаю и последнюю (30). Снятие 1-ого значения.
+				for (; j < Settings.Checkpoints.Count; j++)
 				{
-					id = Settings.Checkpoints[j].Id - 2;// Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList. Выходит -2.
-					Wss01Measurements[id].Ss[i].IsСheckedNow = true;
+					//id = Settings.Checkpoints[j].Id - 2;// Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList. Выходит -2.
+					//Wss01Measurements[id].Ss[i].IsСheckedNow = true;
+					Wss01Measurements[j].Ss[i].IsСheckedNow = true;
 					Prepare(j);// Метод разгона трубы.
 					Stat = $"Точка {Settings.Checkpoints[j].S}: Снятие значения 1";
-					Wss01Measurements[id].Ss[i].V = Cymometer.Inst.GetCurrHz(Settings.Checkpoints[j], i > 0 ? latency : 7000, _t);// Время запроса для точки 0.7 больше из-за маленькой скорости прокрутки датчика.
-					Wss01Measurements[id].Ss[i].IsVerified = true;
+					//Wss01Measurements[id].Ss[i].V = Cymometer.Inst.GetCurrHz(Settings.Checkpoints[j], i > 0 ? latency : 7000, _t);// Время запроса для точки 0.7 больше из-за маленькой скорости прокрутки датчика.
+					//Wss01Measurements[id].Ss[i].IsVerified = true;
+					Wss01Measurements[j].Ss[i].V = Cymometer.Inst.GetCurrHz(Settings.Checkpoints[j], i > 0 ? latency : 7000, _t);// Время запроса для точки 0.7 больше из-за маленькой скорости прокрутки датчика.
+					Wss01Measurements[j].Ss[i].IsVerified = true;
 					Thread.Sleep(50);
 					if (_t.Token.IsCancellationRequested)
 					{
 						return;
 					}
-					Wss01Measurements[id].RefSs[i] = _avgSref;
+					//Wss01Measurements[id].RefSs[i] = _avgSref;
+					Wss01Measurements[j].RefSs[i] = _avgSref;
 				}
 			}
 			for (int i = 0; i < Wss01Measurements.Count; i++)
@@ -471,7 +491,7 @@ namespace VerificationAirVelocitySensor.ViewModels
 				fullPath = Path.Combine(Settings.SavePath, path);
 				attemptSave++;
 			}
-			p.SaveAs(new FileInfo(fullPath));
+			p.SaveAs(fullPath);
 		}
 
 		private void WriteXlsxWss02()
@@ -514,7 +534,7 @@ namespace VerificationAirVelocitySensor.ViewModels
 				fullPath = Path.Combine(Settings.SavePath, path);
 				attemptSave++;
 			}
-			p.SaveAs(new FileInfo(fullPath));
+			p.SaveAs(fullPath);
 		}
 
 		public static void AddToCell(ExcelRange er, decimal? v)// Метод для добавления значения в ячейку excel и её обработка.

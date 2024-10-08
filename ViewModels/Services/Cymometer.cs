@@ -5,10 +5,10 @@ using System.IO.Ports;
 using System.Text;
 using System.Threading;
 using System.Windows;
-using VerificationAirVelocitySensor.Models.Enums;
-using VerificationAirVelocitySensor.Models.Classes;
+using ADVS.Models.Enums;
+using ADVS.Models.Classes;
 
-namespace VerificationAirVelocitySensor.ViewModels.Services
+namespace ADVS.ViewModels.Services
 {
     internal class Cymometer// Управление частотомером.
     {
@@ -22,8 +22,15 @@ namespace VerificationAirVelocitySensor.ViewModels.Services
 
         public void Write(string cmd, int lat = 2000)// Устройство очень долго думает. 2 сек. - это гарантия того, что при старте app все настройки будут отправлены.
         {
-            _p.WriteLine(cmd);
-            Thread.Sleep(lat);
+            try
+            {
+                _p.WriteLine(cmd);
+                Thread.Sleep(lat);
+            }
+            catch (TimeoutException e)
+            {
+                MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
 		public string Read()

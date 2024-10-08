@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Models
+﻿namespace ADVS.Models
 {
     internal class Wss01Measur : ViewModels.Base.BaseVm
     {

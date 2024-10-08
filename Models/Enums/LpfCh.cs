@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Models.Enums
+﻿namespace ADVS.Models.Enums
 {
     internal enum LpfCh// Каналы частотометра 1 и 2. 3-ий использоваться не планируется.
     {

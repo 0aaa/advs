@@ -1,4 +1,4 @@
-﻿namespace VerificationAirVelocitySensor.Views
+﻿namespace ADVS.Views
 {
     public partial class DebugView// Логика взаимодействия для DebugView.xaml.
     {
