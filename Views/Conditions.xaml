@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:ADVS.ViewModels"
         d:DataContext="{d:DesignInstance Type={x:Type viewModels:ConditionsVm}}"
-        Height="285"
+        Height="235"
         Width="620"
-        MinHeight="285"
+        MinHeight="235"
         MinWidth="620"
         ResizeMode="NoResize"
         mc:Ignorable="d"
@@ -79,27 +79,24 @@
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
-            <RowDefinition/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <TextBlock Text="Серийный номер" Style="{StaticResource HeaderGridColumnTextBlock}" />
         <TextBox Grid.Column="1" Text="{Binding Settings.Conditions.Snum}" Style="{StaticResource HeaderGridColumnTextBox}" />
-        <TextBlock Grid.Row="1" Text="Поверитель" Style="{StaticResource HeaderGridColumnTextBlock}" />
-        <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Settings.Conditions.Verifier}" Style="{StaticResource HeaderGridColumnTextBox}" />
-        <TextBlock Grid.Row="2" Text="Температура, °С" Style="{StaticResource HeaderGridColumnTextBlock}" />
-        <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Settings.Conditions.T}" Style="{StaticResource HeaderGridColumnTextBox}" />
-        <TextBlock Grid.Row="3" Text="Влажность, %" Style="{StaticResource HeaderGridColumnTextBlock}" />
-        <TextBox Grid.ColumnSpan="2" Grid.Column="1" Grid.Row="3" Text="{Binding Settings.Conditions.H}" Style="{StaticResource HeaderGridColumnTextBox}" />
-        <TextBlock Grid.Row="4" Text="Давление, кПа" Style="{StaticResource HeaderGridColumnTextBlock}" />
-        <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding Settings.Conditions.P}" Style="{StaticResource HeaderGridColumnTextBox}" />
-        <TextBlock Grid.Row="5" Text="Путь сохранения" Style="{StaticResource HeaderGridColumnTextBlock}" />
-        <Grid Grid.Column="1" Grid.Row="5">
-            <TextBox Text="{Binding Settings.SavePath}" Style="{StaticResource HeaderGridColumnTextBox}" />
+        <TextBlock Grid.Row="1" Text="Температура, °С" Style="{StaticResource HeaderGridColumnTextBlock}" />
+        <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Settings.Conditions.T}" Style="{StaticResource HeaderGridColumnTextBox}" />
+        <TextBlock Grid.Row="2" Text="Влажность, %" Style="{StaticResource HeaderGridColumnTextBlock}" />
+        <TextBox Grid.ColumnSpan="2" Grid.Column="1" Grid.Row="2" Text="{Binding Settings.Conditions.H}" Style="{StaticResource HeaderGridColumnTextBox}" />
+        <TextBlock Grid.Row="3" Text="Давление, кПа" Style="{StaticResource HeaderGridColumnTextBlock}" />
+        <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding Settings.Conditions.P}" Style="{StaticResource HeaderGridColumnTextBox}" />
+        <TextBlock Grid.Row="4" Text="Путь сохранения" Style="{StaticResource HeaderGridColumnTextBlock}" />
+        <Grid Grid.Column="1" Grid.Row="4">
+            <TextBox Text="{Binding Settings.Path}" Style="{StaticResource HeaderGridColumnTextBox}" />
             <Button Margin="0,3,10,3" HorizontalAlignment="Right" Style="{StaticResource IconButton}" Command="{Binding Rcs[2]}" Background="{DynamicResource {x:Static SystemColors.GradientInactiveCaptionBrushKey}}">
                 <Image Source="{StaticResource FolderIcon}" />
             </Button>
         </Grid>
-        <Grid Grid.Row="6" Grid.ColumnSpan="2" Margin="2" Background="#D8D3D3">
+        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="2" Background="#D8D3D3">
             <Grid.Resources>
                 <Style TargetType="Button">
                     <Setter Property="FontSize" Value="16"/>

@@ -1,6 +1,6 @@
 ﻿namespace ADVS.Views
 {
-    public partial class Conditions// Логика взаимодействия для SetMeasurementsData.xaml.
+    public partial class Conditions
     {
         internal ViewModels.ConditionsVm ViewModel { get; }
 

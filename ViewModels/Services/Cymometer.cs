@@ -6,7 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 using ADVS.Models.Enums;
-using ADVS.Models.Classes;
+using ADVS.Models.Events;
+using ADVS.Models.Evaluations;
 
 namespace ADVS.ViewModels.Services
 {
@@ -14,9 +15,9 @@ namespace ADVS.ViewModels.Services
     {
         private const int B_RATE = 9600;
 		private const string ID = "43-85/6";
-		private static Cymometer _i;
+		private static Cymometer _inst;
         private SerialPort _p;
-        public static Cymometer Inst => _i ??= new Cymometer();
+        public static Cymometer Inst => _inst ??= new Cymometer();
         public Action Stop { get; set; }
         internal event EventHandler<CymometerOpening> IsOpenUpd;
 
@@ -72,21 +73,12 @@ namespace ADVS.ViewModels.Services
         }
         #endregion
 
-        public void Reset()// Reset device.
+        public void Reset()
         {
             Write("*RST");
         }
 
-        public void SwitchFilter(int ch, bool isOn, int lat = 2000)// Вкл., выкл. фильтра. 1, 2, 3 only.
-        {
-            if (ch != 1 && ch != 2 && ch != 3)
-			{
-                throw new ArgumentOutOfRangeException(nameof(ch));
-			}
-            Write($":INPut{ch}:FILTer {(isOn ? "ON" : "OFF")}", lat);
-        }
-
-        public decimal GetCurrHz(Checkpoint c, int lat, CancellationTokenSource t)
+        public decimal GetHz(Checkpoint c, int lat, CancellationTokenSource t)
         {
             const string CMD = "FETC?";
             const int MAX_ATTEMPTS = 3;
@@ -103,8 +95,7 @@ namespace ADVS.ViewModels.Services
                     _p.ReadExisting();// 1. Clear buffer.
                     if (writeAtts++ >= MAX_ATTEMPTS)
 					{
-						MessageBox.Show("Превышено кол-во попыток чтения значения частоты с частотомера", "Ошибка чтения частотомера", MessageBoxButton.OK, MessageBoxImage.Error);
-						throw new Exception("Превышено кол-во попыток чтения значения частоты с частотомера");
+						throw new InvalidOperationException();
 					}
                     Write(CMD, 500);
                     var buff = new List<byte>();
@@ -147,8 +138,7 @@ namespace ADVS.ViewModels.Services
                     } while (buff.Count != BYTES_CNT);
                     // 5.Calibration.
                     decimal res = Math.Round(decimal.Parse(Encoding.UTF8.GetString(buff.ToArray()).Replace("\r", "").Replace("\n", "").Replace(" ", ""), NumberStyles.Float, CultureInfo.InvariantCulture), 3);
-        /// <summary>Метод для проверки полученного значения на вброс (баги со стороны частотометра).</summary><param name="value"></param><param name="checkpoint"></param>
-                    if (res >= c.Min && res <= c.Max)// 6. Validation.
+                    if (res >= c.Min && res <= c.Max)// 6. Validation. Проверка полученного значения на вброс (баги со стороны частотометра).
 					{
                         return res;
 					}
@@ -158,15 +148,14 @@ namespace ADVS.ViewModels.Services
                 {
                     if (writeAtts >= MAX_ATTEMPTS)
 					{
-						MessageBox.Show($"Превышено кол-во попыток чтения значения частоты с частотомера. {e.Message}", "Ошибка чтения частотомера", MessageBoxButton.OK, MessageBoxImage.Error);
-						throw new Exception("Превышено кол-во попыток запроса частоты с частотомера", e);
+						throw new InvalidOperationException("Превышено кол-во попыток запроса частоты с частотомера", e);
 					}
                     Thread.Sleep(lat);
                 }
             }
         }
 
-        public string GetModel(int lat = 1000)// Запрос версии.
+        public string GetModel(int lat = 1000)
         {
             Write("*IDN?", lat);
             Thread.Sleep(100);
@@ -180,23 +169,23 @@ namespace ADVS.ViewModels.Services
                 Write("CLOSE");
                 _p.ReadExisting();
 				Write("OPEN 1");
-                ans = _p.ReadTo(">");
-                if (ans.Contains("DSNV"))
-                {
-				    return "WSS";
-                }
+				try
+				{
+					ans = _p.ReadTo(">");
+					if (ans.Contains("DSNV"))
+					{
+						return "WSS";
+					}
+				}
+				catch (TimeoutException) { }
 			}
 			return "error";
         }
 
-        public void SetGt(Secs sec, int lat = 2000)// Установка времени опроса частотомером.
+        public void SetUp(Secs sec, int lat = 2000)// Установка LPF, времени опроса частотомером.
         {
+            Write(":INPut1:FILTer ON", lat);
             Write($":ARM:TIMer {(int)sec} S", lat);
         }
-
-        //public void SetChannelFrequency(FreqChannel frequencyChannel, int sleepTime = 2000)// Устанавливает выбранный канал для считывания значения частоты. Доступные каналы: 1, 2, 3.
-        //{
-        //    WriteCommand($":FUNCtion FREQuency {(int) frequencyChannel}", sleepTime);
-        //}
     }
 }

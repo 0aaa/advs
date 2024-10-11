@@ -1,4 +1,4 @@
-﻿namespace ADVS.Models.Classes
+﻿namespace ADVS.Models.Events
 {
     internal class CymometerOpening : System.EventArgs// Событие открытия или закрытия порта частотомера.
     {

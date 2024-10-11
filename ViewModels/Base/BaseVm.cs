@@ -1,6 +1,6 @@
 ﻿namespace ADVS.ViewModels.Base
 {
-    internal class BaseVm : System.ComponentModel.INotifyPropertyChanged
+    internal partial class BaseVm : System.ComponentModel.INotifyPropertyChanged
     {
         public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 

@@ -40,11 +40,11 @@
             </DataGrid.CellStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Номер" Binding="{Binding Id}"  />
-                <DataGridTextColumn Header="Скорость возд. потока, м/с" Binding="{Binding S, StringFormat={}{0:0.0}}" />
+                <DataGridTextColumn Header="Скорость потока, м/с" Binding="{Binding S, StringFormat={}{0:0.0}}" />
                 <DataGridTextColumn Header="Вращения двигателя" Binding="{Binding F, StringFormat={}{0:0}}" />
-                <DataGridTextColumn Header="Шаг коррекции частоты" Binding="{Binding MaxStep, StringFormat={}{0:0}}" />
-                <DataGridTextColumn Header="Левый край" Binding="{Binding Min}" />
-                <DataGridTextColumn Header="Правый край" Binding="{Binding Max}" />
+                <DataGridTextColumn Header="Шаг коррекции" Binding="{Binding MaxStep, StringFormat={}{0:0}}" />
+                <DataGridTextColumn Header="Min" Binding="{Binding Min}" />
+                <DataGridTextColumn Header="Max" Binding="{Binding Max}" />
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Row="1" Margin="20,0,0,0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">

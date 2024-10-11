@@ -1,4 +1,4 @@
-﻿namespace ADVS.Models.Classes
+﻿namespace ADVS.Models.Events
 {
     public class TubeOpening : System.EventArgs// Событие открытия или закрытия порта частотного двигателя.
     {

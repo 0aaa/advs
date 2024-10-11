@@ -2,8 +2,8 @@
 {
     internal enum Model
     {
-        Dvs01 = 1,
-        Dvs02 = 2,
+        Wss01 = 1,
+        Wss02 = 2,
         Wss03 = 3
     }
 }

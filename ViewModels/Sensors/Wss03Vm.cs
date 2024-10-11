@@ -6,18 +6,19 @@ using System.IO;
 using System.Threading;
 using System.Windows;
 using ADVS.Models;
-using ADVS.Models.Classes;
 using ADVS.ViewModels.Services;
 using System.Linq;
+using ADVS.Models.Evaluations;
+using ADVS.ViewModels.Base;
 
 namespace ADVS.ViewModels.Sensors
 {
-	internal class Wss03Vm(Settings s) : Base.BaseVm
+    internal partial class Wss03Vm(Settings s) : BaseVm
 	{
 		private const int LAT = 5000;// Время ожидания после установки значения частоты, чтобы дать аэротрубе стабилизировать значение.
 		private readonly Settings _s = s;
 		private string _stat;
-		public ObservableCollection<Wss03Measur> Measurements { get; } = [];
+		public ObservableCollection<Wss03Eval> Evals { get; } = [];
 		public string Stat
 		{
 			get => _stat;
@@ -49,7 +50,7 @@ namespace ADVS.ViewModels.Sensors
 			var t = Convert.ToInt32(_s.Conditions.T);
 			var h = Convert.ToInt32(_s.Conditions.H);
 			var p = Convert.ToInt32(_s.Conditions.P);
-			if (t >= 15 && t <= 25 && h >= 30 && h <= 80 && p >= 84 && p <= 106 && IsSnum(_s.Conditions.Snum))
+			if (t >= 15 && t <= 25 && h >= 30 && h <= 80 && p >= 84 && p <= 106)
 			{
 				return true;
 			}
@@ -70,6 +71,23 @@ namespace ADVS.ViewModels.Sensors
 			return true;
 		}
 
+		private bool CheckSnum()
+		{
+			Cymometer.Inst.Write("SNUM");
+			Stat = Cymometer.Inst.Read().Replace("\r\n", "");
+			if (IsSnum(Stat))
+			{
+				_s.Conditions.Snum = Stat;
+				return true;
+			}
+			MessageBox.Show($"Wrong serial number {Stat}.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			return false;
+		}
+
+        private static bool IsSnum(string n)
+            => n.Length == 10 && n[0] == '0' && n[1] == '0' && n[2] == '9' && n[3] == '8' && n.All(char.IsDigit)
+                && (n[4] - 48) * 10 + (n[5] - 48) <= DateTime.Now.Year - 2000;
+
 		private void SetAveraging()
 		{
 			Cymometer.Inst.Write("INTV 1", 500);
@@ -80,43 +98,42 @@ namespace ADVS.ViewModels.Sensors
 		{
 			Application.Current.Dispatcher?.Invoke(() =>
 			{
-				//var ss = new decimal[] { .7m, 2.5m, 4.8m, 10, 20, 30 };
-				var ss = new decimal[] { .7m, 2.5m, 4.8m, 10, 20, 30 };// Debug.
-				Checkpoint currC;
-				Measurements?.Clear();
+				var ss = new decimal[] { .7m, 2.5m, 4.9m, 10, 20, 30 };
+				Checkpoint c;
+				Evals?.Clear();
 				for (int i = 0; i < _s.Checkpoints.Count; i++)
 				{
-					currC = _s.Checkpoints.ElementAtOrDefault(i);
-                    if (ss.Contains(currC.S))
+					c = _s.Checkpoints.ElementAtOrDefault(i);
+                    if (ss.Contains(c.S))
                     {
-						Measurements.Add(new Wss03Measur(currC.S, currC.F));
+						Evals.Add(new Wss03Eval(c.S, c.F));
                     }
 				}
 			});
 		}
 
-		private void Prepare(int cI, ref bool canAdjust, List<decimal> avgSrefs, ref decimal avgSref, CancellationTokenSource t)
+		private void Prepare(int i, ref bool acceptRef, List<decimal> avgRefs, ref decimal avgRef, CancellationTokenSource t)
 		{
-			canAdjust = false;
-			Stat = $"Точка {Measurements[cI].S}: Задача частоты {Measurements[cI].F}";
-			Tube.Inst.SetF(Measurements[cI].F, Measurements[cI].S);
+			acceptRef = false;
+			Stat = $"Точка {Evals[i].S}: Задача частоты {Evals[i].F}";
+			Tube.Inst.SetF(Evals[i].F, Evals[i].S);
 			Thread.Sleep(LAT);// Время ожидания для стабилизации трубы.
-			Application.Current.Dispatcher?.Invoke(avgSrefs.Clear);
-			if (Measurements[cI].S == 30)
+			Application.Current.Dispatcher?.Invoke(avgRefs.Clear);
+			if (Evals[i].S == 30)
 			{
-				Stat = $"Точка {Measurements[cI].S}: Корректировка невозможна в данной точке";
+				Stat = $"Точка {Evals[i].S}: Корректировка невозможна в данной точке";
 				Thread.Sleep(15000);
 			}
 			else// Для скоростной точки 30 отключаю коррекцию скорости, тк. труба не может разогнаться до 30 м/с. А где-то до 27 - 29 м/с.
 			{
-				Stat = $"Точка {Measurements[cI].S}: Корректировка скорости";
-				Tube.Inst.AdjustS(ref avgSref, _s.Checkpoints.FirstOrDefault(c => c.S == Measurements[cI].S), t);
+				Stat = $"Точка {Evals[i].S}: Корректировка скорости";
+				Tube.Inst.AdjustS(ref avgRef, _s.Checkpoints.FirstOrDefault(c => c.S == Evals[i].S), t);
 			}
 			if (t.Token.IsCancellationRequested)
 			{
 				return;
 			}
-			canAdjust = true;
+			acceptRef = true;
 			Thread.Sleep(100);
 		}
 
@@ -135,65 +152,61 @@ namespace ADVS.ViewModels.Sensors
 			var ws = p.Workbook.Worksheets[0];
 			#region Заполнение значений.
 			const int XLSX_SEED = 18;
-			for (int i = 0; i < Measurements.Count; i++)
+			for (int i = 0; i < Evals.Count; i++)
 			{
-				MainWindowVm.AddToCell(ws.Cells[i + XLSX_SEED, 15], Measurements[i].RefS);
-				for (int j = 0; j < Measurements[i].Ss.Length; j++)
+				MainWindowVm.AddToCell(ws.Cells[i + XLSX_SEED, 15], Evals[i].Ref);
+				for (int j = 0; j < Evals[i].Ss.Length; j++)
 				{
-					MainWindowVm.AddToCell(ws.Cells[i + XLSX_SEED, j + 16], Measurements[i].Ss[j].V);
+					MainWindowVm.AddToCell(ws.Cells[i + XLSX_SEED, j + 16], Evals[i].Ss[j].V);
 				}
 			}
-			// Условия поверки.
-			ws.Cells[42, 16].Value = _s.Conditions.Verifier;
+			ws.Cells[7, 8].Value = DateTime.Now.ToLongDateString();
 			ws.Cells[42, 20].Value = DateTime.Now.ToString("dd.MM.yyyy");
-			ws.Cells[16, 10].Value = (_s.Conditions.Snum[4] - 48) * 10 + _s.Conditions.Snum[5] - 48 + 2000;
+			ws.Cells[45, 19].Value = DateTime.Now.ToLongDateString();
 			ws.Cells[25, 5].Value = _s.Conditions.T;
 			ws.Cells[26, 5].Value = _s.Conditions.H;
 			ws.Cells[27, 5].Value = _s.Conditions.P;
 			ws.Cells[16, 6].Value = _s.Conditions.Snum;
+			ws.Cells[16, 10].Value = (_s.Conditions.Snum[4] - 48) * 10 + _s.Conditions.Snum[5] - 48 + 2000;
 			ws.Cells[37, 19].Value = _s.Conditions.Snum;
 			//ws.Cells[5, 4].Value = "Протокол ДВС-03 №00212522 от 10.01.2021";
 			#endregion
 			string path = $"Протокол ДВС-03 № {_s.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}.xlsx";
-			string fullPath = Path.Combine(_s.SavePath, path);
-			int attempt = 1;
-			while (File.Exists(fullPath))
+			string fullP = Path.Combine(_s.Path, path);
+			int att = 1;
+			while (File.Exists(fullP))
 			{
-				path = $"Протокол ДВС-03 № {_s.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}({attempt}).xlsx";
-				fullPath = Path.Combine(_s.SavePath, path);
-				attempt++;
+				path = $"Протокол ДВС-03 № {_s.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}({att}).xlsx";
+				fullP = Path.Combine(_s.Path, path);
+				att++;
 			}
-			p.SaveAs(fullPath);
+			p.SaveAs(fullP);
 		}
 
-		public void Revise(ref bool canAdjust, List<decimal> avgSrefs, ref decimal avgSref, CancellationTokenSource t)
+		public void Revise(ref bool acceptRef, List<decimal> avgRefs, ref decimal avgRef, CancellationTokenSource t)
 		{
-            if (!CheckCond() || !CheckVer())
+            if (!CheckCond() || !CheckVer() || !CheckSnum())
             {
 				return;
             }
 			SetAveraging();
 			InitSs();
-			for (int i = 0; i < Measurements.Count; i++)
+			for (int i = 0; i < Evals.Count; i++)
 			{
-				Prepare(i, ref canAdjust, avgSrefs, ref avgSref, t);
-				Measurements[i].Ss[0].IsСheckedNow = true;
-				Stat = $"Точка {Measurements[i].S}: Снятие значения";
+				Prepare(i, ref acceptRef, avgRefs, ref avgRef, t);
+				Evals[i].Ss[0].IsСheckedNow = true;
+				Stat = $"Точка {Evals[i].S}: Снятие значения";
 				Thread.Sleep(60000);// 1 min. interval for WSS-03.
-				Measurements[i].Ss[0].V = GetS();
-				Measurements[i].Ss[0].IsVerified = true;
+				Evals[i].Ss[0].V = GetS();
+				Evals[i].Ss[0].IsVerified = true;
 				if (t.Token.IsCancellationRequested)
 				{
 					return;
 				}
 				OnPropertyChanged("IsBusy");// "IsBusy" take only false.
-				Measurements[i].RefS = avgSref;
+				Evals[i].Ref = avgRef;
 			}
 			WriteXlsx();
 		}
-
-        public static bool IsSnum(string str)
-            => str.Length == 10 && str[0] == '0' && str[1] == '0' && str[2] == '9' && str[3] == '8' && str.All(char.IsDigit)
-                && (str[4] - 48) * 10 + (str[5] - 48) <= DateTime.Now.Year - 2000;
     }
 }

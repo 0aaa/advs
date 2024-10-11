@@ -1,6 +1,6 @@
 ﻿namespace ADVS.Views
 {
-    public partial class SettingsView// Логика взаимодействия для SettingsView.xaml.
+    public partial class SettingsView
     {
         internal SettingsView(ViewModels.DeviceSettingsVm s)
         {

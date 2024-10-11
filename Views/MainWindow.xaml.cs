@@ -1,6 +1,6 @@
 ﻿namespace ADVS.Views
 {
-    public partial class MainWindow// Логика взаимодействия для MainWindow.xaml.
+    public partial class MainWindow
     {
         public MainWindow()
         {
@@ -13,7 +13,6 @@
 			//	, 0x31, 0x45, 0x2b, 0x30
 			//	, 0x31, 0x0a
 			//};
-			//var y = Encoding.UTF8.GetString(x);
 		}
     }
 }

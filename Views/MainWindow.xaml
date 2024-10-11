@@ -35,7 +35,7 @@
             <RowDefinition Height="50" />
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid Background="#70808F">
+        <Grid Background="#D8D3D3">
             <Grid.Resources>
                 <Style TargetType="Button">
                     <Setter Property="Margin" Value="15,5"/>
@@ -46,12 +46,10 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
-                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Button Content="Главная страница" Command="{Binding PaginationRcs[0]}" />
             <Button Grid.Column="1" Content="Настройки" Command="{Binding PaginationRcs[1]}" />
             <Button Grid.Column="2" Content="Чекпоинты" Command="{Binding PaginationRcs[2]}" />
-            <Button Grid.Column="3" Content="Отладка" Command="{Binding PaginationRcs[3]}" />
         </Grid>
         <!--#region WSS revision-->
         <Grid Grid.Row="1" Background="#E2E1E1">
@@ -93,7 +91,7 @@
                     <TextBlock Grid.Column="2" Text="№ 2"/>
                     <TextBlock Grid.Column="3" Text="№ 3"/>
                 </Grid>
-                <ItemsControl Grid.Row="1" ItemsSource="{Binding Wss01Measurements}" BorderThickness="0" Padding="0" Margin="0">
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding Wss01Evals}" BorderThickness="0" Padding="0" Margin="0">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Grid>
@@ -199,7 +197,7 @@
                     <TextBlock Grid.Column="4" Text="№ 4"/>
                     <TextBlock Grid.Column="5" Text="№ 5"/>
                 </Grid>
-                <ItemsControl Grid.Row="1" ItemsSource="{Binding Wss02Measurements}" BorderThickness="0" Padding="0" Margin="0">
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding Wss02Evals}" BorderThickness="0" Padding="0" Margin="0">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Grid>
@@ -306,22 +304,10 @@
                         </StackPanel.Resources>
                         <Button Content="Старт" Command="{Binding RevisionRcs[0]}" />
                         <Button Content="Стоп" Command="{Binding RevisionRcs[1]}" />
-                        <ComboBox ItemsSource="{Binding Sensors}" IsEnabled="{Binding ChangeModelOnValidation}" DisplayMemberPath="Descr" SelectedValue="{Binding Settings.M}"
+                        <ComboBox ItemsSource="{Binding Sensors}" IsEnabled="{Binding RevOngoing}" DisplayMemberPath="Descr" SelectedValue="{Binding Settings.M}"
                             SelectedValuePath="Model" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="25" Width="100" Margin="20,10,0,10" />
                     </StackPanel>
-                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
-                        <Grid Margin="50,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="15" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Width="80" Visibility="{Binding Fvisibility, Converter={StaticResource BoolToVis}}" Margin="0,5,10,5" Text="{Binding Settings.Devices.F, StringFormat={}{0:0 n}}" FontSize="16" />
-                            <Button Grid.Column="1" Command="{Binding RevisionRcs[3]}" ToolTip="Вывести отображение частоты вращения частотного двигателя в условных единицах" Style="{StaticResource OnlyBackgroundButtonStyle}">
-                                <Image Source="{StaticResource QuestionMark}" />
-                            </Button>
-                        </Grid>
-                        <TextBlock Text="{Binding Sref, StringFormat={}{0:0.00 м/с}}" Width="80" Margin="0,5,10,5" FontSize="16" />
-                    </StackPanel>
+                    <TextBlock Text="{Binding Ref, StringFormat={}{0:0.00 м/с}}" Width="80" Margin="0,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="16" />
                 </Grid>
                 <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" Background="#D8D3D3">
                     <TextBlock Text="Статус:" Style="{StaticResource GridRowHeaderTextBlock}" Margin="30,0" />

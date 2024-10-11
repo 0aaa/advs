@@ -6,7 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using ADVS.Models.Enums;
-using ADVS.Models.Classes;
+using ADVS.Models.Events;
+using ADVS.Models.Evaluations;
 
 namespace ADVS.ViewModels.Services
 {
@@ -19,7 +20,7 @@ namespace ADVS.ViewModels.Services
         private const byte MSG_06 = 0x06;
         private const byte MSG_04 = 0x04;
         private const byte MSG_03 = 0x03;
-        private static Tube _i;
+        private static Tube _inst;
         private readonly int _cmdReg = 49999;
         private readonly int _tubeReg = 50009;
         private readonly object _locker;
@@ -28,18 +29,18 @@ namespace ADVS.ViewModels.Services
         private bool _isInterview;// Флаг, отвечающий за уведомление о состоянии опроса эталонного значения.
         private bool _isSend;// Флаг для работы с портом, при включенном опросе эталонного значения. Для приостановки его в момент отправки команд.
         private int _currF;// Флаг, отвечающий за выставленную в данный момент скорость. Которая должна соотвествовать эталону.
-        public static Tube Inst => _i ??= new Tube();
+        public static Tube Inst => _inst ??= new Tube();
         public int CurrF
         {
             get => _currF;
             private set
             {
                 _currF = value;
-                CurrFupd?.Invoke(this, new Fupd { F = value });
+                Fupd?.Invoke(this, new Fupd { F = value });
             }
         }
 		#region Event handlers.
-		public event EventHandler<Fupd> CurrFupd;
+		public event EventHandler<Fupd> Fupd;
         public event EventHandler<TubeOpening> IsOpenUpd;
         public event EventHandler<RefUpd> RefUpd;
         #endregion
@@ -129,7 +130,7 @@ namespace ADVS.ViewModels.Services
 			{
                 cmd[2] = (byte)(_cmdReg / 256);
                 cmd[3] = (byte)_cmdReg;
-                // Определенные настроки командного слова для остановки двигателя.
+                // Определенные настройки командного слова для остановки двигателя.
                 cmd[4] = 132; // 0x84.
                 cmd[5] = 188; // 0xBC.
             }
@@ -280,7 +281,7 @@ namespace ADVS.ViewModels.Services
         public void AdjustS(ref decimal avgRefS, Checkpoint c, CancellationTokenSource t)// Метод для корректировки скорости эталона к установленному значению скорости.
         {
             var eCnt = 0;
-            var step = c.MaxStep;
+            var step = c.Step;
             var signChangeCnt = 0;// Переменная для отслеживания смены знака у шага, с помощью которого корректируется частота.
             var currSign = Sing.Plus;// Знак шага, плюс или минус.
 			Sing prevSign;// Старое значение для сравнения при изменении нового.

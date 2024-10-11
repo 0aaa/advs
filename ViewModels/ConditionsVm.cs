@@ -4,7 +4,7 @@ using ADVS.ViewModels.Services;
 
 namespace ADVS.ViewModels
 {
-    internal class ConditionsVm : BaseVm// Vm страницы с условиями поверки.
+    internal partial class ConditionsVm : BaseVm
     {
         private Settings _s;
         public RelayCommand[] Rcs { get; }// Continue, Cancel, SetLogSaveWay.
@@ -23,10 +23,6 @@ namespace ADVS.ViewModels
         public ConditionsVm(Settings s)
         {
 			Settings = s;
-			//TypeVerificationsList = [
-			//	new RevisionType { Iteration = RevisionIteration.Periodic, Description = "Периодическая" }
-			//	, new RevisionType { Iteration = RevisionIteration.Primary, Description = "Первичная" }
-			//];
 			Rcs = [
 				new RelayCommand(() => { IsContinue = true; CloseWindow(); })
 				, new RelayCommand(() => { IsContinue = false; Settings.Serialize(); CloseWindow(); })
@@ -35,10 +31,10 @@ namespace ADVS.ViewModels
 					d.ShowDialog();
 					if (!string.IsNullOrWhiteSpace(d.SelectedPath))
 					{
-						Settings.SavePath = d.SelectedPath;
+						Settings.Path = d.SelectedPath;
 					}
 				})
 			];
         }
-    }
+	}
 }

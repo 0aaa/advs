@@ -1,6 +1,6 @@
 ﻿namespace ADVS.Models
 {
-    internal class Speed : ViewModels.Base.BaseVm
+    internal partial class Speed : ViewModels.Base.BaseVm
     {
         public decimal? V { get; set; }// Итоговое полученное значение тестирования WSS.
         public bool IsСheckedNow { get; set; }// Показывает, проверяется ли сейчас это значение, для его подсветки.

@@ -7,10 +7,9 @@ using ADVS.ViewModels.Base;
 
 namespace ADVS.ViewModels
 {
-    internal class DeviceSettingsVm : BaseVm
+    internal partial class DeviceSettingsVm : BaseVm
     {
         #region Collections.
-        public Lpf[] Lpfs { get; }
         public GateTime[] Gts { get; }
         public ObservableCollection<string> Ps { get; }
         #endregion
@@ -23,15 +22,11 @@ namespace ADVS.ViewModels
         {
             Devices = s;
             Gts = [
-				//new GateTimeDescription(GateTime.S1, "1 сек"),
-				new GateTime(Secs.S4, "4 сек")
-				, new GateTime(Secs.S7, "7 сек")
-				, new GateTime(Secs.S10, "10 сек")
-				, new GateTime(Secs.S100, "100 сек")
-			];
-			Lpfs = [
-				new Lpf(LpfCh.Ch1, "1-ый канал")
-				, new Lpf(LpfCh.Ch2, "2-ой канал")
+				//new GateTimeDescription(GateTime.S1, "1 s"),
+				new GateTime(Secs.S4, "4 s")
+				, new GateTime(Secs.S7, "7 s")
+				, new GateTime(Secs.S10, "10 s")
+				, new GateTime(Secs.S100, "100 s")
 			];
 			Ps = new ObservableCollection<string>(SerialPort.GetPortNames());
 			UpdatePs = new RelayCommand(() => {
@@ -51,9 +46,9 @@ namespace ADVS.ViewModels
 						deletePs.Add(p);
 					}
 				}
-				foreach (var port in deletePs)// Удаляю лишние элементы.
+				foreach (var p in deletePs)// Удаляю лишние элементы.
 				{
-					Ps.Remove(port);
+					Ps.Remove(p);
 				}
 			});
         }

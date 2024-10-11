@@ -16,31 +16,31 @@ using ADVS.ViewModels.Base;
 using ADVS.ViewModels.Sensors;
 using ADVS.ViewModels.Services;
 using ADVS.Models.Enums;
-using System.Diagnostics.Metrics;
+using ADVS.Models.Evaluations;
 
 namespace ADVS.ViewModels
 {
-	internal class MainWindowVm : BaseVm
+    internal partial class MainWindowVm : BaseVm
 	{
 		private const int LAT = 5000;// Время ожидания после установки значения частоты, чтобы дать аэротрубе стабилизировать значение.
-		private readonly List<decimal> _avgSrefs;
+		private readonly List<decimal> _avgRefs;
 		private CancellationTokenSource _t;
 		// Все свойства что ниже, должны сохранятся при перезапуске.
 		private UserControl _frame;
-		private decimal _sRef;// Эталонное значение скорости с частотной трубы.
-		private decimal _avgSref;
-		private bool _canAdjust;// Флаг для включения в коллекцию среднего значения эталона, всех его значений за время теста скоростной точки после прохождения корректировки.
-		private bool _isActiveRevision;// Флаг, показывающий активно ли тестирование.
+		private decimal _ref;// Эталонное значение скорости с частотной трубы.
+		private decimal _avgRef;
+		private bool _acceptRef;// Флаг для включения в коллекцию среднего значения эталона, всех его значений за время теста скоростной точки после прохождения корректировки.
+		private bool _revOngoing;// Флаг, показывающий активно ли тестирование.
 		private bool _isBusy;
 		#region Properties.
-		public ObservableCollection<Wss01Measur> Wss01Measurements { get; }
-		public ObservableCollection<Wss02Measur> Wss02Measurements { get; }
+		public ObservableCollection<Wss01Eval> Wss01Evals { get; }
+		public ObservableCollection<Wss02Eval> Wss02Evals { get; }
 		public Wss[] Sensors { get; }
 		public RelayCommand[] RevisionRcs { get; }// Start, Stop, SaveSpeeds, VisibilitySetFrequency, Reset, ClosePortFrequencyCounter, ClosePortFrequencyMotor.
-		public RelayCommand[] PaginationRcs { get; }// MainWindow, Settings, Checkpoints, Debug tab.
-		public Settings Settings { get; }// Свойство для хранения условий поверки.
+		public RelayCommand[] PaginationRcs { get; }
+		public Settings Settings { get; }
 		public string Title { get; }
-		public bool ChangeModelOnValidation => !_isActiveRevision;
+		public bool RevOngoing => !_revOngoing;
 		public UserControl Frame
 		{
 			get => _frame;
@@ -61,13 +61,13 @@ namespace ADVS.ViewModels
 		public CurrPage CurrPage { get; private set; }
 		public string Stat { get; private set; }// Свойство для биндинга на UI текущего действия внутри app.
 		public string BusyContent { get; private set; }// Текст BusyIndicator.
-		public decimal Sref
+		public decimal Ref
 		{
-			get => _sRef;
+			get => _ref;
 			private set
 			{
-				_sRef = value;
-				OnPropertyChanged(nameof(Sref));
+				_ref = value;
+				OnPropertyChanged(nameof(Ref));
 			}
 		}
 		public bool IsBusy// Активность BusyIndicator.
@@ -82,26 +82,26 @@ namespace ADVS.ViewModels
 				}
 			}
 		}
-		public bool Fvisibility { get; private set; }
-		public bool[] WssVisibility { get; private set; }// Флаг для биндинга отображения таблицы разультатов для WSS-0(n).
+		public bool[] WssVisibility { get; private set; }
 		#endregion
-		private readonly Wss03Vm _wss03Vm;
+		private readonly Wss03Vm _03Vm;
 		public Wss03 Wss03 { get; }
 
 		public MainWindowVm()
 		{
-			_avgSrefs = [];
+			_avgRefs = [];
 			Tube.Inst.RefUpd += (_, e) => {
-				Sref = (decimal)e.Ref;
-				if (_avgSrefs.Count > 5 && !_canAdjust)
+				Ref = (decimal)e.Ref;
+				if (_avgRefs.Count > 5 && !_acceptRef)
 				{
-					_avgSrefs.RemoveAt(0);
+					_avgRefs.RemoveAt(0);
 				}
-				_avgSrefs.Add(Sref);
-				_avgSref = Math.Round(_avgSrefs.Average(), 2);
+				_avgRefs.Add(Ref);
+				_avgRef = Math.Round(_avgRefs.Average(), 2);
 			};
 			WssVisibility = new bool[Enum.GetNames<Model>().Length];
-			Settings = Settings.Deserialize() ?? new Settings() { M = Model.Dvs02 };
+			Settings = Settings.Deserialize();
+			Settings.M = Model.Wss02;
 			Settings.PropertyChanged += (_, _) => {
 				Settings.Serialize();
 				for (int i = 0; i < WssVisibility.Length; i++)
@@ -111,12 +111,12 @@ namespace ADVS.ViewModels
 				WssVisibility[(int)Settings.M - 1] = true;
 				OnPropertyChanged(nameof(WssVisibility));
 			};
-			_wss03Vm = new Wss03Vm(Settings);
-			_wss03Vm.PropertyChanged += (_, e) => {
+			_03Vm = new Wss03Vm(Settings);
+			_03Vm.PropertyChanged += (_, e) => {
 				switch (e.PropertyName)
 				{
 					case "Stat":
-						Stat = _wss03Vm.Stat;
+						Stat = _03Vm.Stat;
 						break;
 					case "IsBusy":
 						IsBusy = false;// "IsBusy" take only false.
@@ -124,72 +124,37 @@ namespace ADVS.ViewModels
 				}
 			};
 			WssVisibility[(int)Settings.M - 1] = true;
-			Tube.Inst.CurrFupd += (_, e) => Settings.Devices.F = e.F;
+			//Tube.Inst.CurrFupd += (_, e) => Settings.Devices.F = e.F;
 			Title = $"{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title}  v{Assembly.GetExecutingAssembly().GetName().Version}";
-			Sensors = [new Wss(Model.Dvs01, "ДСВ-01"), new Wss(Model.Dvs02, "ДВС-02"), new Wss(Model.Wss03, "ДВС-03")];
-			Wss01Measurements = [];
-			Wss02Measurements = [];
-			Wss03 = new Wss03(_wss03Vm);
+			Sensors = [new Wss(Model.Wss01, "ДСВ-01"), new Wss(Model.Wss02, "ДВС-02"), new Wss(Model.Wss03, "ДВС-03")];
+			Wss01Evals = [];
+			Wss02Evals = [];
+			Wss03 = new Wss03(_03Vm);
 			RevisionRcs = [
-				 new(Start, () => !_isActiveRevision)// Start.
+				 new(Start, () => !_revOngoing)
 				, new(() => {
 					BusyContent = "Тестирование прервано пользователем\nОжидание завершения процесса";
 					IsBusy = true;
-					_isActiveRevision = false;
+					_revOngoing = false;
 					_t.Cancel();
-				}, () => _isActiveRevision)// Stop.
-				, new(() => Settings.Serialize())// SaveSpeeds.
-				, new(() => Fvisibility = !Fvisibility)// VisibilitySetFrequency.
+				}, () => _revOngoing)// Stop.
+				, new(() => Settings.Serialize())
 				#region Частотомер ЧЗ-85/6.
-				, new RelayCommand(Cymometer.Inst.Reset, Cymometer.Inst.IsOpen)// Reset.
-				, new RelayCommand(Cymometer.Inst.Close, Cymometer.Inst.IsOpen)// ClosePortFrequencyCounter.
+				, new RelayCommand(Cymometer.Inst.Reset, Cymometer.Inst.IsOpen)
+				, new RelayCommand(Cymometer.Inst.Close, Cymometer.Inst.IsOpen)
 				#endregion
 				#region Анемометр / Частотный двигатель.
-				, new RelayCommand(Tube.Inst.Close, Tube.Inst.IsOpen)// ClosePortFrequencyMotor.
+				, new RelayCommand(Tube.Inst.Close, Tube.Inst.IsOpen)
 				#endregion
 			];
             PaginationRcs = [
-				new(() => { Frame = null; CurrPage = CurrPage.Main; }, () => CurrPage != CurrPage.Main && !_isActiveRevision)// MainWindow.
-				, new(() => Frame = new SettingsView(new DeviceSettingsVm(Settings.Devices)), () => CurrPage != CurrPage.Settings && !_isActiveRevision)// Settings.
-				, new(() => Frame = new CheckpointsView(Settings.Checkpoints, RevisionRcs[2]), () => CurrPage != CurrPage.Checkpoints && !_isActiveRevision)// Checkpoints.
-				, new(ChangePageOnDebug, () => CurrPage != CurrPage.Debug && !_isActiveRevision)// Debug tab.
+				new(() => { Frame = null; CurrPage = CurrPage.Main; }, () => CurrPage != CurrPage.Main && !_revOngoing)
+				, new(() => Frame = new SettingsView(new DeviceSettingsVm(Settings.Devices)), () => CurrPage != CurrPage.Settings && !_revOngoing)
+				, new(() => Frame = new CheckpointsView(Settings.Checkpoints, RevisionRcs[2]), () => CurrPage != CurrPage.Checkpoints && !_revOngoing)
 			];
-			#region Debug.
-			//CollectionDvsValue02.Add(new DvsValue02(5) {
-			//	DeviceSpeedValue1 = new SpeedValue { IsVerified = true, IsСheckedNow = true, ResultValue = 4.32m }
-			//	, DeviceSpeedValue2 = new SpeedValue()
-			//	, DeviceSpeedValue3 = new SpeedValue()
-			//	, DeviceSpeedValue4 = new SpeedValue()
-			//	, DeviceSpeedValue5 = new SpeedValue()
-			//	, ReferenceSpeedValue = 5
-			//});
-			//CollectionDvsValue02.Add(new DvsValue02(10) { DeviceSpeedValue1 = new SpeedValue { ResultValue = 14.32m }, ReferenceSpeedValue = 10 });
-			//CollectionDvsValue02.Add(new DvsValue02(15) { DeviceSpeedValue1 = new SpeedValue { IsСheckedNow = true, ResultValue = 24.32m }, ReferenceSpeedValue = 15 });
-			//CollectionDvsValue02.Add(new DvsValue02(20) { DeviceSpeedValue1 = new SpeedValue { ResultValue = 14.32m }, ReferenceSpeedValue = 20 });
-			//CollectionDvsValue02.Add(new DvsValue02(25) { DeviceSpeedValue1 = new SpeedValue { IsСheckedNow = true, ResultValue = 24.32m }, ReferenceSpeedValue = 25 });
-			//CollectionDvsValue02.Add(new DvsValue02(30) { DeviceSpeedValue1 = new SpeedValue { ResultValue = 14.32m }, ReferenceSpeedValue = 30 });
-			#endregion
 		}
 
-		#region Relay command methods.
-		#region Методы смены страниц.
-		private async void ChangePageOnDebug()
-		{
-			await Task.Run(() =>
-			{
-				IsBusy = true;
-				BusyContent = "Проверка подключения аэродинамической трубы";
-				if (!Tube.Inst.Open(Settings.Devices.Tube))
-				{
-					IsBusy = false;
-					return;
-				}
-				IsBusy = false;
-				Application.Current.Dispatcher?.Invoke(() => Frame = new DebugView());
-			});
-		}
-		#endregion
-
+		#region Частотомер ЧЗ-85/6.
 		private bool OpenCymometer()
 		{
 			if (!Cymometer.Inst.Open(Settings.Devices.Cymometer, (int)Settings.Devices.Sec * 1000))
@@ -199,9 +164,7 @@ namespace ADVS.ViewModels
 			switch (Cymometer.Inst.GetModel())
 			{
 				case "counter":
-					OnOffFilter(0);
-					OnOffFilter(1);
-					Cymometer.Inst.SetGt(Settings.Devices.Sec);
+					Cymometer.Inst.SetUp(Settings.Devices.Sec);
 					break;
 				case "WSS":
 					break;
@@ -212,17 +175,6 @@ namespace ADVS.ViewModels
 			}
 			return true;
 		}
-
-		#region Частотомер ЧЗ-85/6.
-		private void OnOffFilter(int chI)
-		{
-			if (chI < 0 || 1 < chI)
-			{
-				throw new ArgumentOutOfRangeException(nameof(chI));
-			}
-			Cymometer.Inst.SwitchFilter(chI + 1, Settings.Devices.FilterChs[chI]);
-		}
-		#endregion
 		#endregion
 
 		#region Revision methods.
@@ -230,14 +182,14 @@ namespace ADVS.ViewModels
 		{
 			BusyContent = "Аварийная остановка";
 			IsBusy = true;
-			_isActiveRevision = false;
+			_revOngoing = false;
 			_t.Cancel();
 			MessageBox.Show("Произошло аварийное завершение поверки", "Внимание", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 
 		private void Stop()
 		{
-			_isActiveRevision = false;
+			_revOngoing = false;
 			IsBusy = false;
 			Cymometer.Inst.Close();
 			Tube.Inst.Close();
@@ -245,16 +197,16 @@ namespace ADVS.ViewModels
 
 		private async void Start()
 		{
-			_isActiveRevision = true;
+			_revOngoing = true;
 			if (!OpenConditions())
 			{
-				_isActiveRevision = false;
+				_revOngoing = false;
 				return;
 			}
 			await Task.Run(() =>
 			{
 				IsBusy = true;
-				BusyContent = "Проверка подключенных устройств и их настройка";
+				BusyContent = "Проверка подключённых устройств и их настройка";
 				if (!OpenCymometer() || !Tube.Inst.Open(Settings.Devices.Tube))
 				{
 					Stop();
@@ -268,16 +220,16 @@ namespace ADVS.ViewModels
 					Stat = "Запуск тестирования";
 					switch (Settings.M)
 					{
-						case Model.Dvs01:
-							Init01Sps();
-							StartWss01();
+						case Model.Wss01:
+							Init01();
+							Start01();
 							break;
-						case Model.Dvs02:
-							Init02Sps();
-							StartWss02();
+						case Model.Wss02:
+							Init02();
+							Start02();
 							break;
 						case Model.Wss03:
-							_wss03Vm.Revise(ref _canAdjust, _avgSrefs, ref _avgSref, _t);
+							_03Vm.Revise(ref _acceptRef, _avgRefs, ref _avgRef, _t);
 							break;
 						default:
 							throw new ArgumentOutOfRangeException();
@@ -294,11 +246,11 @@ namespace ADVS.ViewModels
 					Tube.Inst.SetF(0, 0);
 					switch (Settings.M)
 					{
-						case Model.Dvs01:
-							WriteXlsxWss01();
+						case Model.Wss01:
+							WriteXlsx01();
 							break;
-						case Model.Dvs02:
-							WriteXlsxWss02();
+						case Model.Wss02:
+							WriteXlsx02();
 							break;
 					}
 					Stop();
@@ -315,110 +267,89 @@ namespace ADVS.ViewModels
 			c.Close();
 			if (!isContinue)
 			{
-				MessageBox.Show("Отменено пользователем", "Внимание", MessageBoxButton.OK, MessageBoxImage.Error);
 				return false;
 			}
 			Settings.Serialize();
-			if (string.IsNullOrEmpty(Settings.SavePath))
-			{
-				MessageBox.Show("Не указан путь сохранения", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-				return false;
-			}
-			return isContinue;
+			return Settings.CheckCond();
 		}
 
-		private void Init01Sps()// Метод для очистки от старых значений WssValues01 с заполнением пустыми значениями. Для WSS-01.
+		private void Init01()
 		{
 			Application.Current.Dispatcher?.Invoke(() =>
 			{
 				var ss = new decimal[] { 5, 10, 15, 20, 25 };
-				decimal currS;
-				Wss01Measurements?.Clear();
-                for (int i = 0; i < Settings.Checkpoints.Count; i++)// Первые 3 точки (0.7, 2.5, 4.8) скипаю и последнюю (30).
+				Wss01Evals?.Clear();
+                for (int i = 0; i < ss.Length; i++)
                 {
-                    currS = Settings.Checkpoints.ElementAtOrDefault(i).S;
-                    if (ss.Contains(currS))
-                    {
-                        Wss01Measurements.Add(new Wss01Measur(currS));
-                    }
+					Wss01Evals.Add(new Wss01Eval(ss[i]));
                 }
             });
 		}
 
-		private void Init02Sps()// Метод для очистки от старых значений WssValues02 с заполнением пустыми значениями. Для WSS-02.
+		private void Init02()
 		{
 			Application.Current.Dispatcher?.Invoke(() =>
 			{
-				var ss = new decimal[] { 0.7m, 5, 10, 15, 20, 25, 30 };
-				decimal currS;
-				Wss02Measurements?.Clear();
-                for (int i = 0; i < Settings.Checkpoints.Count; i++)
+				var ss = new decimal[] { .7m, 5, 10, 15, 20, 25, 30 };
+				Wss02Evals?.Clear();
+                for (int i = 0; i < ss.Length; i++)
                 {
-                    currS = Settings.Checkpoints.ElementAtOrDefault(i).S;
-                    if (ss.Contains(currS))
-                    {
-                        Wss02Measurements.Add(new Wss02Measur(currS));
-                    }
+					Wss02Evals.Add(new Wss02Eval(ss[i]));
                 }
             });
 		}
 
-		private void StartWss01()
+		private void Start01()
 		{
-			int latency = (int)Settings.Devices.Sec * 1000;
+			int lat = (int)Settings.Devices.Sec * 1000;
+			Checkpoint c;
 			decimal? avg;
-			//int id = 0;
-			//for (int i = 0; i < Wss01Measurements[id].Ss.Length; i++)
-			var j = 0;
-			for (int i = 0; i < Wss01Measurements[j].Ss.Length; i++)
+			for (int i = 0; i < Wss01Evals[0].Ss.Length; i++)// Beware. Only 1st Checkpoint taken. Speeds quantity for each Checkpoint can be different.
 			{
-				//for (int j = 1; j < Settings.Checkpoints.Count - 1; j++)// Первую точку (0.7) скипаю и последнюю (30). Снятие 1-ого значения.
-				for (; j < Settings.Checkpoints.Count; j++)
+				for (int j = 0; j < Wss01Evals.Count; j++)
 				{
-					//id = Settings.Checkpoints[j].Id - 2;// Исправляем смещение из-за скипа 1-ой позиции в SpeedPointsList и в разнице нумерации в SpeedPointsList. Выходит -2.
-					//Wss01Measurements[id].Ss[i].IsСheckedNow = true;
-					Wss01Measurements[j].Ss[i].IsСheckedNow = true;
-					Prepare(j);// Метод разгона трубы.
-					Stat = $"Точка {Settings.Checkpoints[j].S}: Снятие значения 1";
-					//Wss01Measurements[id].Ss[i].V = Cymometer.Inst.GetCurrHz(Settings.Checkpoints[j], i > 0 ? latency : 7000, _t);// Время запроса для точки 0.7 больше из-за маленькой скорости прокрутки датчика.
-					//Wss01Measurements[id].Ss[i].IsVerified = true;
-					Wss01Measurements[j].Ss[i].V = Cymometer.Inst.GetCurrHz(Settings.Checkpoints[j], i > 0 ? latency : 7000, _t);// Время запроса для точки 0.7 больше из-за маленькой скорости прокрутки датчика.
-					Wss01Measurements[j].Ss[i].IsVerified = true;
+					Wss01Evals[j].Ss[i].IsСheckedNow = true;
+					c = Settings.Checkpoints.FirstOrDefault(cp => cp.S == Wss01Evals[j].S);
+					Prepare(c);
+					Stat = $"Точка {c.S}: Снятие значения {i + 1}";
+					Wss01Evals[j].Ss[i].V = Cymometer.Inst.GetHz(c, i > 0 ? lat : 7000, _t);// Время запроса для точки 0.7 больше из-за маленькой скорости прокрутки датчика.
+					Wss01Evals[j].Ss[i].IsVerified = true;
 					Thread.Sleep(50);
 					if (_t.Token.IsCancellationRequested)
 					{
 						return;
 					}
-					//Wss01Measurements[id].RefSs[i] = _avgSref;
-					Wss01Measurements[j].RefSs[i] = _avgSref;
+					Wss01Evals[j].Refs[i] = _avgRef;
 				}
 			}
-			for (int i = 0; i < Wss01Measurements.Count; i++)
+			for (int i = 0; i < Wss01Evals.Count; i++)
 			{
-				avg = Wss01Measurements[i].RefSs.Average();
+				avg = Wss01Evals[i].Refs.Average();
 				if (avg != null)
 				{
-					Wss01Measurements[i].RefS = Math.Round((decimal)avg, 2);
+					Wss01Evals[i].Ref = Math.Round((decimal)avg, 2);
 				}
 			}
 		}
 
-		private void StartWss02()
+		private void Start02()
 		{
-			int latency = (int)Settings.Devices.Sec * 1000;
-			for (int i = 0; i < Settings.Checkpoints.Count; i++)
+            int lat = (int)Settings.Devices.Sec * 1000;
+			Checkpoint c;
+			for (int i = 0; i < Wss02Evals.Count; i++)
 			{
-				Prepare(i);
-				if (Settings.Checkpoints[i].S == 0.7m)// На данной скорости, датчик вращается очень медленно. А значение поступает на частотомер в момент полного оборота датчика.
+				c = Settings.Checkpoints.FirstOrDefault(cp => cp.S == Wss02Evals[i].S);
+				Prepare(c);
+				if (c.S == .7m)// На данной скорости, датчик вращается очень медленно. А значение поступает на частотомер в момент полного оборота датчика.
 				{
-					latency = 5000;
+					lat = 5000;
 				}
-				for (int j = 0; j < Wss02Measurements[i].Ss.Length; j++)
+				for (int j = 0; j < Wss02Evals[i].Ss.Length; j++)
 				{
-					Wss02Measurements[i].Ss[j].IsСheckedNow = true;
-					Stat = $"Точка {Settings.Checkpoints[i].S}: Снятие значения {j + 1}";
-					Wss02Measurements[i].Ss[j].V = Cymometer.Inst.GetCurrHz(Settings.Checkpoints[i], latency, _t);
-					Wss02Measurements[i].Ss[j].IsVerified = true;
+					Wss02Evals[i].Ss[j].IsСheckedNow = true;
+					Stat = $"Точка {c.S}: Снятие значения {j + 1}";
+					Wss02Evals[i].Ss[j].V = Cymometer.Inst.GetHz(c, lat, _t);
+					Wss02Evals[i].Ss[j].IsVerified = true;
 					Thread.Sleep(50);
 					if (_t.Token.IsCancellationRequested)
 					{
@@ -426,35 +357,35 @@ namespace ADVS.ViewModels
 					}
 				}
 				IsBusy = false;
-				Wss02Measurements[i].RefS = _avgSref;
+				Wss02Evals[i].Ref = _avgRef;
 			}
 		}
 
-		private void Prepare(int cpI)
+		private void Prepare(Checkpoint c)
 		{
-			Stat = $"Точка {Settings.Checkpoints[cpI].S}";
-			_canAdjust = false;
-			Tube.Inst.SetF(Settings.Checkpoints[cpI].F, Settings.Checkpoints[cpI].S);
-			Thread.Sleep(LAT);// Время ожидания для стабилизации трубы.
-			Application.Current.Dispatcher?.Invoke(_avgSrefs.Clear);
-			Stat = $"Точка {Settings.Checkpoints[cpI].S}: Корректировка скорости";
-			if (Settings.Checkpoints[cpI].S == 30)
+			Stat = $"Точка {c.S}";
+			_acceptRef = false;
+			Tube.Inst.SetF(c.F, c.S);
+			Thread.Sleep(LAT);
+			Application.Current.Dispatcher?.Invoke(_avgRefs.Clear);
+			Stat = $"Точка {c.S}: Корректировка скорости";
+			if (c.S == 30)
 			{
 				Thread.Sleep(15000);
 			}
-			else// Для скоростной точки 30 отключаю коррекцию скорости, тк. труба не может разогнаться до 30 м/с. А где-то до 27-29 м/с.
+			else// Для скоростной точки 30 отключаю коррекцию скорости, т.к. труба не может разогнаться до 30 м/с. А где-то до 27-29 м/с.
 			{
-				Tube.Inst.AdjustS(ref _avgSref, Settings.Checkpoints[cpI], _t);
+				Tube.Inst.AdjustS(ref _avgRef, c, _t);
 			}
 			if (_t.Token.IsCancellationRequested)
 			{
 				return;
 			}
-			_canAdjust = true;
+			_acceptRef = true;
 			Thread.Sleep(100);
 		}
 
-		private void WriteXlsxWss01()
+		private void WriteXlsx01()
 		{
 			const string SAMPLE_PATH = @"Resources\Wss1.xlsx";
 			while (!File.Exists(SAMPLE_PATH))
@@ -464,37 +395,36 @@ namespace ADVS.ViewModels
 					return;
 				}
 			}
-			var p = new ExcelPackage(new FileInfo(SAMPLE_PATH));
-			var ws = p.Workbook.Worksheets[0];
+			var ep = new ExcelPackage(new FileInfo(SAMPLE_PATH));
+			var ws = ep.Workbook.Worksheets[0];
 			const int XLSX_SEED = 14;
-			for (int i = 0; i < Wss01Measurements.Count; i++)
+			for (int i = 0; i < Wss01Evals.Count; i++)
 			{
-				AddToCell(ws.Cells[i + XLSX_SEED, 16], Wss01Measurements[i].RefS);
-				for (int j = 0; j < Wss01Measurements[i].Ss.Length; j++)
+				AddToCell(ws.Cells[i + XLSX_SEED, 16], Wss01Evals[i].Ref);
+				for (int j = 0; j < Wss01Evals[i].Ss.Length; j++)
 				{
-					AddToCell(ws.Cells[i + XLSX_SEED, j + 17], Wss01Measurements[i].Ss[j].V);
+					AddToCell(ws.Cells[i + XLSX_SEED, j + 17], Wss01Evals[i].Ss[j].V);
 				}
 			}
-			// Условия поверки.
-			ws.Cells[44, 16].Value = Settings.Conditions.Verifier;
+			ws.Cells[7, 8].Value = DateTime.Now.ToLongDateString();
+			ws.Cells[49, 7].Value = DateTime.Now.ToLongDateString();
 			ws.Cells[44, 20].Value = DateTime.Now.ToString("dd.MM.yyyy");
+			ws.Cells[47, 19].Value = DateTime.Now.ToLongDateString();
 			ws.Cells[25, 5].Value = Settings.Conditions.T;
 			ws.Cells[26, 5].Value = Settings.Conditions.H;
 			ws.Cells[27, 5].Value = Settings.Conditions.P;
 			ws.Cells[16, 6].Value = Settings.Conditions.Snum;
-			string path = $"Протокол ДСВ-01 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}.xlsx";
-			string fullPath = Path.Combine(Settings.SavePath, path);
-			int attemptSave = 1;
-			while (File.Exists(fullPath))
+			ws.Cells[16, 10].Value = (Settings.Conditions.Snum[4] - 48) * 10 + (Settings.Conditions.Snum[5] - 48) + 2000;
+			string p = $"{Settings.Path}\\Протокол ДСВ-01 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}.xlsx";
+			int att = 0;
+			while (File.Exists(p))
 			{
-				path = $"Протокол ДСВ-01 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
-				fullPath = Path.Combine(Settings.SavePath, path);
-				attemptSave++;
+				p = $"{Settings.Path}\\Протокол ДСВ-01 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}({att++}).xlsx";
 			}
-			p.SaveAs(fullPath);
+			ep.SaveAs(p);
 		}
 
-		private void WriteXlsxWss02()
+		private void WriteXlsx02()
 		{
 			const string SAMPLE_PATH = @"Resources\Wss2.xlsx";
 			while (!File.Exists(SAMPLE_PATH))
@@ -504,40 +434,37 @@ namespace ADVS.ViewModels
 					return;
 				}
 			}
-			var p = new ExcelPackage(new FileInfo(SAMPLE_PATH));
-			var ws = p.Workbook.Worksheets[0];
+			var ep = new ExcelPackage(new FileInfo(SAMPLE_PATH));
+			var ws = ep.Workbook.Worksheets[0];
 			#region Заполнение значений.
 			const int XLSX_SEED = 14;
-			for (int i = 0; i < Wss02Measurements.Count; i++)
+			for (int i = 0; i < Wss02Evals.Count; i++)
 			{
-				AddToCell(ws.Cells[i + XLSX_SEED, 12], Wss02Measurements[i].RefS);
-				for (int j = 0; j < Wss02Measurements[i].Ss.Length; j++)
+				AddToCell(ws.Cells[i + XLSX_SEED, 12], Wss02Evals[i].Ref);
+				for (int j = 0; j < Wss02Evals[i].Ss.Length; j++)
 				{
-					AddToCell(ws.Cells[i + XLSX_SEED, j + 13], Wss02Measurements[i].Ss[j].V);
+					AddToCell(ws.Cells[i + XLSX_SEED, j + 13], Wss02Evals[i].Ss[j].V);
 				}
 			}
-			// Условия поверки.
-			ws.Cells[42, 16].Value = Settings.Conditions.Verifier;
+			ws.Cells[7, 8].Value = DateTime.Now.ToLongDateString();
 			ws.Cells[42, 20].Value = DateTime.Now.ToString("dd.MM.yyyy");
+			ws.Cells[45, 19].Value = DateTime.Now.ToLongDateString();
 			ws.Cells[25, 5].Value = Settings.Conditions.T;
 			ws.Cells[26, 5].Value = Settings.Conditions.H;
 			ws.Cells[27, 5].Value = Settings.Conditions.P;
 			ws.Cells[16, 6].Value = Settings.Conditions.Snum;
-			//ws.Cells[5, 4].Value = "Протокол ДВС-02 №00212522 от 10.01.2021";
+			ws.Cells[16, 10].Value = (Settings.Conditions.Snum[4] - 48) * 10 + (Settings.Conditions.Snum[5] - 48) + 2000;
 			#endregion
-			string path = $"Протокол ДВС-02 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}.xlsx";
-			string fullPath = Path.Combine(Settings.SavePath, path);
-			int attemptSave = 1;
-			while (File.Exists(fullPath))
+			string p = $"{Settings.Path}\\Протокол ДВС-02 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}.xlsx";
+			int att = 0;
+			while (File.Exists(p))
 			{
-				path = $"Протокол ДВС-02 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}({attemptSave}).xlsx";
-				fullPath = Path.Combine(Settings.SavePath, path);
-				attemptSave++;
+				p = $"{Settings.Path}\\Протокол ДВС-02 № {Settings.Conditions.Snum} от {DateTime.Now:dd.MM.yyyy}({att++}).xlsx";
 			}
-			p.SaveAs(fullPath);
+			ep.SaveAs(p);
 		}
 
-		public static void AddToCell(ExcelRange er, decimal? v)// Метод для добавления значения в ячейку excel и её обработка.
+		public static void AddToCell(ExcelRange er, decimal? v)
 		{
 			if (v != null)
 			{
