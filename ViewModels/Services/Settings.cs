@@ -1,11 +1,9 @@
 ﻿using ADVS.Models;
-using ADVS.Models.Enums;
 using ADVS.Models.Evaluations;
 using ADVS.ViewModels.Base;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
@@ -15,11 +13,11 @@ namespace ADVS.ViewModels.Services
     internal partial class Settings : BaseVm
 	{
 		private const string FILENAME = "UserSettings.txt";
-		private Model _m;
+		private string _m;
 		public ObservableCollection<Checkpoint> Checkpoints { get; private set; }
 		public Devices Devices { get; private set; }
 		public Conditions Conditions { get; private set; }
-		public Model M
+		public string M
 		{
 			get => _m;
 			set
@@ -88,36 +86,29 @@ namespace ADVS.ViewModels.Services
 		}
 		#endregion
 
-		public bool IsSnum(string c)
-		{
-			var n = Conditions.Snum;
-			return n.Length == 10 && n[0] == '0' && n[1] == '0' && n[2] == c[0] && n[3] == c[1] && n.All(char.IsDigit)
-				&& (n[4] - 48) * 10 + (n[5] - 48) <= System.DateTime.Now.Year - 2000;
-		}
-
 		public bool CheckCond()
 		{
 			var t = Convert.ToInt32(Conditions.T);
 			var h = Convert.ToInt32(Conditions.H);
 			var p = Convert.ToInt32(Conditions.P);
+			var n = Conditions.Snum;
 			var r = false;
 			switch (_m)
 			{
-				case Model.Wss01:
-					r = t >= 15 && t <= 25 && h >= 20 && h <= 90 && p >= 95 && p <= 105 && IsSnum("06");
+				case "ДСВ-01":
+					r = t >= 15 && t <= 25 && h >= 20 && h <= 90 && p >= 95 && p <= 105;
 					break;
-				case Model.Wss02:
-					r = t >= 5 && t <= 35 && h <= 75 && IsSnum("46");
+				case "ДВС-02":
+					r = t >= 5 && t <= 35 && h <= 75;
 					break;
-				case Model.Wss03:
-					r = t >= 15 && t <= 25 && h >= 30 && h <= 80 && p >= 84 && p <= 106 && IsSnum("98");
-					break;
+				case "WSS-03":
+					return true;
 			}
-			if (r && Path != "")
+			if (r && Path != "" && (n.Length == 10 || n.Length == 6))
 			{
 				return true;
 			}
-			MessageBox.Show("Wrong measurement conditions or saving path or snum", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			MessageBox.Show("Wrong measurement conditions or saving path or snum length", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			return false;
 		}
 	}

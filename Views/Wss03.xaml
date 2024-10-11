@@ -7,7 +7,7 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewModel:Wss03Vm}"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Width="360" HorizontalAlignment="Left">
+    <Grid Width="350" HorizontalAlignment="Left">
         <Grid.RowDefinitions>
             <RowDefinition Height="100" />
             <RowDefinition/>
@@ -33,7 +33,7 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <TextBox IsReadOnly="True" Text="{Binding RefS}" Margin="10 2" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextAlignment="Center" FontSize="15"/>
+                        <TextBox IsReadOnly="True" Text="{Binding Ref}" Margin="10 2" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextAlignment="Center" FontSize="15"/>
                         <TextBox Grid.Column="1" Text="{Binding Ss[0].V}">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">

@@ -7,13 +7,12 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewModel:CheckpointsVm}"
              d:DesignHeight="300" d:DesignWidth="600">
-    <Grid Background="#E2E1E1">
+    <Grid Background="#D8D3D3">
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
-        <DataGrid ItemsSource="{Binding Checkpoints}" RowBackground="LightGray" AlternatingRowBackground="White" Background="#E2E1E1" FontSize="16" CanUserAddRows="True" CanUserDeleteRows="True"
-                CanUserResizeRows="False" CanUserResizeColumns="False" CanUserReorderColumns="False" CanUserSortColumns="False" AutoGenerateColumns="False" Margin="5,10,10,10" >
+        <DataGrid ColumnWidth="*" ItemsSource="{Binding Checkpoints}" BorderThickness="0" RowBackground="#D8D3D3" AlternatingRowBackground="White" Background="#D8D3D3" FontSize="16" AutoGenerateColumns="False" Margin="5,10,10,10" >
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="DataGridColumnHeader">
                     <Setter Property="ContentTemplate">
@@ -40,9 +39,9 @@
             </DataGrid.CellStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Номер" Binding="{Binding Id}"  />
-                <DataGridTextColumn Header="Скорость потока, м/с" Binding="{Binding S, StringFormat={}{0:0.0}}" />
-                <DataGridTextColumn Header="Вращения двигателя" Binding="{Binding F, StringFormat={}{0:0}}" />
-                <DataGridTextColumn Header="Шаг коррекции" Binding="{Binding MaxStep, StringFormat={}{0:0}}" />
+                <DataGridTextColumn Header="Скорость" Binding="{Binding S, StringFormat={}{0:0.0}}" />
+                <DataGridTextColumn Header="Вращения" Binding="{Binding F, StringFormat={}{0:0}}" />
+                <DataGridTextColumn Header="Коррекция" Binding="{Binding Step, StringFormat={}{0:0}}" />
                 <DataGridTextColumn Header="Min" Binding="{Binding Min}" />
                 <DataGridTextColumn Header="Max" Binding="{Binding Max}" />
             </DataGrid.Columns>

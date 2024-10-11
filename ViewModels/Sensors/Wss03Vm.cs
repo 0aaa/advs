@@ -75,9 +75,10 @@ namespace ADVS.ViewModels.Sensors
 		{
 			Cymometer.Inst.Write("SNUM");
 			Stat = Cymometer.Inst.Read().Replace("\r\n", "");
-			if (IsSnum(Stat))
+			var n = Stat.Split()[^1];
+			if (IsSnum(n))
 			{
-				_s.Conditions.Snum = Stat;
+				_s.Conditions.Snum = n;
 				return true;
 			}
 			MessageBox.Show($"Wrong serial number {Stat}.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);

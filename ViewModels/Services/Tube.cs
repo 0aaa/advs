@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using ADVS.Models.Enums;
 using ADVS.Models.Events;
 using ADVS.Models.Evaluations;
 
@@ -36,12 +35,9 @@ namespace ADVS.ViewModels.Services
             private set
             {
                 _currF = value;
-                Fupd?.Invoke(this, new Fupd { F = value });
             }
         }
 		#region Event handlers.
-		public event EventHandler<Fupd> Fupd;
-        public event EventHandler<TubeOpening> IsOpenUpd;
         public event EventHandler<RefUpd> RefUpd;
         #endregion
 
@@ -71,7 +67,6 @@ namespace ADVS.ViewModels.Services
                     _p.Dispose();
                     throw new Exception($"{p} не является ПЛК 73");
                 }
-                IsOpenUpd?.Invoke(this, new TubeOpening { IsOpen = _p.IsOpen });
                 OnInterviewRef();
                 return true;
             }
@@ -94,8 +89,7 @@ namespace ADVS.ViewModels.Services
                 }
                 catch
                 {
-                    att++;
-                    if (att >= 3)
+                    if (att++ > 2)
                     {
                         return false;
                     }
@@ -108,12 +102,10 @@ namespace ADVS.ViewModels.Services
 			_isInterview = false;// Выкл. переодического опроса эталонного датчика.
             if (_p == null)
             {
-				IsOpenUpd?.Invoke(this, new TubeOpening { IsOpen = false });
                 return;
             }
 			_p.Close();
             _p.Dispose();
-			IsOpenUpd?.Invoke(this, new TubeOpening { IsOpen = _p.IsOpen });
         }
 		#endregion
 
@@ -278,13 +270,13 @@ namespace ADVS.ViewModels.Services
             throw new ArgumentOutOfRangeException(_currS.ToString(), "Недопустимое значение скорости");
         }
 
-        public void AdjustS(ref decimal avgRefS, Checkpoint c, CancellationTokenSource t)// Метод для корректировки скорости эталона к установленному значению скорости.
+        public void AdjustS(ref decimal avgRef, Checkpoint c, CancellationTokenSource t)// Метод для корректировки скорости эталона к установленному значению скорости.
         {
             var eCnt = 0;
             var step = c.Step;
             var signChangeCnt = 0;// Переменная для отслеживания смены знака у шага, с помощью которого корректируется частота.
-            var currSign = Sing.Plus;// Знак шага, плюс или минус.
-			Sing prevSign;// Старое значение для сравнения при изменении нового.
+            var isPos = true;// Знак шага, true - плюс или false - минус.
+			bool prevSign;// Старое значение для сравнения при изменении нового.
 			var is1stStart = true;// Флаг для первого прохода, чтобы в случае смены знака stepValue, это не пошло в счётчик.
 			while (true)
             {
@@ -296,27 +288,27 @@ namespace ADVS.ViewModels.Services
                 {
                     step = 10;
                 }
-                prevSign = currSign;
-                if (IsErrValidation(ref avgRefS) && eCnt++ == 2)// Делаю проверку на 2 корректировки, чтобы в случае первой корректировки значение не уплыло из-за быстрой смены частоты вращения двигателя аэротрубы.
+                prevSign = isPos;
+                if (IsErrValidation(ref avgRef) && eCnt++ == 2)// Делаю проверку на 2 корректировки, чтобы в случае первой корректировки значение не уплыло из-за быстрой смены частоты вращения двигателя аэротрубы.
 				{
 					return;
                 }
-                currSign = _currS - avgRefS > 0 ? Sing.Plus : Sing.Minus;
-				if (!is1stStart && currSign != prevSign)// Если это не первый прогон цикла.
+                isPos = _currS - avgRef > 0;
+				if (!is1stStart && isPos != prevSign)// Если это не первый прогон цикла.
 				{
 					signChangeCnt++;
                 }
-                CurrF += currSign == Sing.Plus ? step : -step;
+                CurrF += isPos ? step : -step;
                 SetF(_currF, _currS);
                 Thread.Sleep(LAT);
                 is1stStart = false;
             }
         }
 
-        private bool IsErrValidation(ref decimal avgRefS)// Проверка валидности эталонной скорости, относительно выставленной.
+        private bool IsErrValidation(ref decimal avgRef)// Проверка валидности эталонной скорости, относительно выставленной.
         {
             var e = GetErr();// Допустимая погрешность (0,02 или 0,1).
-            var diff = _currS - avgRefS;// Разница между установленной скоростью и полученной с эталона.
+            var diff = _currS - avgRef;// Разница между установленной скоростью и полученной с эталона.
             return e >= diff && diff >= -e;// Флаг, отвечающий за совпадение скоростей эталона и выставленной с учётом допустимой погрешности.
 		}
 
@@ -345,8 +337,8 @@ namespace ADVS.ViewModels.Services
         }
 
         #region Работа с коэффициентом для обработки получаемого с анемометра значения.
-        private readonly decimal[] _vPnts = [ 0m, 0.72m, 5m, 10m, 15m, 30m ];// Скоростные точки для расчёта коэффициента. Данные от сотрудников MD.
-        private readonly decimal[] _kPnts = [ 0.866m, 0.866m, 0.96m, 0.94m, 0.953m, 1.03m ];// Коэффициенты, расчитанные для v_point (для каждого диапазона). Данные от сотрудников MD.
+        private readonly decimal[] _vPnts = [ 0, .72m, 5, 10, 15, 30 ];// Скоростные точки для расчёта коэффициента. Данные от сотрудников MD.
+        private readonly decimal[] _kPnts = [ .866m, .866m, .96m, .94m, .953m, 1.03m ];// Коэффициенты, расчитанные для v_point (для каждого диапазона). Данные от сотрудников MD.
         private readonly decimal[] _aKoef = new decimal[5];
         private readonly decimal[] _bKoef = new decimal[5];
 

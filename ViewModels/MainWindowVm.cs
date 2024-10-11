@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using ADVS.Models;
-using ADVS.Models.Classes;
 using ADVS.Views;
 using ADVS.ViewModels.Base;
 using ADVS.ViewModels.Sensors;
 using ADVS.ViewModels.Services;
-using ADVS.Models.Enums;
 using ADVS.Models.Evaluations;
+using ADVS.Models.Events;
+using System.ComponentModel;
 
 namespace ADVS.ViewModels
 {
@@ -24,43 +24,34 @@ namespace ADVS.ViewModels
 	{
 		private const int LAT = 5000;// Время ожидания после установки значения частоты, чтобы дать аэротрубе стабилизировать значение.
 		private readonly List<decimal> _avgRefs;
+		private readonly Wss03Vm _wss03Vm;
 		private CancellationTokenSource _t;
 		// Все свойства что ниже, должны сохранятся при перезапуске.
 		private UserControl _frame;
 		private decimal _ref;// Эталонное значение скорости с частотной трубы.
 		private decimal _avgRef;
 		private bool _acceptRef;// Флаг для включения в коллекцию среднего значения эталона, всех его значений за время теста скоростной точки после прохождения корректировки.
-		private bool _revOngoing;// Флаг, показывающий активно ли тестирование.
-		private bool _isBusy;
 		#region Properties.
 		public ObservableCollection<Wss01Eval> Wss01Evals { get; }
 		public ObservableCollection<Wss02Eval> Wss02Evals { get; }
-		public Wss[] Sensors { get; }
 		public RelayCommand[] RevisionRcs { get; }// Start, Stop, SaveSpeeds, VisibilitySetFrequency, Reset, ClosePortFrequencyCounter, ClosePortFrequencyMotor.
 		public RelayCommand[] PaginationRcs { get; }
+		public string[] Sensors { get; }
 		public Settings Settings { get; }
 		public string Title { get; }
-		public bool RevOngoing => !_revOngoing;
+		public bool IsBusy => !string.IsNullOrEmpty(BusyContent);
+		public bool[] WssVisibility { get; private set; }
 		public UserControl Frame
 		{
 			get => _frame;
 			private set
 			{
 				_frame = value;
-				if (value != null)
-				{
-					CurrPage = Enum.GetValues<CurrPage>().FirstOrDefault(p => p.ToString().StartsWith(value.GetType().Name.Split("View")[0]));
-				}
-				else
-				{
-                    CurrPage = CurrPage.Main;
-				}
 				Settings.Serialize();
 			}
 		}
-		public CurrPage CurrPage { get; private set; }
 		public string Stat { get; private set; }// Свойство для биндинга на UI текущего действия внутри app.
-		public string BusyContent { get; private set; }// Текст BusyIndicator.
+		public string BusyContent { get; private set; }
 		public decimal Ref
 		{
 			get => _ref;
@@ -70,74 +61,32 @@ namespace ADVS.ViewModels
 				OnPropertyChanged(nameof(Ref));
 			}
 		}
-		public bool IsBusy// Активность BusyIndicator.
-		{
-			get => _isBusy;
-			private set
-			{
-				_isBusy = value;
-				if (!value)
-				{
-					BusyContent = "";
-				}
-			}
-		}
-		public bool[] WssVisibility { get; private set; }
+		public bool IsReady { get; private set; }
 		#endregion
-		private readonly Wss03Vm _03Vm;
 		public Wss03 Wss03 { get; }
 
 		public MainWindowVm()
 		{
 			_avgRefs = [];
-			Tube.Inst.RefUpd += (_, e) => {
-				Ref = (decimal)e.Ref;
-				if (_avgRefs.Count > 5 && !_acceptRef)
-				{
-					_avgRefs.RemoveAt(0);
-				}
-				_avgRefs.Add(Ref);
-				_avgRef = Math.Round(_avgRefs.Average(), 2);
-			};
-			WssVisibility = new bool[Enum.GetNames<Model>().Length];
+            Tube.Inst.RefUpd += HandleRef;
+			Sensors = ["ДСВ-01", "ДВС-02"];
+			WssVisibility = new bool[Sensors.Length + 1];// + 1 for WSS-03.
 			Settings = Settings.Deserialize();
-			Settings.M = Model.Wss02;
-			Settings.PropertyChanged += (_, _) => {
-				Settings.Serialize();
-				for (int i = 0; i < WssVisibility.Length; i++)
-				{
-					WssVisibility[i] = false;
-				}
-				WssVisibility[(int)Settings.M - 1] = true;
-				OnPropertyChanged(nameof(WssVisibility));
-			};
-			_03Vm = new Wss03Vm(Settings);
-			_03Vm.PropertyChanged += (_, e) => {
-				switch (e.PropertyName)
-				{
-					case "Stat":
-						Stat = _03Vm.Stat;
-						break;
-					case "IsBusy":
-						IsBusy = false;// "IsBusy" take only false.
-						break;
-				}
-			};
-			WssVisibility[(int)Settings.M - 1] = true;
-			//Tube.Inst.CurrFupd += (_, e) => Settings.Devices.F = e.F;
+            Settings.PropertyChanged += HandleSettings;
+			_wss03Vm = new Wss03Vm(Settings);
+            _wss03Vm.PropertyChanged += HandleStat;
+			WssVisibility[Array.IndexOf(Sensors, Settings.M) >= 0 ? Array.IndexOf(Sensors, Settings.M) : ^1] = true;
 			Title = $"{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title}  v{Assembly.GetExecutingAssembly().GetName().Version}";
-			Sensors = [new Wss(Model.Wss01, "ДСВ-01"), new Wss(Model.Wss02, "ДВС-02"), new Wss(Model.Wss03, "ДВС-03")];
 			Wss01Evals = [];
 			Wss02Evals = [];
-			Wss03 = new Wss03(_03Vm);
+			Wss03 = new Wss03(_wss03Vm);
 			RevisionRcs = [
-				 new(Start, () => !_revOngoing)
+				 new(Start, () => IsReady)
 				, new(() => {
-					BusyContent = "Тестирование прервано пользователем\nОжидание завершения процесса";
-					IsBusy = true;
-					_revOngoing = false;
+					BusyContent = "Тестирование прервано пользователем. Ожидание завершения процесса";
+					IsReady = true;
 					_t.Cancel();
-				}, () => _revOngoing)// Stop.
+				}, () => !IsReady)// Stop.
 				, new(() => Settings.Serialize())
 				#region Частотомер ЧЗ-85/6.
 				, new RelayCommand(Cymometer.Inst.Reset, Cymometer.Inst.IsOpen)
@@ -148,14 +97,55 @@ namespace ADVS.ViewModels
 				#endregion
 			];
             PaginationRcs = [
-				new(() => { Frame = null; CurrPage = CurrPage.Main; }, () => CurrPage != CurrPage.Main && !_revOngoing)
-				, new(() => Frame = new SettingsView(new DeviceSettingsVm(Settings.Devices)), () => CurrPage != CurrPage.Settings && !_revOngoing)
-				, new(() => Frame = new CheckpointsView(Settings.Checkpoints, RevisionRcs[2]), () => CurrPage != CurrPage.Checkpoints && !_revOngoing)
+				new(() => Frame = null)
+				, new(() => Frame = new SettingsView(new DeviceSettingsVm(Settings.Devices)), () => IsReady)
+				, new(() => Frame = new CheckpointsView(Settings.Checkpoints, RevisionRcs[2]), () => IsReady)
 			];
+			IsReady = true;
 		}
 
-		#region Частотомер ЧЗ-85/6.
-		private bool OpenCymometer()
+        private void HandleSettings(object _, PropertyChangedEventArgs e)
+        {
+            Settings.Serialize();
+			SetVisibility();
+			OnPropertyChanged(nameof(WssVisibility));
+        }
+
+		private void SetVisibility()
+		{
+            for (int i = 0; i < WssVisibility.Length; i++)
+            {
+                WssVisibility[i] = false;
+            }
+			WssVisibility[Array.IndexOf(Sensors, Settings.M) >= 0 ? Array.IndexOf(Sensors, Settings.M) : ^1] = true;
+		}
+
+        private void HandleStat(object _, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case "Stat":
+                    Stat = _wss03Vm.Stat;
+                    break;
+                case "IsBusy":
+					BusyContent = "";// "IsBusy" take only false.
+                    break;
+            }
+        }
+
+        private void HandleRef(object _, RefUpd e)
+        {
+            Ref = (decimal)e.Ref;
+            if (_avgRefs.Count > 5 && !_acceptRef)
+            {
+                _avgRefs.RemoveAt(0);
+            }
+            _avgRefs.Add(Ref);
+            _avgRef = Math.Round(_avgRefs.Average(), 2);
+        }
+
+        #region Частотомер ЧЗ-85/6.
+        private bool OpenCymometer()
 		{
 			if (!Cymometer.Inst.Open(Settings.Devices.Cymometer, (int)Settings.Devices.Sec * 1000))
 			{
@@ -167,6 +157,8 @@ namespace ADVS.ViewModels
 					Cymometer.Inst.SetUp(Settings.Devices.Sec);
 					break;
 				case "WSS":
+					Settings.M = "WSS-03";
+					SetVisibility();
 					break;
 				default:
 					Cymometer.Inst.Close();
@@ -178,41 +170,23 @@ namespace ADVS.ViewModels
 		#endregion
 
 		#region Revision methods.
-		private void EmergencyStop()
-		{
-			BusyContent = "Аварийная остановка";
-			IsBusy = true;
-			_revOngoing = false;
-			_t.Cancel();
-			MessageBox.Show("Произошло аварийное завершение поверки", "Внимание", MessageBoxButton.OK, MessageBoxImage.Error);
-		}
-
-		private void Stop()
-		{
-			_revOngoing = false;
-			IsBusy = false;
-			Cymometer.Inst.Close();
-			Tube.Inst.Close();
-		}
-
 		private async void Start()
 		{
-			_revOngoing = true;
+			IsReady = false;
 			if (!OpenConditions())
 			{
-				_revOngoing = false;
+				IsReady = true;
 				return;
 			}
 			await Task.Run(() =>
 			{
-				IsBusy = true;
 				BusyContent = "Проверка подключённых устройств и их настройка";
 				if (!OpenCymometer() || !Tube.Inst.Open(Settings.Devices.Tube))
 				{
 					Stop();
 					return;
 				}
-				IsBusy = false;
+				BusyContent = "";
 				_t = new CancellationTokenSource();
 				Cymometer.Inst.Stop = EmergencyStop;
 				try
@@ -220,16 +194,16 @@ namespace ADVS.ViewModels
 					Stat = "Запуск тестирования";
 					switch (Settings.M)
 					{
-						case Model.Wss01:
+						case "ДСВ-01":
 							Init01();
 							Start01();
 							break;
-						case Model.Wss02:
+						case "ДВС-02":
 							Init02();
 							Start02();
 							break;
-						case Model.Wss03:
-							_03Vm.Revise(ref _acceptRef, _avgRefs, ref _avgRef, _t);
+						case "WSS-03":
+							_wss03Vm.Revise(ref _acceptRef, _avgRefs, ref _avgRef, _t);
 							break;
 						default:
 							throw new ArgumentOutOfRangeException();
@@ -238,7 +212,6 @@ namespace ADVS.ViewModels
 				}
 				catch (Exception e)
 				{
-					GlobalLog.Log.Debug(e, e.Message);
 					MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 				}
 				finally
@@ -246,10 +219,10 @@ namespace ADVS.ViewModels
 					Tube.Inst.SetF(0, 0);
 					switch (Settings.M)
 					{
-						case Model.Wss01:
+						case "ДСВ-01":
 							WriteXlsx01();
 							break;
-						case Model.Wss02:
+						case "ДВС-02":
 							WriteXlsx02();
 							break;
 					}
@@ -257,6 +230,22 @@ namespace ADVS.ViewModels
 					MessageBox.Show("Поверка завершена", "Завершено", MessageBoxButton.OK, MessageBoxImage.Asterisk);
 				}
 			});
+		}
+
+		private void Stop()
+		{
+			IsReady = true;
+			BusyContent = "";
+			Cymometer.Inst.Close();
+			Tube.Inst.Close();
+		}
+
+		private void EmergencyStop()
+		{
+			BusyContent = "Аварийная остановка";
+			IsReady = true;
+			_t.Cancel();
+			MessageBox.Show("Произошло аварийное завершение поверки", "Внимание", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 
 		private bool OpenConditions()
@@ -356,7 +345,7 @@ namespace ADVS.ViewModels
 						return;
 					}
 				}
-				IsBusy = false;
+				BusyContent = "";
 				Wss02Evals[i].Ref = _avgRef;
 			}
 		}
@@ -396,6 +385,7 @@ namespace ADVS.ViewModels
 				}
 			}
 			var ep = new ExcelPackage(new FileInfo(SAMPLE_PATH));
+			ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
 			var ws = ep.Workbook.Worksheets[0];
 			const int XLSX_SEED = 14;
 			for (int i = 0; i < Wss01Evals.Count; i++)
@@ -435,6 +425,7 @@ namespace ADVS.ViewModels
 				}
 			}
 			var ep = new ExcelPackage(new FileInfo(SAMPLE_PATH));
+			ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
 			var ws = ep.Workbook.Worksheets[0];
 			#region Заполнение значений.
 			const int XLSX_SEED = 14;

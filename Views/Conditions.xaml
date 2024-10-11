@@ -68,7 +68,7 @@
             <Setter Property="Margin" Value="0,2" />
         </Style>
     </Window.Resources>
-    <Grid Margin="2" Background="#E2E1E1">
+    <Grid Margin="2" Background="#D8D3D3">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="2*"/>
@@ -96,7 +96,7 @@
                 <Image Source="{StaticResource FolderIcon}" />
             </Button>
         </Grid>
-        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="2" Background="#D8D3D3">
+        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="2">
             <Grid.Resources>
                 <Style TargetType="Button">
                     <Setter Property="FontSize" Value="16"/>

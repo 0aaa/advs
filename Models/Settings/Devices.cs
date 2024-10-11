@@ -6,6 +6,5 @@
 		// COM-ports.
 		public string Tube { get; set; }
 		public string Cymometer { get; set; }
-        //public int F { get; set; } = 0;// Режим ручной настройки ПКЛ73.
     }
 }

@@ -30,12 +30,12 @@
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
     </Window.Resources>
-    <Grid>
+    <Grid Background="#D8D3D3">
         <Grid.RowDefinitions>
             <RowDefinition Height="50" />
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid Background="#D8D3D3">
+        <Grid>
             <Grid.Resources>
                 <Style TargetType="Button">
                     <Setter Property="Margin" Value="15,5"/>
@@ -52,13 +52,13 @@
             <Button Grid.Column="2" Content="Чекпоинты" Command="{Binding PaginationRcs[2]}" />
         </Grid>
         <!--#region WSS revision-->
-        <Grid Grid.Row="1" Background="#E2E1E1">
+        <Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition Height="90" />
             </Grid.RowDefinitions>
             <!--#region WSS-01 revision-->
-            <Grid Visibility="{Binding WssVisibility[0], UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolToVis}}">
+            <Grid Visibility="{Binding WssVisibility[0], UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolToVis}}" Width="350" HorizontalAlignment="Left">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="100" />
                     <RowDefinition/>
@@ -78,14 +78,12 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30" />
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Grid.ColumnSpan="6" Text="ДСВ-01" Margin="2,3" Style="{StaticResource HeaderPageTextBlock}" HorizontalAlignment="Center" />
+                    <TextBlock Grid.Row="0" Grid.ColumnSpan="4" Text="ДСВ-01" Margin="2,3" Style="{StaticResource HeaderPageTextBlock}" HorizontalAlignment="Center" />
                     <TextBlock Text="Эталон, м/с"/>
                     <TextBlock Grid.Column="1" Text="№ 1"/>
                     <TextBlock Grid.Column="2" Text="№ 2"/>
@@ -98,63 +96,56 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="100" />
                                     <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding RefS}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" Margin="2" HorizontalContentAlignment="Center"
+                                <TextBox Text="{Binding Ref}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" Margin="2" HorizontalContentAlignment="Center"
                                     VerticalContentAlignment="Center" />
-                                <Grid Grid.Column="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox Text="{Binding Ss[0].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
-                                             VerticalContentAlignment="Center">
-                                        <TextBox.Style>
-                                            <Style TargetType="TextBox">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Ss[0].IsСheckedNow}" Value="True">
-                                                        <Setter Property="Background" Value="Yellow" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Ss[0].IsVerified}" Value="True">
-                                                        <Setter Property="Background" Value="#7BD87B" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBox.Style>
-                                    </TextBox>
-                                    <TextBox Grid.Column="1" Text="{Binding Ss[1].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
-                                             VerticalContentAlignment="Center">
-                                        <TextBox.Style>
-                                            <Style TargetType="TextBox">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Ss[1].IsСheckedNow}" Value="True">
-                                                        <Setter Property="Background" Value="Yellow" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Ss[1].IsVerified}" Value="True">
-                                                        <Setter Property="Background" Value="#7BD87B" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBox.Style>
-                                    </TextBox>
-                                    <TextBox Grid.Column="2" Text="{Binding Ss[2].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
-                                             VerticalContentAlignment="Center">
-                                        <TextBox.Style>
-                                            <Style TargetType="TextBox">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Ss[2].IsСheckedNow}" Value="True">
-                                                        <Setter Property="Background" Value="Yellow" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Ss[2].IsVerified}" Value="True">
-                                                        <Setter Property="Background" Value="#7BD87B" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBox.Style>
-                                    </TextBox>
-                                </Grid>
+                                <TextBox Grid.Column="1" Text="{Binding Ss[0].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
+                                         VerticalContentAlignment="Center">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Ss[0].IsСheckedNow}" Value="True">
+                                                    <Setter Property="Background" Value="Yellow" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Ss[0].IsVerified}" Value="True">
+                                                    <Setter Property="Background" Value="#7BD87B" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+                                <TextBox Grid.Column="2" Text="{Binding Ss[1].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
+                                         VerticalContentAlignment="Center">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Ss[1].IsСheckedNow}" Value="True">
+                                                    <Setter Property="Background" Value="Yellow" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Ss[1].IsVerified}" Value="True">
+                                                    <Setter Property="Background" Value="#7BD87B" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+                                <TextBox Grid.Column="3" Text="{Binding Ss[2].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center"
+                                         VerticalContentAlignment="Center">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Ss[2].IsСheckedNow}" Value="True">
+                                                    <Setter Property="Background" Value="Yellow" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Ss[2].IsVerified}" Value="True">
+                                                    <Setter Property="Background" Value="#7BD87B" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -209,7 +200,7 @@
                                     <ColumnDefinition/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding RefS}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" Margin="2" HorizontalContentAlignment="Center"
+                                <TextBox Text="{Binding Ref}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" Margin="2" HorizontalContentAlignment="Center"
                                     VerticalContentAlignment="Center" />
                                 <TextBox Grid.Column="1" Text="{Binding Ss[0].V}" Height="25" Width="80" IsReadOnly="True" TextAlignment="Center" FontSize="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                     <TextBox.Style>
@@ -297,22 +288,18 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                         <StackPanel.Resources>
                             <Style TargetType="Button">
-                                <Setter Property="Margin" Value="20,10,0,10"/>
+                                <Setter Property="Margin" Value="10"/>
                                 <Setter Property="Width" Value="100"/>
                                 <Setter Property="Height" Value="25"/>
                             </Style>
                         </StackPanel.Resources>
                         <Button Content="Старт" Command="{Binding RevisionRcs[0]}" />
                         <Button Content="Стоп" Command="{Binding RevisionRcs[1]}" />
-                        <ComboBox ItemsSource="{Binding Sensors}" IsEnabled="{Binding RevOngoing}" DisplayMemberPath="Descr" SelectedValue="{Binding Settings.M}"
-                            SelectedValuePath="Model" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="25" Width="100" Margin="20,10,0,10" />
+                        <ComboBox ItemsSource="{Binding Sensors}" SelectedValue="{Binding Settings.M}" IsEnabled="{Binding IsReady}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="25" Width="100" Margin="10,10,0,10" />
                     </StackPanel>
                     <TextBlock Text="{Binding Ref, StringFormat={}{0:0.00 м/с}}" Width="80" Margin="0,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="16" />
                 </Grid>
-                <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" Background="#D8D3D3">
-                    <TextBlock Text="Статус:" Style="{StaticResource GridRowHeaderTextBlock}" Margin="30,0" />
-                    <TextBlock Text="{Binding Stat}" Style="{StaticResource GridRowHeaderTextBlock}" />
-                </StackPanel>
+                <TextBlock Grid.Row="1" Text="{Binding Stat}" Style="{StaticResource GridRowHeaderTextBlock}" Margin="10 0" />
             </Grid>
         </Grid>
         <!--#endregion-->

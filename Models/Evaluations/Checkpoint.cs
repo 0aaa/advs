@@ -21,6 +21,6 @@
                 _step = value;
             }
         }
-        public int Id { get; set; }// Номер в списке.
+        public int Id { get; set; }
     }
 }

@@ -8,7 +8,7 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewModel:DeviceSettingsVm}"
              d:DesignHeight="300" d:DesignWidth="600">
-    <Grid Margin="5" Background="#E2E1E1">
+    <Grid Margin="5" Background="#D8D3D3">
         <Grid.Resources>
             <Style TargetType="TextBlock">
                 <Setter Property="VerticalAlignment" Value="Center"/>

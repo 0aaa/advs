@@ -6,12 +6,11 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 using ADVS.Models.Enums;
-using ADVS.Models.Events;
 using ADVS.Models.Evaluations;
 
 namespace ADVS.ViewModels.Services
 {
-    internal class Cymometer// Управление частотомером.
+    internal class Cymometer
     {
         private const int B_RATE = 9600;
 		private const string ID = "43-85/6";
@@ -19,7 +18,6 @@ namespace ADVS.ViewModels.Services
         private SerialPort _p;
         public static Cymometer Inst => _inst ??= new Cymometer();
         public Action Stop { get; set; }
-        internal event EventHandler<CymometerOpening> IsOpenUpd;
 
         public void Write(string cmd, int lat = 2000)// Устройство очень долго думает. 2 сек. - это гарантия того, что при старте app все настройки будут отправлены.
         {
@@ -49,13 +47,12 @@ namespace ADVS.ViewModels.Services
             {
                 _p = new SerialPort(p, B_RATE) { ReadTimeout = tOut, WriteTimeout = tOut };
                 _p.Open();
-				IsOpenUpd?.Invoke(this, new CymometerOpening { IsOpen = _p.IsOpen });
 				return true;
             }
             catch (Exception e)
             {
                 _p?.Close();
-                MessageBox.Show($"Ошибка открытия порта частотомера. {e.Message}", "Ошибка открытия порта частотомера", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка открытия порта частотомера / ДВС-03. {e.Message}", "Ошибка открытия порта частотомера", MessageBoxButton.OK, MessageBoxImage.Error);
 				return false;
             }
         }
@@ -64,12 +61,10 @@ namespace ADVS.ViewModels.Services
         {
             if (_p == null)
             {
-                IsOpenUpd?.Invoke(this, new CymometerOpening { IsOpen = false });
                 return;
             }
             _p.Close();
             _p.Dispose();
-			IsOpenUpd?.Invoke(this, new CymometerOpening { IsOpen = _p.IsOpen });
         }
         #endregion
 
